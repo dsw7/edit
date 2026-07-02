@@ -1,9 +1,11 @@
+mod params;
 mod query_openai;
 
 use std::path::PathBuf;
 
 use clap::Parser;
 
+use params::Parameters;
 use query_openai::query_openai;
 
 #[derive(Parser, Debug)]
@@ -11,12 +13,28 @@ use query_openai::query_openai;
 struct Cli {
     #[arg(value_name = "FILE-TO-EDIT")]
     file_to_edit: PathBuf,
+
+    #[arg(short, long, help = "Specify prompt via command line")]
+    prompt: String,
+
+    #[arg(
+        short,
+        long,
+        default_value = "gpt-4o",
+        help = "Specify provider specific LLM"
+    )]
+    model: String,
 }
 
 fn main() {
     let cli = Cli::parse();
 
-    if let Err(err) = query_openai() {
+    let params = Parameters {
+        prompt: cli.prompt,
+        model: cli.model,
+    };
+
+    if let Err(err) = query_openai(&params) {
         eprintln!("Error: {}", err);
     }
 }
