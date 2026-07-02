@@ -33,6 +33,7 @@ fn main() {
     let params = Parameters {
         prompt: cli.prompt,
         model: cli.model,
+        client_timeout: 10,
     };
 
     if let Err(err) = query_openai(&params) {

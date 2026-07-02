@@ -28,7 +28,9 @@ fn get_request_body(params: &Parameters) -> serde_json::Value {
 
 pub fn query_openai(params: &Parameters) -> Result<(), Box<dyn Error>> {
     let api_key = get_api_key()?;
-    let client = Client::builder().timeout(Duration::from_secs(10)).build()?;
+    let client = Client::builder()
+        .timeout(Duration::from_secs(params.client_timeout))
+        .build()?;
 
     let request_body = get_request_body(&params);
     let response = client
