@@ -6,7 +6,7 @@ use reqwest::blocking::Client;
 use serde_json::{self, json};
 
 use crate::params::Parameters;
-use crate::response_openai::OpenAIResponse;
+use crate::response_openai::unpack_response;
 
 fn get_api_key() -> Result<String, String> {
     const OPENAI_API_KEY: &str = "OPENAI_API_KEY";
@@ -42,21 +42,7 @@ pub fn query_openai(params: &Parameters) -> Result<(), Box<dyn Error>> {
         .send()?;
 
     let response_text = response.text()?;
-    println!("{}", response_text);
-
-    let results: OpenAIResponse = serde_json::from_str(&response_text)?;
-
-    match results {
-        OpenAIResponse::Success(success) => {
-            println!(
-                "Input tokens: {:?} {:?}",
-                success.usage.input_tokens, success.usage.output_tokens
-            );
-        }
-        OpenAIResponse::Error(error) => {
-            println!("Error: {:?}", error.error.message);
-        }
-    }
+    let _ = unpack_response(response_text);
 
     Ok(())
 }

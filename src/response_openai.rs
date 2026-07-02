@@ -1,41 +1,61 @@
-use serde::{Deserialize};
+use std::error;
+
+use serde::Deserialize;
 
 #[derive(Deserialize, Debug)]
-pub struct Content {
-    pub text: String,
+struct Content {
+    text: String,
 }
 
 #[derive(Deserialize, Debug)]
-pub struct Output {
-    pub status: String,
-    pub content: Vec<Content>,
+struct Output {
+    status: String,
+    content: Vec<Content>,
 }
 
 #[derive(Deserialize, Debug)]
-pub struct Usage {
-    pub input_tokens: u32,
-    pub output_tokens: u32,
+struct Usage {
+    input_tokens: u32,
+    output_tokens: u32,
 }
 
 #[derive(Deserialize, Debug)]
-pub struct SuccessResponse {
-    pub usage: Usage,
-    pub output: Vec<Output>,
+struct SuccessResponse {
+    usage: Usage,
+    output: Vec<Output>,
 }
 
 #[derive(Deserialize, Debug)]
-pub struct NestedError {
-    pub message: String,
+struct Error {
+    message: String,
 }
 
 #[derive(Deserialize, Debug)]
-pub struct ErrorResponse {
-    pub error: NestedError,
+struct ErrorResponse {
+    error: Error,
 }
 
 #[derive(Deserialize, Debug)]
 #[serde(untagged)]
-pub enum OpenAIResponse {
+enum OpenAIResponse {
     Success(SuccessResponse),
     Error(ErrorResponse),
+}
+
+pub fn unpack_response(response_text: String) -> Result<(), Box<dyn error::Error>> {
+    let results: OpenAIResponse = serde_json::from_str(&response_text)?;
+
+    match results {
+        OpenAIResponse::Success(success) => {
+            println!(
+                "Input tokens: {:?} {:?}",
+                success.usage.input_tokens, success.usage.output_tokens
+            );
+        }
+        OpenAIResponse::Error(error) => {
+            println!("Error: {:?}", error.error.message);
+        }
+    }
+
+    Ok(())
 }
