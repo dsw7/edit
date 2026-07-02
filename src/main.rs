@@ -2,6 +2,7 @@ mod params;
 mod query_openai;
 
 use std::path::PathBuf;
+use std::process;
 
 use clap::Parser;
 
@@ -36,5 +37,6 @@ fn main() {
 
     if let Err(err) = query_openai(&params) {
         eprintln!("Error: {}", err);
+        process::exit(1);
     }
 }
