@@ -37,8 +37,8 @@ fn main() {
         client_timeout: 10,
     };
 
-    if let Err(err) = query_openai(&params) {
-        eprintln!("Error: {}", err);
+    if let Err(error) = query_openai(&params) {
+        eprintln!("Error: {}", error);
         process::exit(1);
     }
 }
