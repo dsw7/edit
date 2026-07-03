@@ -37,25 +37,39 @@ struct ErrorResponse {
 
 #[derive(Deserialize, Debug)]
 #[serde(untagged)]
-enum OpenAIResponse {
+enum RawResponse {
     Success(SuccessResponse),
     Error(ErrorResponse),
 }
 
-pub fn unpack_response(response_text: String) -> Result<(), Box<dyn error::Error>> {
-    let results: OpenAIResponse = serde_json::from_str(&response_text)?;
+pub struct OpenAIResults {
+    pub input_tokens: u32,
+    pub output_tokens: u32,
+    pub completion: String,
+}
 
-    match results {
-        OpenAIResponse::Success(success) => {
-            println!(
-                "Input tokens: {:?} {:?}",
-                success.usage.input_tokens, success.usage.output_tokens
-            );
-        }
-        OpenAIResponse::Error(error) => {
-            println!("Error: {:?}", error.error.message);
-        }
-    }
+pub struct OpenAIError {
+    pub errmsg: String,
+}
 
-    Ok(())
+pub enum OpenAIResponse {
+    OpenAIResults(OpenAIResults),
+    OpenAIError(OpenAIError),
+}
+
+pub fn unpack_response(response_text: String) -> Result<OpenAIResponse, Box<dyn error::Error>> {
+    let response: RawResponse = serde_json::from_str(&response_text)?;
+
+    let results = match response {
+        RawResponse::Success(success) => OpenAIResponse::OpenAIResults(OpenAIResults {
+            input_tokens: success.usage.input_tokens,
+            output_tokens: success.usage.output_tokens,
+            completion: success.output[0].content[0].text.clone(),
+        }),
+        RawResponse::Error(error) => OpenAIResponse::OpenAIError(OpenAIError {
+            errmsg: error.error.message,
+        }),
+    };
+
+    Ok(results)
 }

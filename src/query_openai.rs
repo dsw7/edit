@@ -5,7 +5,7 @@ use reqwest::blocking::Client;
 use serde_json::{self, json};
 
 use crate::params::Parameters;
-use crate::response_openai::unpack_response;
+use crate::response_openai::{OpenAIResponse, unpack_response};
 use crate::utils::load_api_key;
 
 fn get_request_body(params: &Parameters) -> serde_json::Value {
@@ -32,7 +32,12 @@ pub fn query_openai(params: &Parameters) -> Result<(), Box<dyn Error>> {
         .send()?;
 
     let response_text = response.text()?;
-    let _ = unpack_response(response_text);
+    let results = unpack_response(response_text)?;
+
+    match results {
+        OpenAIResponse::OpenAIResults(result) => println!("{}", result.completion),
+        OpenAIResponse::OpenAIError(result) => eprintln!("{}", result.errmsg),
+    }
 
     Ok(())
 }
