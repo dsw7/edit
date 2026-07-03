@@ -1,12 +1,13 @@
-use std::error::Error;
 use std::time::Duration;
 
 use reqwest::blocking::Client;
+use serde::Deserialize;
 use serde_json::{self, json};
 
 use crate::params::Parameters;
-use crate::response_openai::{OpenAIResponse, unpack_response};
 use crate::utils::load_api_key;
+
+// set up request ---------------------------------------------------------------------------------
 
 fn get_request_body(params: &Parameters) -> serde_json::Value {
     let input = json!([
@@ -17,7 +18,57 @@ fn get_request_body(params: &Parameters) -> serde_json::Value {
     json!({ "model": params.model, "input": input })
 }
 
-pub fn query_openai(params: &Parameters) -> Result<(), Box<dyn Error>> {
+// unpack response --------------------------------------------------------------------------------
+
+#[derive(Deserialize, Debug)]
+struct SuccessResponse {
+    usage: Usage,
+    output: Vec<Output>,
+}
+
+#[derive(Deserialize, Debug)]
+struct Usage {
+    input_tokens: u32,
+    output_tokens: u32,
+}
+
+#[derive(Deserialize, Debug)]
+struct Output {
+    status: String,
+    content: Vec<Content>,
+}
+
+#[derive(Deserialize, Debug)]
+struct Content {
+    text: String,
+}
+
+#[derive(Deserialize, Debug)]
+struct ErrorResponse {
+    error: Error,
+}
+
+#[derive(Deserialize, Debug)]
+struct Error {
+    message: String,
+}
+
+#[derive(Deserialize, Debug)]
+#[serde(untagged)]
+enum RawResponse {
+    Success(SuccessResponse),
+    Error(ErrorResponse),
+}
+
+// ------------------------------------------------------------------------------------------------
+
+pub struct OpenAIResults {
+    input_tokens: u32,
+    output_tokens: u32,
+    completion: String,
+}
+
+pub fn query_openai(params: &Parameters) -> Result<OpenAIResults, Box<dyn std::error::Error>> {
     let api_key = load_api_key("OPENAI_API_KEY")?;
     let client = Client::builder()
         .timeout(Duration::from_secs(params.client_timeout))
@@ -32,12 +83,17 @@ pub fn query_openai(params: &Parameters) -> Result<(), Box<dyn Error>> {
         .send()?;
 
     let response_text = response.text()?;
-    let results = unpack_response(response_text)?;
+    let response: RawResponse = serde_json::from_str(&response_text)?;
 
-    match results {
-        OpenAIResponse::OpenAIResults(result) => println!("{}", result.completion),
-        OpenAIResponse::OpenAIError(result) => eprintln!("{}", result.errmsg),
+    match response {
+        RawResponse::Success(success) => {
+            let results = OpenAIResults {
+                input_tokens: success.usage.input_tokens,
+                output_tokens: success.usage.output_tokens,
+                completion: success.output[0].content[0].text.clone(),
+            };
+            Ok(results)
+        }
+        RawResponse::Error(error) => Err(error.error.message.into()),
     }
-
-    Ok(())
 }

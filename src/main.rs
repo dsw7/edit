@@ -1,6 +1,5 @@
 mod params;
 mod query_openai;
-mod response_openai;
 mod utils;
 
 use std::path::PathBuf;
