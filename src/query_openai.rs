@@ -1,4 +1,3 @@
-use std::env::{self, VarError};
 use std::error::Error;
 use std::time::Duration;
 
@@ -7,16 +6,7 @@ use serde_json::{self, json};
 
 use crate::params::Parameters;
 use crate::response_openai::unpack_response;
-
-fn get_api_key() -> Result<String, String> {
-    const OPENAI_API_KEY: &str = "OPENAI_API_KEY";
-
-    match env::var(OPENAI_API_KEY) {
-        Ok(key) => Ok(key),
-        Err(VarError::NotPresent) => Err("OpenAI API key not found".to_string()),
-        Err(err) => Err(format!("Failed to retrieve API key: {:?}", err)),
-    }
-}
+use crate::utils::load_api_key;
 
 fn get_request_body(params: &Parameters) -> serde_json::Value {
     let input = json!([
@@ -28,7 +18,7 @@ fn get_request_body(params: &Parameters) -> serde_json::Value {
 }
 
 pub fn query_openai(params: &Parameters) -> Result<(), Box<dyn Error>> {
-    let api_key = get_api_key()?;
+    let api_key = load_api_key("OPENAI_API_KEY")?;
     let client = Client::builder()
         .timeout(Duration::from_secs(params.client_timeout))
         .build()?;
