@@ -16,10 +16,10 @@ fn get_structured_output_schema() -> serde_json::Value {
             "schema": {
                 "type": "object",
                 "properties": {
-                    "description_of_changes": { "type": "string" },
+                    "description_of_what_was_done": { "type": "string" },
                     "code": { "type": "string" }
                 },
-                "required": ["description_of_changes", "code"],
+                "required": ["description_of_what_was_done", "code"],
                 "additionalProperties": false
             }
         }
@@ -83,7 +83,7 @@ enum RawResponse {
 #[derive(Deserialize, Debug)]
 struct StructuredOutput {
     code: String,
-    description_of_changes: String,
+    description_of_what_was_done: String,
 }
 
 fn extract_output_text(response: &SuccessResponse) -> Result<String, String> {
@@ -103,7 +103,7 @@ pub struct OpenAIResults {
     pub input_tokens: u32,
     pub output_tokens: u32,
     pub code: String,
-    pub description_of_changes: String,
+    pub description_of_what_was_done: String,
 }
 
 pub fn query_openai(params: &Parameters) -> Result<OpenAIResults, Box<dyn std::error::Error>> {
@@ -132,7 +132,7 @@ pub fn query_openai(params: &Parameters) -> Result<OpenAIResults, Box<dyn std::e
                 input_tokens: success.usage.input_tokens,
                 output_tokens: success.usage.output_tokens,
                 code: structured_output.code,
-                description_of_changes: structured_output.description_of_changes,
+                description_of_what_was_done: structured_output.description_of_what_was_done,
             };
             Ok(results)
         }

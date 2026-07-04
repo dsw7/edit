@@ -9,7 +9,7 @@ pub fn edit_file(params: &Parameters) -> Result<(), Box<dyn std::error::Error>> 
     println!("Code: {}", results.code);
     println!(
         "Description of what was done: {}",
-        results.description_of_changes
+        results.description_of_what_was_done
     );
 
     Ok(())
