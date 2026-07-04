@@ -1,3 +1,4 @@
+mod edit_file;
 mod params;
 mod query_openai;
 mod utils;
@@ -7,8 +8,8 @@ use std::process;
 
 use clap::Parser;
 
+use edit_file::edit_file;
 use params::Parameters;
-use query_openai::query_openai;
 
 #[derive(Parser, Debug)]
 #[command(about = "Program for editing individual files using LLMs.", version)]
@@ -37,7 +38,7 @@ fn main() {
         client_timeout: 10,
     };
 
-    if let Err(error) = query_openai(&params) {
+    if let Err(error) = edit_file(&params) {
         eprintln!("Error: {}", error);
         process::exit(1);
     }

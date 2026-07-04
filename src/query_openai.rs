@@ -74,9 +74,9 @@ fn extract_output_text(response: &SuccessResponse) -> String {
 // ------------------------------------------------------------------------------------------------
 
 pub struct OpenAIResults {
-    input_tokens: u32,
-    output_tokens: u32,
-    completion: String,
+    pub input_tokens: u32,
+    pub output_tokens: u32,
+    pub completion: String,
 }
 
 pub fn query_openai(params: &Parameters) -> Result<OpenAIResults, Box<dyn std::error::Error>> {
