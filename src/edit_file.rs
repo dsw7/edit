@@ -32,27 +32,43 @@ fn read_file_to_string(file: &PathBuf) -> Result<String, io::Error> {
     Ok(file_content)
 }
 
-pub fn edit_file(
+/*
+fn operate_on_existing_file(
     file_to_edit: &PathBuf,
     params: &Parameters,
 ) -> Result<(), Box<dyn std::error::Error>> {
-    if !file_to_edit.exists() {
-        create_file_with_prompt(&file_to_edit)?;
-    }
+}
+*/
 
-    let text_to_edit = read_file_to_string(&file_to_edit)?;
+fn operate_on_new_file(
+    file_to_edit: &PathBuf,
+    params: &Parameters,
+) -> Result<(), Box<dyn std::error::Error>> {
+    create_file_with_prompt(&file_to_edit)?;
 
     let results = query_openai(&params)?;
+    fs::write(file_to_edit, results.code)?;
 
     println!("Input tokens: {}", results.input_tokens);
     println!("Output tokens: {}", results.output_tokens);
-    println!("Code: {}", results.code);
     println!(
         "Description of what was done: {}",
         results.description_of_what_was_done
     );
 
-    fs::write(file_to_edit, results.code)?;
+    Ok(())
+}
+
+pub fn edit_file(
+    file_to_edit: &PathBuf,
+    params: &Parameters,
+) -> Result<(), Box<dyn std::error::Error>> {
+    if file_to_edit.exists() {
+    } else {
+        operate_on_new_file(&file_to_edit, &params)?;
+    }
+
+    //let text_to_edit = read_file_to_string(&file_to_edit)?;
 
     Ok(())
 }
