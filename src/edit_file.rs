@@ -6,7 +6,7 @@ use std::io::{self, Write};
 use std::path::PathBuf;
 
 fn create_file_with_prompt(file: &PathBuf) -> Result<(), Box<dyn std::error::Error>> {
-    print!("File does not exist. Do you want to create it? (y/n): ");
+    print!("File does not exist. Do you want to create it? [y/n]: ");
     io::stdout().flush()?;
 
     let mut input = String::new();
@@ -16,7 +16,7 @@ fn create_file_with_prompt(file: &PathBuf) -> Result<(), Box<dyn std::error::Err
         File::create(file)?;
     } else {
         return Err(Box::from(
-            "File does not exist and was not created. Cannot proceed",
+            "File does not exist and was not created. Cannot proceed!",
         ));
     }
 
