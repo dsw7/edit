@@ -54,12 +54,20 @@ struct Usage {
 #[derive(Deserialize, Debug)]
 struct Output {
     status: String,
-    content: Vec<Content>,
+    content: Vec<TextOrRefusal>,
+}
+
+#[derive(Debug, Deserialize)]
+#[serde(untagged)]
+enum TextOrRefusal {
+    TextResponse { text: String },
+    RefusalResponse { refusal: String },
 }
 
 #[derive(Deserialize, Debug)]
-struct Content {
-    text: String,
+struct StructuredOutput {
+    code: String,
+    description_of_changes: String,
 }
 
 #[derive(Deserialize, Debug)]
@@ -79,15 +87,17 @@ enum RawResponse {
     Error(ErrorResponse),
 }
 
-fn extract_output_text(response: &SuccessResponse) -> String {
+fn extract_output_text(response: &SuccessResponse) -> Result<String, String> {
     for object in &response.output {
         if object.status == "completed" {
-            let content = &object.content[0];
-            return content.text.clone();
+            return match &object.content[0] {
+                TextOrRefusal::TextResponse { text } => Ok(text.clone()),
+                TextOrRefusal::RefusalResponse { refusal } => Err(refusal.clone()),
+            };
         }
     }
 
-    String::from("No results")
+    Err("Query never completed".to_string())
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -113,6 +123,7 @@ pub fn query_openai(params: &Parameters) -> Result<OpenAIResults, Box<dyn std::e
         .send()?;
 
     let response_text = response.text()?;
+    println!("{response_text}");
     let response: RawResponse = serde_json::from_str(&response_text)?;
 
     match response {
@@ -120,7 +131,7 @@ pub fn query_openai(params: &Parameters) -> Result<OpenAIResults, Box<dyn std::e
             let results = OpenAIResults {
                 input_tokens: success.usage.input_tokens,
                 output_tokens: success.usage.output_tokens,
-                completion: extract_output_text(&success),
+                completion: extract_output_text(&success)?,
             };
             Ok(results)
         }
