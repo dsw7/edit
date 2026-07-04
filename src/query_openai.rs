@@ -9,8 +9,8 @@ use crate::utils::load_api_key;
 
 // set up request ---------------------------------------------------------------------------------
 
-fn get_structured_output() -> serde_json::Value {
-    json!({
+fn get_request_body(params: &Parameters) -> serde_json::Value {
+    let structured_output_schema: serde_json::Value = json!({
         "format": {
             "type": "json_schema",
             "name": "updated_code",
@@ -25,16 +25,16 @@ fn get_structured_output() -> serde_json::Value {
                 "additionalProperties": false
             }
         }
+    });
+
+    let system_prompt: &str = "You are a helpful assistant.";
+
+    json!({
+        "input": params.prompt,
+        "model": params.model,
+        "instructions": system_prompt,
+        "text": structured_output_schema,
     })
-}
-
-fn get_request_body(params: &Parameters) -> serde_json::Value {
-    let input = json!([
-        { "role": "system", "content": "You are a helpful assistant." },
-        { "role": "user", "content": params.prompt }
-    ]);
-
-    json!({ "model": params.model, "input": input , "text": get_structured_output() })
 }
 
 // unpack response --------------------------------------------------------------------------------
