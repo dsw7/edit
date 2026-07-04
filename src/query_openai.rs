@@ -7,10 +7,8 @@ use serde_json::{self, json};
 use crate::params::Parameters;
 use crate::utils::load_api_key;
 
-// set up request ---------------------------------------------------------------------------------
-
-fn get_request_body(params: &Parameters) -> serde_json::Value {
-    let structured_output_schema: serde_json::Value = json!({
+fn get_structured_output_schema() -> serde_json::Value {
+    json!({
         "format": {
             "type": "json_schema",
             "name": "updated_code",
@@ -25,8 +23,11 @@ fn get_request_body(params: &Parameters) -> serde_json::Value {
                 "additionalProperties": false
             }
         }
-    });
+    })
+}
 
+fn set_up_request_body(params: &Parameters) -> serde_json::Value {
+    let structured_output_schema = get_structured_output_schema();
     let system_prompt: &str = "You are a helpful assistant.";
 
     json!({
@@ -36,8 +37,6 @@ fn get_request_body(params: &Parameters) -> serde_json::Value {
         "text": structured_output_schema,
     })
 }
-
-// unpack response --------------------------------------------------------------------------------
 
 #[derive(Deserialize, Debug)]
 struct SuccessResponse {
@@ -81,8 +80,6 @@ enum RawResponse {
     Error(ErrorResponse),
 }
 
-// unpack structured output / refusal -------------------------------------------------------------
-
 #[derive(Deserialize, Debug)]
 struct StructuredOutput {
     code: String,
@@ -91,7 +88,7 @@ struct StructuredOutput {
 
 fn extract_output_text(response: &SuccessResponse) -> Result<String, String> {
     for object in &response.output {
-        if object.status == "completed" {
+        if object.status == "completed2" {
             return match &object.content[0] {
                 TextOrRefusal::TextResponse { text } => Ok(text.clone()),
                 TextOrRefusal::RefusalResponse { refusal } => Err(refusal.clone()),
@@ -101,8 +98,6 @@ fn extract_output_text(response: &SuccessResponse) -> Result<String, String> {
 
     Err("Query never completed".to_string())
 }
-
-// ------------------------------------------------------------------------------------------------
 
 pub struct OpenAIResults {
     pub input_tokens: u32,
@@ -117,7 +112,7 @@ pub fn query_openai(params: &Parameters) -> Result<OpenAIResults, Box<dyn std::e
         .timeout(Duration::from_secs(params.client_timeout))
         .build()?;
 
-    let request_body = get_request_body(&params);
+    let request_body = set_up_request_body(&params);
     let response = client
         .post("https://api.openai.com/v1/responses")
         .header("Content-Type", "application/json")
