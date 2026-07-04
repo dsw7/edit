@@ -60,6 +60,17 @@ enum RawResponse {
     Error(ErrorResponse),
 }
 
+fn extract_output_text(response: &SuccessResponse) -> String {
+    for object in &response.output {
+        if object.status == "completed" {
+            let content = &object.content[0];
+            return content.text.clone();
+        }
+    }
+
+    String::from("No results")
+}
+
 // ------------------------------------------------------------------------------------------------
 
 pub struct OpenAIResults {
@@ -90,7 +101,7 @@ pub fn query_openai(params: &Parameters) -> Result<OpenAIResults, Box<dyn std::e
             let results = OpenAIResults {
                 input_tokens: success.usage.input_tokens,
                 output_tokens: success.usage.output_tokens,
-                completion: success.output[0].content[0].text.clone(),
+                completion: extract_output_text(&success),
             };
             Ok(results)
         }
