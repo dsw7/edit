@@ -65,12 +65,6 @@ enum TextOrRefusal {
 }
 
 #[derive(Deserialize, Debug)]
-struct StructuredOutput {
-    code: String,
-    description_of_changes: String,
-}
-
-#[derive(Deserialize, Debug)]
 struct ErrorResponse {
     error: Error,
 }
@@ -85,6 +79,14 @@ struct Error {
 enum RawResponse {
     Success(SuccessResponse),
     Error(ErrorResponse),
+}
+
+// unpack structured output / refusal -------------------------------------------------------------
+
+#[derive(Deserialize, Debug)]
+struct StructuredOutput {
+    code: String,
+    description_of_changes: String,
 }
 
 fn extract_output_text(response: &SuccessResponse) -> Result<String, String> {
@@ -105,7 +107,8 @@ fn extract_output_text(response: &SuccessResponse) -> Result<String, String> {
 pub struct OpenAIResults {
     pub input_tokens: u32,
     pub output_tokens: u32,
-    pub completion: String,
+    pub code: String,
+    pub description_of_changes: String,
 }
 
 pub fn query_openai(params: &Parameters) -> Result<OpenAIResults, Box<dyn std::error::Error>> {
@@ -123,15 +126,18 @@ pub fn query_openai(params: &Parameters) -> Result<OpenAIResults, Box<dyn std::e
         .send()?;
 
     let response_text = response.text()?;
-    println!("{response_text}");
     let response: RawResponse = serde_json::from_str(&response_text)?;
 
     match response {
         RawResponse::Success(success) => {
+            let text = extract_output_text(&success)?;
+            let structured_output: StructuredOutput = serde_json::from_str(&text)?;
+
             let results = OpenAIResults {
                 input_tokens: success.usage.input_tokens,
                 output_tokens: success.usage.output_tokens,
-                completion: extract_output_text(&success)?,
+                code: structured_output.code,
+                description_of_changes: structured_output.description_of_changes,
             };
             Ok(results)
         }

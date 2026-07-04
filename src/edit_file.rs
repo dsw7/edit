@@ -6,7 +6,11 @@ pub fn edit_file(params: &Parameters) -> Result<(), Box<dyn std::error::Error>> 
 
     println!("Input tokens: {}", results.input_tokens);
     println!("Output tokens: {}", results.output_tokens);
-    println!("Completion: {}", results.completion);
+    println!("Code: {}", results.code);
+    println!(
+        "Description of what was done: {}",
+        results.description_of_changes
+    );
 
     Ok(())
 }
