@@ -1,7 +1,36 @@
 use crate::params::Parameters;
 use crate::query_openai::query_openai;
 
-pub fn edit_file(params: &Parameters) -> Result<(), Box<dyn std::error::Error>> {
+use std::fs::File;
+use std::io::{self, Write};
+use std::path::PathBuf;
+
+fn create_file_with_prompt(file: &PathBuf) -> Result<(), Box<dyn std::error::Error>> {
+    print!("File does not exist. Do you want to create it? (y/n): ");
+    io::stdout().flush()?;
+
+    let mut input = String::new();
+    io::stdin().read_line(&mut input)?;
+
+    if input.trim().eq_ignore_ascii_case("y") {
+        File::create(file)?;
+    } else {
+        return Err(Box::from(
+            "File does not exist and was not created. Cannot proceed",
+        ));
+    }
+
+    Ok(())
+}
+
+pub fn edit_file(
+    file_to_edit: &PathBuf,
+    params: &Parameters,
+) -> Result<(), Box<dyn std::error::Error>> {
+    if !file_to_edit.exists() {
+        create_file_with_prompt(&file_to_edit)?;
+    }
+
     let results = query_openai(&params)?;
 
     println!("Input tokens: {}", results.input_tokens);

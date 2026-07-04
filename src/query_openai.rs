@@ -88,7 +88,7 @@ struct StructuredOutput {
 
 fn extract_output_text(response: &SuccessResponse) -> Result<String, String> {
     for object in &response.output {
-        if object.status == "completed2" {
+        if object.status == "completed" {
             return match &object.content[0] {
                 TextOrRefusal::TextResponse { text } => Ok(text.clone()),
                 TextOrRefusal::RefusalResponse { refusal } => Err(refusal.clone()),

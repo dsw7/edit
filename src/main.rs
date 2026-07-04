@@ -38,7 +38,7 @@ fn main() {
         client_timeout: 10,
     };
 
-    if let Err(error) = edit_file(&params) {
+    if let Err(error) = edit_file(&cli.file_to_edit, &params) {
         eprintln!("Error: {}", error);
         process::exit(1);
     }
