@@ -1,18 +1,7 @@
 use crate::params::Parameters;
 use crate::query_openai::{OpenAIResults, query_openai};
 
-use std::fs::{self, File};
-use std::io::{self, Read};
-use std::path::PathBuf;
-
-fn read_file_to_string(file: &PathBuf) -> Result<String, io::Error> {
-    let mut file_handle = File::open(file)?;
-
-    let mut file_content = String::new();
-    file_handle.read_to_string(&mut file_content)?;
-
-    Ok(file_content)
-}
+use std::fs;
 
 fn update_user_prompt(user_prompt: &String, text_to_edit: String) -> String {
     format!(
@@ -31,8 +20,7 @@ And apply them to the code:
 fn operate_on_existing_file(
     params: &Parameters,
 ) -> Result<OpenAIResults, Box<dyn std::error::Error>> {
-    let text_to_edit = read_file_to_string(&params.input_file)?;
-
+    let text_to_edit = fs::read_to_string(&params.input_file)?;
     let prompt = update_user_prompt(&params.prompt, text_to_edit);
 
     let results = query_openai(&prompt, &params.model)?;
