@@ -111,6 +111,26 @@ fn extract_output_text(response: &SuccessResponse) -> Result<String, String> {
     Err("Query never completed".to_string())
 }
 
+fn deserialize_raw_json(raw_json: String) -> Result<OpenAIResults, Box<dyn std::error::Error>> {
+    let response: RawResponse = serde_json::from_str(&raw_json)?;
+
+    match response {
+        RawResponse::Success(success) => {
+            let text = extract_output_text(&success)?;
+            let structured_output: StructuredOutput = serde_json::from_str(&text)?;
+
+            let results = OpenAIResults {
+                input_tokens: success.usage.input_tokens,
+                output_tokens: success.usage.output_tokens,
+                code: structured_output.code,
+                description_of_what_was_done: structured_output.description_of_what_was_done,
+            };
+            Ok(results)
+        }
+        RawResponse::Error(error) => Err(error.error.message.into()),
+    }
+}
+
 pub struct OpenAIResults {
     pub input_tokens: u32,
     pub output_tokens: u32,
@@ -132,22 +152,6 @@ pub fn query_openai(params: &Parameters) -> Result<OpenAIResults, Box<dyn std::e
         .json(&request_body)
         .send()?;
 
-    let response_text = response.text()?;
-    let response: RawResponse = serde_json::from_str(&response_text)?;
-
-    match response {
-        RawResponse::Success(success) => {
-            let text = extract_output_text(&success)?;
-            let structured_output: StructuredOutput = serde_json::from_str(&text)?;
-
-            let results = OpenAIResults {
-                input_tokens: success.usage.input_tokens,
-                output_tokens: success.usage.output_tokens,
-                code: structured_output.code,
-                description_of_what_was_done: structured_output.description_of_what_was_done,
-            };
-            Ok(results)
-        }
-        RawResponse::Error(error) => Err(error.error.message.into()),
-    }
+    let raw_json = response.text()?;
+    deserialize_raw_json(raw_json)
 }
