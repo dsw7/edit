@@ -27,8 +27,7 @@ fn get_structured_output_schema() -> serde_json::Value {
 }
 
 fn get_system_prompt() -> &'static str {
-    "You are a helpful assistant that specializes in programming.
-The user will provide some code and instructions on what to do with the code.
+    "You are a helpful programming assistant.
 
 IMPORTANT: Do not wrap your response in backticks (```). Output the code
 directly without markdown code fences.
