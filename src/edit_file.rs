@@ -33,7 +33,7 @@ fn operate_on_existing_file(
 ) -> Result<OpenAIResults, Box<dyn std::error::Error>> {
     let text_to_edit = read_file_to_string(&params.input_file)?;
 
-    let results = query_openai(&params)?;
+    let results = query_openai(&params.prompt, &params.model)?;
     fs::write(&params.input_file, &results.code)?;
 
     Ok(results)
@@ -45,7 +45,7 @@ fn operate_on_new_file(params: &Parameters) -> Result<OpenAIResults, Box<dyn std
         &params.input_file.display()
     );
 
-    let results = query_openai(&params)?;
+    let results = query_openai(&params.prompt, &params.model)?;
     fs::write(&params.input_file, &results.code)?;
 
     Ok(results)

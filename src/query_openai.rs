@@ -4,7 +4,6 @@ use reqwest::blocking::Client;
 use serde::Deserialize;
 use serde_json::{self, json};
 
-use crate::params::Parameters;
 use crate::utils::load_api_key;
 
 fn get_structured_output_schema() -> serde_json::Value {
@@ -38,13 +37,13 @@ Output:
 "
 }
 
-fn set_up_request_body(params: &Parameters) -> serde_json::Value {
+fn set_up_request_body(prompt: &String, model: &String) -> serde_json::Value {
     let structured_output_schema = get_structured_output_schema();
     let system_prompt = get_system_prompt();
 
     json!({
-        "input": params.prompt,
-        "model": params.model,
+        "input": prompt,
+        "model": model,
         "instructions": system_prompt,
         "text": structured_output_schema,
     })
@@ -138,13 +137,14 @@ fn deserialize_raw_json(raw_json: String) -> Result<OpenAIResults, Box<dyn std::
     }
 }
 
-pub fn query_openai(params: &Parameters) -> Result<OpenAIResults, Box<dyn std::error::Error>> {
+pub fn query_openai(
+    prompt: &String,
+    model: &String,
+) -> Result<OpenAIResults, Box<dyn std::error::Error>> {
     let api_key = load_api_key("OPENAI_API_KEY")?;
-    let client = Client::builder()
-        .timeout(Duration::from_secs(params.client_timeout))
-        .build()?;
+    let client = Client::builder().timeout(Duration::from_secs(10)).build()?;
 
-    let request_body = set_up_request_body(&params);
+    let request_body = set_up_request_body(&prompt, &model);
     let response = client
         .post("https://api.openai.com/v1/responses")
         .header("Content-Type", "application/json")
