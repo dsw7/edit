@@ -33,7 +33,6 @@ fn main() {
     let cli = Cli::parse();
 
     let params = Parameters {
-        client_timeout: 10,
         input_file: cli.file_to_edit,
         model: cli.model,
         prompt: cli.prompt,
