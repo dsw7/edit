@@ -26,9 +26,22 @@ fn get_structured_output_schema() -> serde_json::Value {
     })
 }
 
+fn get_system_prompt() -> &'static str {
+    "You are a helpful assistant that specializes in programming.
+The user will provide some code and instructions on what to do with the code.
+
+IMPORTANT: Do not wrap your response in backticks (```). Output the code
+directly without markdown code fences.
+
+Output:
+- description_of_what_was_done: brief summary of what you did
+- code: your updated code
+"
+}
+
 fn set_up_request_body(params: &Parameters) -> serde_json::Value {
     let structured_output_schema = get_structured_output_schema();
-    let system_prompt: &str = "You are a helpful assistant.";
+    let system_prompt = get_system_prompt();
 
     json!({
         "input": params.prompt,
