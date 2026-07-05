@@ -14,6 +14,20 @@ fn read_file_to_string(file: &PathBuf) -> Result<String, io::Error> {
     Ok(file_content)
 }
 
+fn update_user_prompt(user_prompt: &String, text_to_edit: String) -> String {
+    format!(
+        "Take the instructions:
+```plaintext
+{}
+```
+And apply them to the code:
+```
+{}
+```",
+        user_prompt, text_to_edit
+    )
+}
+
 fn operate_on_existing_file(
     params: &Parameters,
 ) -> Result<OpenAIResults, Box<dyn std::error::Error>> {
