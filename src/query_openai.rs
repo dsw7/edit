@@ -111,6 +111,13 @@ fn extract_output_text(response: &SuccessResponse) -> Result<String, String> {
     Err("Query never completed".to_string())
 }
 
+pub struct OpenAIResults {
+    pub input_tokens: u32,
+    pub output_tokens: u32,
+    pub code: String,
+    pub description_of_what_was_done: String,
+}
+
 fn deserialize_raw_json(raw_json: String) -> Result<OpenAIResults, Box<dyn std::error::Error>> {
     let response: RawResponse = serde_json::from_str(&raw_json)?;
 
@@ -129,13 +136,6 @@ fn deserialize_raw_json(raw_json: String) -> Result<OpenAIResults, Box<dyn std::
         }
         RawResponse::Error(error) => Err(error.error.message.into()),
     }
-}
-
-pub struct OpenAIResults {
-    pub input_tokens: u32,
-    pub output_tokens: u32,
-    pub code: String,
-    pub description_of_what_was_done: String,
 }
 
 pub fn query_openai(params: &Parameters) -> Result<OpenAIResults, Box<dyn std::error::Error>> {
