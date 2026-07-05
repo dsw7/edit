@@ -33,12 +33,13 @@ fn main() {
     let cli = Cli::parse();
 
     let params = Parameters {
-        prompt: cli.prompt,
-        model: cli.model,
         client_timeout: 10,
+        input_file: cli.file_to_edit,
+        model: cli.model,
+        prompt: cli.prompt,
     };
 
-    if let Err(error) = edit_file(&cli.file_to_edit, &params) {
+    if let Err(error) = edit_file(&params) {
         eprintln!("Error: {}", error);
         process::exit(1);
     }
