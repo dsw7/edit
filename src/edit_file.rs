@@ -2,26 +2,8 @@ use crate::params::Parameters;
 use crate::query_openai::{OpenAIResults, query_openai};
 
 use std::fs::{self, File};
-use std::io::{self, Read, Write};
+use std::io::{self, Read};
 use std::path::PathBuf;
-
-fn create_file_with_prompt(file: &PathBuf) -> Result<(), Box<dyn std::error::Error>> {
-    print!("File does not exist. Do you want to create it? [y/n]: ");
-    io::stdout().flush()?;
-
-    let mut input = String::new();
-    io::stdin().read_line(&mut input)?;
-
-    if input.trim().eq_ignore_ascii_case("y") {
-        File::create(file)?;
-    } else {
-        return Err(Box::from(
-            "File does not exist and was not created. Cannot proceed!",
-        ));
-    }
-
-    Ok(())
-}
 
 fn read_file_to_string(file: &PathBuf) -> Result<String, io::Error> {
     let mut file_handle = File::open(file)?;
@@ -44,7 +26,10 @@ fn operate_on_existing_file(
 }
 
 fn operate_on_new_file(params: &Parameters) -> Result<OpenAIResults, Box<dyn std::error::Error>> {
-    create_file_with_prompt(&params.input_file)?;
+    println!(
+        "File '{}' does not exist. Will create new file",
+        &params.input_file.display()
+    );
 
     let results = query_openai(&params)?;
     fs::write(&params.input_file, &results.code)?;
