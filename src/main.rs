@@ -18,7 +18,7 @@ struct Cli {
     file_to_edit: PathBuf,
 
     #[arg(short, long, help = "Specify prompt via command line")]
-    prompt: String,
+    prompt: Option<String>,
 
     #[arg(
         short,
