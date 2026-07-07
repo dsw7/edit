@@ -1,6 +1,7 @@
 mod edit_file;
 mod params;
 mod query_openai;
+mod select_prompt;
 mod utils;
 
 use std::path::PathBuf;
