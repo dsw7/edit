@@ -11,16 +11,14 @@ fn load_prompt_from_stdin() -> Result<String, io::Error> {
     Ok(prompt_from_stdin)
 }
 
-fn load_prompt_from_file() -> Result<String, io::Error> {
+fn load_prompt_from_file() -> Option<String> {
     if fs::metadata("Inputfile").is_ok() {
-        let prompt_from_file = fs::read_to_string("Inputfile")?;
-        return Ok(prompt_from_file);
+        if let Ok(prompt_from_file) = fs::read_to_string("Inputfile") {
+            return Some(prompt_from_file);
+        }
     }
 
-    Err(io::Error::new(
-        io::ErrorKind::NotFound,
-        "Inputfile not found",
-    ))
+    None
 }
 
 fn is_prompt_empty(user_prompt: Result<String, io::Error>) -> Result<String, io::Error> {
@@ -45,8 +43,8 @@ pub fn select_prompt(user_prompt_from_cli: &Option<String>) -> Result<String, io
     let user_prompt = match user_prompt_from_cli {
         Some(prompt) => Ok(prompt.to_string()),
         None => match load_prompt_from_file() {
-            Ok(file_prompt) => Ok(file_prompt),
-            Err(_) => load_prompt_from_stdin(),
+            Some(file_prompt) => Ok(file_prompt),
+            None => load_prompt_from_stdin(),
         },
     };
 
