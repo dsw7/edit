@@ -1,6 +1,13 @@
 use anyhow::{Context, bail};
 use serde::Deserialize;
 
+#[derive(Deserialize, Debug)]
+#[serde(untagged)]
+enum RawResponse {
+    Success(SuccessResponse),
+    Error(ErrorResponse),
+}
+
 // success
 
 #[derive(Deserialize, Debug)]
@@ -96,13 +103,6 @@ fn deserialize_success(response: &SuccessResponse) -> anyhow::Result<OpenAIResul
         description_of_what_was_done: structured_output.description_of_what_was_done,
     };
     Ok(results)
-}
-
-#[derive(Deserialize, Debug)]
-#[serde(untagged)]
-enum RawResponse {
-    Success(SuccessResponse),
-    Error(ErrorResponse),
 }
 
 pub fn deserialize_json_response(raw_json: String) -> anyhow::Result<OpenAIResults> {
