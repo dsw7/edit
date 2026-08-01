@@ -1,50 +1,43 @@
+use anyhow::{self, Context};
 use std::fs;
 use std::io::{self, Write};
 
-fn load_prompt_from_stdin() -> Result<String, io::Error> {
+fn load_prompt_from_file() -> anyhow::Result<String> {
+    if fs::metadata("Inputfile").is_ok() {
+        return fs::read_to_string("Inputfile").context("Failed to read the content of Inputfile");
+    }
+
+    Err(anyhow::anyhow!("Inputfile does not exist"))
+}
+
+fn load_prompt_from_stdin() -> anyhow::Result<String> {
     print!(">>> ");
-    io::stdout().flush()?;
+    io::stdout().flush().context("Failed to flush stdout")?;
 
     let mut prompt_from_stdin = String::new();
-    io::stdin().read_line(&mut prompt_from_stdin)?;
+    io::stdin()
+        .read_line(&mut prompt_from_stdin)
+        .context("Failed to read line from stdin")?;
 
     Ok(prompt_from_stdin)
 }
 
-fn load_prompt_from_file() -> Option<String> {
-    if fs::metadata("Inputfile").is_ok() {
-        if let Ok(prompt_from_file) = fs::read_to_string("Inputfile") {
-            return Some(prompt_from_file);
-        }
-    }
+fn is_prompt_empty(user_prompt: String) -> anyhow::Result<String> {
+    let prompt_trimmed = user_prompt.trim().to_string();
 
-    None
-}
-
-fn is_prompt_empty(user_prompt: Result<String, io::Error>) -> Result<String, io::Error> {
-    match user_prompt {
-        Ok(prompt) => {
-            let prompt_trimmed = prompt.trim().to_string();
-
-            if prompt_trimmed.is_empty() {
-                Err(io::Error::new(
-                    io::ErrorKind::InvalidInput,
-                    "Prompt cannot be empty",
-                ))
-            } else {
-                Ok(prompt_trimmed)
-            }
-        }
-        Err(error) => Err(error),
+    if prompt_trimmed.is_empty() {
+        anyhow::bail!("Prompt cannot be empty");
+    } else {
+        Ok(prompt_trimmed)
     }
 }
 
-pub fn select_prompt(user_prompt_from_cli: &Option<String>) -> Result<String, io::Error> {
+pub fn select_prompt(user_prompt_from_cli: &Option<String>) -> anyhow::Result<String> {
     let user_prompt = match user_prompt_from_cli {
-        Some(prompt) => Ok(prompt.to_string()),
+        Some(prompt) => prompt.to_string(),
         None => match load_prompt_from_file() {
-            Some(file_prompt) => Ok(file_prompt),
-            None => load_prompt_from_stdin(),
+            Ok(file_prompt) => file_prompt,
+            Err(_) => load_prompt_from_stdin()?,
         },
     };
 
