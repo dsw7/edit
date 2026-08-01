@@ -40,18 +40,12 @@ struct Error {
     message: String,
 }
 
-// content
+// extract content dynamically
 
 enum ContentType {
     Text(String),
     Refusal(String),
     Incomplete,
-}
-
-#[derive(Deserialize, Debug)]
-struct StructuredOutput {
-    code: String,
-    description_of_what_was_done: String,
 }
 
 fn extract_completed_object(response: &SuccessResponse) -> ContentType {
@@ -70,6 +64,12 @@ fn extract_completed_object(response: &SuccessResponse) -> ContentType {
     }
 
     ContentType::Incomplete
+}
+
+#[derive(Deserialize, Debug)]
+struct StructuredOutput {
+    code: String,
+    description_of_what_was_done: String,
 }
 
 pub struct OpenAIResults {
