@@ -2,7 +2,7 @@ use std::fs;
 use std::io::{self, Write};
 use std::path::Path;
 
-use anyhow::{self, Context};
+use anyhow::Context;
 
 fn load_prompt_from_stdin() -> anyhow::Result<String> {
     print!(">>> ");
