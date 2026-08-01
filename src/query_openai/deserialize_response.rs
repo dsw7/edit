@@ -8,8 +8,6 @@ enum RawResponse {
     Error(ErrorResponse),
 }
 
-// success
-
 #[derive(Deserialize, Debug)]
 struct SuccessResponse {
     usage: Usage,
@@ -28,8 +26,6 @@ struct Output {
     content: Vec<serde_json::Value>,
 }
 
-// error
-
 #[derive(Deserialize, Debug)]
 struct ErrorResponse {
     error: Error,
@@ -39,8 +35,6 @@ struct ErrorResponse {
 struct Error {
     message: String,
 }
-
-// extract content dynamically
 
 enum ContentType {
     Text(String),
