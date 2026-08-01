@@ -5,7 +5,7 @@ mod select_prompt;
 mod utils;
 
 use std::path::PathBuf;
-use std::process;
+use std::process::ExitCode;
 
 use clap::Parser;
 
@@ -30,7 +30,7 @@ struct Cli {
     model: String,
 }
 
-fn main() {
+fn main() -> ExitCode {
     let cli = Cli::parse();
 
     let params = Parameters {
@@ -39,8 +39,11 @@ fn main() {
         prompt: cli.prompt,
     };
 
-    if let Err(error) = edit_file(&params) {
-        eprintln!("Error: {error}");
-        process::exit(1);
+    match edit_file(&params) {
+        Ok(()) => ExitCode::SUCCESS,
+        Err(error) => {
+            eprintln!("{error}");
+            ExitCode::FAILURE
+        }
     }
 }
