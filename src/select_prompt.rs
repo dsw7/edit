@@ -25,25 +25,10 @@ fn load_prompt_from_file() -> anyhow::Result<String> {
     Ok(prompt)
 }
 
-fn load_prompt_from_file_or_stdin() -> anyhow::Result<String> {
+pub fn load_prompt_from_file_or_stdin() -> anyhow::Result<String> {
     if Path::new("Inputfile").exists() {
         load_prompt_from_file()
     } else {
         load_prompt_from_stdin()
-    }
-}
-
-pub fn select_prompt(user_prompt_from_cli: &Option<String>) -> anyhow::Result<String> {
-    let user_prompt = match user_prompt_from_cli {
-        Some(prompt) => prompt.to_string(),
-        None => load_prompt_from_file_or_stdin()?,
-    };
-
-    let user_prompt = user_prompt.trim().to_string();
-
-    if user_prompt.is_empty() {
-        anyhow::bail!("Cannot proceed. The prompt is empty")
-    } else {
-        Ok(user_prompt)
     }
 }

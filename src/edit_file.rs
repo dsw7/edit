@@ -1,6 +1,6 @@
 use crate::params::Parameters;
 use crate::query_openai::{OpenAIResults, query_openai};
-use crate::select_prompt::select_prompt;
+use crate::select_prompt::load_prompt_from_file_or_stdin;
 
 use std::fs;
 
@@ -17,13 +17,28 @@ And apply them to the code:
     )
 }
 
+fn extract_user_prompt(params: &Parameters) -> anyhow::Result<String> {
+    let prompt = match &params.prompt {
+        Some(prompt) => prompt.to_string(),
+        None => load_prompt_from_file_or_stdin()?,
+    };
+
+    let prompt = prompt.trim().to_string();
+
+    if prompt.is_empty() {
+        anyhow::bail!("Cannot proceed. The prompt is empty")
+    } else {
+        Ok(prompt)
+    }
+}
+
 fn operate_on_existing_file(
     params: &Parameters,
 ) -> Result<OpenAIResults, Box<dyn std::error::Error>> {
-    let prompt = select_prompt(&params.prompt)?;
+    let user_prompt = extract_user_prompt(params)?;
 
     let text_to_edit = fs::read_to_string(&params.input_file)?;
-    let prompt_updated = update_user_prompt(prompt, text_to_edit);
+    let prompt_updated = update_user_prompt(user_prompt, text_to_edit);
 
     let results = query_openai(&prompt_updated, &params.model)?;
     fs::write(&params.input_file, &results.code)?;
@@ -32,8 +47,8 @@ fn operate_on_existing_file(
 }
 
 fn operate_on_new_file(params: &Parameters) -> Result<OpenAIResults, Box<dyn std::error::Error>> {
-    let prompt = select_prompt(&params.prompt)?;
-    let results = query_openai(&prompt, &params.model)?;
+    let user_prompt = extract_user_prompt(params)?;
+    let results = query_openai(&user_prompt, &params.model)?;
 
     println!("Created new file: '{}'", &params.input_file.display());
     fs::write(&params.input_file, &results.code)?;
