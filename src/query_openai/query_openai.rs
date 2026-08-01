@@ -137,10 +137,7 @@ fn deserialize_raw_json(raw_json: String) -> Result<OpenAIResults, Box<dyn std::
     }
 }
 
-pub fn query_openai(
-    prompt: &String,
-    model: &String,
-) -> Result<OpenAIResults, Box<dyn std::error::Error>> {
+pub fn query_openai(prompt: &String, model: &String) -> anyhow::Result<OpenAIResults> {
     let api_key = load_api_key("OPENAI_API_KEY")?;
     let client = Client::builder().timeout(Duration::from_secs(10)).build()?;
 
