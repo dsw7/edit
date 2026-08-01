@@ -1,4 +1,3 @@
-mod query_openai;
+mod run_query;
 
-pub use query_openai::OpenAIResults;
-pub use query_openai::query_openai;
+pub use run_query::{OpenAIResults, run_query};
