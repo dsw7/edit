@@ -2,6 +2,8 @@ use crate::params::Parameters;
 use crate::query_openai::{OpenAIResults, run_query};
 use crate::select_prompt::load_prompt_from_file_or_stdin;
 
+use anyhow::Context;
+
 use std::fs;
 
 fn update_user_prompt(user_prompt: String, text_to_edit: String) -> String {
@@ -32,31 +34,30 @@ fn extract_user_prompt(params: &Parameters) -> anyhow::Result<String> {
     }
 }
 
-fn operate_on_existing_file(
-    params: &Parameters,
-) -> Result<OpenAIResults, Box<dyn std::error::Error>> {
+fn operate_on_existing_file(params: &Parameters) -> anyhow::Result<OpenAIResults> {
     let user_prompt = extract_user_prompt(params)?;
 
-    let text_to_edit = fs::read_to_string(&params.input_file)?;
+    let text_to_edit =
+        fs::read_to_string(&params.input_file).context("Failed to read file to edit")?;
     let prompt_updated = update_user_prompt(user_prompt, text_to_edit);
 
     let results = run_query(&prompt_updated, &params.model)?;
-    fs::write(&params.input_file, &results.code)?;
+    fs::write(&params.input_file, &results.code).context("Failed to write changes to file")?;
 
     Ok(results)
 }
 
-fn operate_on_new_file(params: &Parameters) -> Result<OpenAIResults, Box<dyn std::error::Error>> {
+fn operate_on_new_file(params: &Parameters) -> anyhow::Result<OpenAIResults> {
     let user_prompt = extract_user_prompt(params)?;
     let results = run_query(&user_prompt, &params.model)?;
 
     println!("Created new file: '{}'", &params.input_file.display());
-    fs::write(&params.input_file, &results.code)?;
+    fs::write(&params.input_file, &results.code).context("Failed to write changes to file")?;
 
     Ok(results)
 }
 
-fn operate_on_file(params: &Parameters) -> Result<OpenAIResults, Box<dyn std::error::Error>> {
+fn operate_on_file(params: &Parameters) -> anyhow::Result<OpenAIResults> {
     if params.input_file.exists() {
         operate_on_existing_file(params)
     } else {
@@ -64,7 +65,7 @@ fn operate_on_file(params: &Parameters) -> Result<OpenAIResults, Box<dyn std::er
     }
 }
 
-pub fn edit_file(params: &Parameters) -> Result<(), Box<dyn std::error::Error>> {
+pub fn edit_file(params: &Parameters) -> anyhow::Result<()> {
     let results = operate_on_file(params)?;
 
     println!("Input tokens: {}", results.input_tokens);
