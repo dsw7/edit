@@ -40,7 +40,7 @@ fn main() {
     };
 
     if let Err(error) = edit_file(&params) {
-        eprintln!("Error: {}", error);
+        eprintln!("Error: {error}");
         process::exit(1);
     }
 }

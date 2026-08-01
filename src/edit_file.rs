@@ -8,13 +8,12 @@ fn update_user_prompt(user_prompt: String, text_to_edit: String) -> String {
     format!(
         "Take the instructions:
 ```plaintext
-{}
+{user_prompt}
 ```
 And apply them to the code:
 ```
-{}
-```",
-        user_prompt, text_to_edit
+{text_to_edit}
+```"
     )
 }
 

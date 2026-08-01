@@ -144,11 +144,11 @@ pub fn query_openai(
     let api_key = load_api_key("OPENAI_API_KEY")?;
     let client = Client::builder().timeout(Duration::from_secs(10)).build()?;
 
-    let request_body = set_up_request_body(&prompt, &model);
+    let request_body = set_up_request_body(prompt, model);
     let response = client
         .post("https://api.openai.com/v1/responses")
         .header("Content-Type", "application/json")
-        .header("Authorization", format!("Bearer {}", api_key))
+        .header("Authorization", format!("Bearer {api_key}"))
         .json(&request_body)
         .send()?;
 
