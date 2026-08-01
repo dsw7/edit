@@ -46,13 +46,13 @@ fn extract_completed_object(response: &SuccessResponse) -> ContentType {
     for object in &response.output {
         if object.status == "completed" {
             for content in &object.content {
-                if let Some(content_type) = content.get("type") {
+                if let Some(content_type) = content.get("type").and_then(|v| v.as_str()) {
                     if content_type == "output_text" {
-                        if let Some(text) = content.get("text") {
+                        if let Some(text) = content.get("text").and_then(|v| v.as_str()) {
                             return ContentType::Text(text.to_string());
                         }
                     } else if content_type == "refusal" {
-                        if let Some(refusal) = content.get("refusal") {
+                        if let Some(refusal) = content.get("refusal").and_then(|v| v.as_str()) {
                             return ContentType::Refusal(refusal.to_string());
                         }
                     }
