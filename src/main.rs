@@ -42,7 +42,7 @@ fn main() -> ExitCode {
     match edit_file(&params) {
         Ok(()) => ExitCode::SUCCESS,
         Err(error) => {
-            eprintln!("{:?}", error);
+            eprintln!("{error:?}");
             ExitCode::FAILURE
         }
     }

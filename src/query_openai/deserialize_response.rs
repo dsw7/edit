@@ -80,9 +80,9 @@ pub struct OpenAIResults {
 }
 
 fn deserialize_success(response: &SuccessResponse) -> anyhow::Result<OpenAIResults> {
-    let text = match extract_completed_object(&response) {
+    let text = match extract_completed_object(response) {
         ContentType::Text(text) => text,
-        ContentType::Refusal(refusal) => bail!("OpenAI returned a refusal: {}", refusal),
+        ContentType::Refusal(refusal) => bail!("OpenAI returned a refusal: {refusal}"),
         ContentType::Incomplete => bail!("Query never completed"),
     };
 
