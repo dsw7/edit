@@ -1,6 +1,7 @@
-use anyhow::{self, Context};
 use std::fs;
 use std::io::{self, Write};
+
+use anyhow::{self, Context};
 
 fn load_prompt_from_file() -> anyhow::Result<String> {
     if fs::metadata("Inputfile").is_ok() {
@@ -22,16 +23,6 @@ fn load_prompt_from_stdin() -> anyhow::Result<String> {
     Ok(prompt_from_stdin)
 }
 
-fn is_prompt_empty(user_prompt: String) -> anyhow::Result<String> {
-    let prompt_trimmed = user_prompt.trim().to_string();
-
-    if prompt_trimmed.is_empty() {
-        anyhow::bail!("Prompt cannot be empty");
-    } else {
-        Ok(prompt_trimmed)
-    }
-}
-
 pub fn select_prompt(user_prompt_from_cli: &Option<String>) -> anyhow::Result<String> {
     let user_prompt = match user_prompt_from_cli {
         Some(prompt) => prompt.to_string(),
@@ -41,5 +32,11 @@ pub fn select_prompt(user_prompt_from_cli: &Option<String>) -> anyhow::Result<St
         },
     };
 
-    is_prompt_empty(user_prompt)
+    let user_prompt = user_prompt.trim().to_string();
+
+    if user_prompt.is_empty() {
+        anyhow::bail!("Cannot proceed. The prompt is empty")
+    } else {
+        Ok(user_prompt)
+    }
 }
