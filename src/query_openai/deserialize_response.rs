@@ -105,3 +105,46 @@ pub fn deserialize_json_response(raw_json: String) -> anyhow::Result<OpenAIResul
         RawResponse::Error(error) => bail!(error.error.message),
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_deserialize_success_response() {
+        let raw_json = r#"{
+            "usage": {"input_tokens": 100, "output_tokens": 50},
+            "output": [{
+                "status": "completed",
+                "content": [{
+                    "type": "output_text",
+                    "text": "{\"code\": \"print('Hello, world!')\", \"description_of_what_was_done\": \"A simple hello world code\"}"
+                }]
+            }]
+        }"#;
+
+        let response = deserialize_json_response(raw_json.to_string()).unwrap();
+
+        assert_eq!(response.input_tokens, 100);
+        assert_eq!(response.output_tokens, 50);
+        assert_eq!(response.code, "print('Hello, world!')");
+        assert_eq!(
+            response.description_of_what_was_done,
+            "A simple hello world code"
+        );
+    }
+
+    /*
+    #[test]
+    fn test_deserialize_error_response() {
+        let raw_json = r#"{
+            "error": {"message": "An error occurred"}
+        }"#;
+
+        let result = deserialize_json_response(raw_json.to_string());
+
+        assert!(result.is_err());
+        assert_eq!(result.unwrap_err().to_string(), "An error occurred");
+    }
+    */
+}
