@@ -48,17 +48,24 @@ struct StructuredOutput {
     description_of_what_was_done: String,
 }
 
-fn extract_output_text(response: &SuccessResponse) -> anyhow::Result<String> {
+enum Results {
+    Text(String),
+    Refusal(String),
+}
+
+fn extract_output_text(response: &SuccessResponse) -> Option<Results> {
     for object in &response.output {
         if object.status == "completed" {
             return match &object.content[0] {
-                TextOrRefusal::TextResponse { text } => Ok(text.clone()),
-                TextOrRefusal::RefusalResponse { refusal } => bail!(refusal.clone()),
+                TextOrRefusal::TextResponse { text } => Some(Results::Text(text.to_string())),
+                TextOrRefusal::RefusalResponse { refusal } => {
+                    Some(Results::Refusal(refusal.to_string()))
+                }
             };
         }
     }
 
-    bail!("Query never completed")
+    None
 }
 
 pub struct OpenAIResults {
@@ -69,7 +76,16 @@ pub struct OpenAIResults {
 }
 
 fn deserialize_success(response: &SuccessResponse) -> anyhow::Result<OpenAIResults> {
-    let text = extract_output_text(&response)?;
+    let res = match extract_output_text(&response) {
+        Some(results) => results,
+        None => bail!("Query never completed"),
+    };
+
+    let text = match res {
+        Results::Text(text) => text,
+        Results::Refusal(refusal) => bail!("{}", refusal),
+    };
+
     let structured_output: StructuredOutput =
         serde_json::from_str(&text).context("Failed to deserialize structured output")?;
 
