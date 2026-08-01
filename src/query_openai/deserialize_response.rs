@@ -1,4 +1,7 @@
+use anyhow::{Context, bail};
 use serde::Deserialize;
+
+// success
 
 #[derive(Deserialize, Debug)]
 struct SuccessResponse {
@@ -25,6 +28,8 @@ enum TextOrRefusal {
     RefusalResponse { refusal: String },
 }
 
+// error
+
 #[derive(Deserialize, Debug)]
 struct ErrorResponse {
     error: Error,
@@ -35,12 +40,7 @@ struct Error {
     message: String,
 }
 
-#[derive(Deserialize, Debug)]
-#[serde(untagged)]
-enum RawResponse {
-    Success(SuccessResponse),
-    Error(ErrorResponse),
-}
+// structured output
 
 #[derive(Deserialize, Debug)]
 struct StructuredOutput {
@@ -48,17 +48,17 @@ struct StructuredOutput {
     description_of_what_was_done: String,
 }
 
-fn extract_output_text(response: &SuccessResponse) -> Result<String, String> {
+fn extract_output_text(response: &SuccessResponse) -> anyhow::Result<String> {
     for object in &response.output {
         if object.status == "completed" {
             return match &object.content[0] {
                 TextOrRefusal::TextResponse { text } => Ok(text.clone()),
-                TextOrRefusal::RefusalResponse { refusal } => Err(refusal.clone()),
+                TextOrRefusal::RefusalResponse { refusal } => bail!(refusal.clone()),
             };
         }
     }
 
-    Err("Query never completed".to_string())
+    bail!("Query never completed")
 }
 
 pub struct OpenAIResults {
@@ -68,22 +68,33 @@ pub struct OpenAIResults {
     pub description_of_what_was_done: String,
 }
 
-pub fn deserialize_json_response(raw_json: String) -> Result<OpenAIResults, Box<dyn std::error::Error>> {
-    let response: RawResponse = serde_json::from_str(&raw_json)?;
+fn deserialize_success(response: &SuccessResponse) -> anyhow::Result<OpenAIResults> {
+    let text = extract_output_text(&response)?;
+    let structured_output: StructuredOutput =
+        serde_json::from_str(&text).context("Failed to deserialize structured output")?;
+
+    let results = OpenAIResults {
+        input_tokens: response.usage.input_tokens,
+        output_tokens: response.usage.output_tokens,
+        code: structured_output.code,
+        description_of_what_was_done: structured_output.description_of_what_was_done,
+    };
+    Ok(results)
+}
+
+#[derive(Deserialize, Debug)]
+#[serde(untagged)]
+enum RawResponse {
+    Success(SuccessResponse),
+    Error(ErrorResponse),
+}
+
+pub fn deserialize_json_response(raw_json: String) -> anyhow::Result<OpenAIResults> {
+    let response: RawResponse =
+        serde_json::from_str(&raw_json).context("Failed to deserialize raw JSON")?;
 
     match response {
-        RawResponse::Success(success) => {
-            let text = extract_output_text(&success)?;
-            let structured_output: StructuredOutput = serde_json::from_str(&text)?;
-
-            let results = OpenAIResults {
-                input_tokens: success.usage.input_tokens,
-                output_tokens: success.usage.output_tokens,
-                code: structured_output.code,
-                description_of_what_was_done: structured_output.description_of_what_was_done,
-            };
-            Ok(results)
-        }
-        RawResponse::Error(error) => Err(error.error.message.into()),
+        RawResponse::Success(response) => deserialize_success(&response),
+        RawResponse::Error(error) => bail!(error.error.message),
     }
 }
