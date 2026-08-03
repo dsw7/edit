@@ -112,7 +112,20 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_deserialize_success_response() {
+    fn test_deserialize_error_response() {
+        let raw_json = r#"{
+            "error": {"message": "Model not found"}
+        }"#;
+
+        let result = deserialize_json_response(raw_json.to_string());
+        assert!(result.is_err());
+
+        let error = result.unwrap_err();
+        assert_eq!(error.to_string(), "Model not found");
+    }
+
+    #[test]
+    fn test_deserialize_success_response_output_text() {
         let raw_json = r#"{
             "usage": {"input_tokens": 100, "output_tokens": 50},
             "output": [{
@@ -136,15 +149,42 @@ mod tests {
     }
 
     #[test]
-    fn test_deserialize_error_response() {
+    fn test_deserialize_success_response_refusal() {
         let raw_json = r#"{
-            "error": {"message": "An error occurred"}
+            "usage": {"input_tokens": 100, "output_tokens": 50},
+            "output": [{
+                "status": "completed",
+                "content": [{
+                    "type": "refusal",
+                    "refusal": "The query was too long"
+                }]
+            }]
         }"#;
 
         let result = deserialize_json_response(raw_json.to_string());
         assert!(result.is_err());
 
         let error = result.unwrap_err();
-        assert_eq!(error.to_string(), "An error occurred");
+        assert_eq!(
+            error.to_string(),
+            "OpenAI returned a refusal: The query was too long"
+        );
+    }
+
+    #[test]
+    fn test_deserialize_success_response_never_completed() {
+        let raw_json = r#"{
+            "usage": {"input_tokens": 100, "output_tokens": 50},
+            "output": [{
+                "status": "in progress",
+                "content": []
+            }]
+        }"#;
+
+        let result = deserialize_json_response(raw_json.to_string());
+        assert!(result.is_err());
+
+        let error = result.unwrap_err();
+        assert_eq!(error.to_string(), "Query never completed");
     }
 }
