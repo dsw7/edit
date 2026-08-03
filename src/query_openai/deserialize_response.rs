@@ -70,6 +70,7 @@ struct StructuredOutput {
     description_of_what_was_done: String,
 }
 
+#[derive(Debug)]
 pub struct OpenAIResults {
     pub input_tokens: u32,
     pub output_tokens: u32,
@@ -134,7 +135,6 @@ mod tests {
         );
     }
 
-    /*
     #[test]
     fn test_deserialize_error_response() {
         let raw_json = r#"{
@@ -142,9 +142,9 @@ mod tests {
         }"#;
 
         let result = deserialize_json_response(raw_json.to_string());
-
         assert!(result.is_err());
-        assert_eq!(result.unwrap_err().to_string(), "An error occurred");
+
+        let error = result.unwrap_err();
+        assert_eq!(error.to_string(), "An error occurred");
     }
-    */
 }
