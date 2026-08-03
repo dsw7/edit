@@ -28,7 +28,7 @@ fn extract_user_prompt(params: &Parameters) -> anyhow::Result<String> {
     let prompt = prompt.trim().to_string();
 
     if prompt.is_empty() {
-        anyhow::bail!("Cannot proceed. The prompt is empty")
+        anyhow::bail!("The prompt is empty")
     } else {
         Ok(prompt)
     }
@@ -37,12 +37,18 @@ fn extract_user_prompt(params: &Parameters) -> anyhow::Result<String> {
 fn operate_on_existing_file(params: &Parameters) -> anyhow::Result<OpenAIResults> {
     let user_prompt = extract_user_prompt(params)?;
 
-    let text_to_edit =
-        fs::read_to_string(&params.input_file).context("Failed to read file to edit")?;
-    let prompt_updated = update_user_prompt(user_prompt, text_to_edit);
+    let text_to_edit = fs::read_to_string(&params.input_file).context(format!(
+        "Failed to read file `{}`",
+        &params.input_file.display()
+    ))?;
 
+    let prompt_updated = update_user_prompt(user_prompt, text_to_edit);
     let results = run_query(&prompt_updated, &params.model)?;
-    fs::write(&params.input_file, &results.code).context("Failed to write changes to file")?;
+
+    fs::write(&params.input_file, &results.code).context(format!(
+        "Failed to write changes to `{}`",
+        &params.input_file.display()
+    ))?;
 
     Ok(results)
 }
@@ -51,8 +57,12 @@ fn operate_on_new_file(params: &Parameters) -> anyhow::Result<OpenAIResults> {
     let user_prompt = extract_user_prompt(params)?;
     let results = run_query(&user_prompt, &params.model)?;
 
-    println!("Created new file: '{}'", &params.input_file.display());
-    fs::write(&params.input_file, &results.code).context("Failed to write changes to file")?;
+    println!("Created new file `{}`", &params.input_file.display());
+
+    fs::write(&params.input_file, &results.code).context(format!(
+        "Failed to write changes to `{}`",
+        &params.input_file.display()
+    ))?;
 
     Ok(results)
 }
@@ -66,7 +76,7 @@ fn operate_on_file(params: &Parameters) -> anyhow::Result<OpenAIResults> {
 }
 
 pub fn edit_file(params: &Parameters) -> anyhow::Result<()> {
-    let results = operate_on_file(params)?;
+    let results = operate_on_file(params).context("Editing process failed")?;
 
     println!("Input tokens: {}", results.input_tokens);
     println!("Output tokens: {}", results.output_tokens);
