@@ -1,10 +1,11 @@
-use crate::params::Parameters;
-use crate::query_openai::{OpenAIResults, run_query};
-use crate::select_prompt::load_prompt_from_file_or_stdin;
+use std::fs;
 
 use anyhow::Context;
 
-use std::fs;
+use crate::params::Parameters;
+use crate::query_openai::{OpenAIResults, run_query};
+use crate::select_prompt::load_prompt_from_file_or_stdin;
+use crate::utils;
 
 fn update_user_prompt(user_prompt: String, text_to_edit: String) -> String {
     format!(
@@ -37,11 +38,7 @@ fn extract_user_prompt(params: &Parameters) -> anyhow::Result<String> {
 fn operate_on_existing_file(params: &Parameters) -> anyhow::Result<OpenAIResults> {
     let user_prompt = extract_user_prompt(params)?;
 
-    let text_to_edit = fs::read_to_string(&params.input_file).context(format!(
-        "Failed to read file `{}`",
-        &params.input_file.display()
-    ))?;
-
+    let text_to_edit = utils::read_file(&params.input_file)?;
     let prompt_updated = update_user_prompt(user_prompt, text_to_edit);
     let results = run_query(&prompt_updated, &params.model)?;
 
