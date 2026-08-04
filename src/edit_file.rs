@@ -1,5 +1,3 @@
-use std::fs;
-
 use anyhow::Context;
 
 use crate::params::Parameters;
@@ -42,11 +40,7 @@ fn operate_on_existing_file(params: &Parameters) -> anyhow::Result<OpenAIResults
     let prompt_updated = update_user_prompt(user_prompt, text_to_edit);
     let results = run_query(&prompt_updated, &params.model)?;
 
-    fs::write(&params.input_file, &results.code).context(format!(
-        "Failed to write changes to `{}`",
-        &params.input_file.display()
-    ))?;
-
+    utils::write_to_file(&params.input_file, &results.code)?;
     Ok(results)
 }
 
@@ -54,12 +48,8 @@ fn operate_on_new_file(params: &Parameters) -> anyhow::Result<OpenAIResults> {
     let user_prompt = extract_user_prompt(params)?;
     let results = run_query(&user_prompt, &params.model)?;
 
+    utils::write_to_file(&params.input_file, &results.code)?;
     println!("Created new file `{}`", &params.input_file.display());
-
-    fs::write(&params.input_file, &results.code).context(format!(
-        "Failed to write changes to `{}`",
-        &params.input_file.display()
-    ))?;
 
     Ok(results)
 }
