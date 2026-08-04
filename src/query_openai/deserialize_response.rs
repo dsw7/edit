@@ -43,25 +43,29 @@ enum ContentType {
 }
 
 fn extract_completed_object(response: &SuccessResponse) -> ContentType {
-    for object in &response.output {
-        if object.status == "completed" {
-            for content in &object.content {
-                if let Some(content_type) = content.get("type").and_then(|v| v.as_str()) {
-                    if content_type == "output_text" {
-                        if let Some(text) = content.get("text").and_then(|v| v.as_str()) {
-                            return ContentType::Text(text.to_string());
-                        }
-                    } else if content_type == "refusal" {
-                        if let Some(refusal) = content.get("refusal").and_then(|v| v.as_str()) {
-                            return ContentType::Refusal(refusal.to_string());
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    ContentType::Incomplete
+    response
+        .output
+        .iter()
+        .filter(|object| object.status == "completed")
+        .flat_map(|object| &object.content)
+        .filter_map(|content| {
+            content
+                .get("type")
+                .and_then(|v| v.as_str())
+                .map(|content_type| (content_type, content))
+        })
+        .find_map(|(content_type, content)| match content_type {
+            "output_text" => content
+                .get("text")
+                .and_then(|v| v.as_str())
+                .map(|text| ContentType::Text(text.to_string())),
+            "refusal" => content
+                .get("refusal")
+                .and_then(|v| v.as_str())
+                .map(|refusal| ContentType::Refusal(refusal.to_string())),
+            _ => None,
+        })
+        .unwrap_or(ContentType::Incomplete)
 }
 
 #[derive(Deserialize, Debug)]
