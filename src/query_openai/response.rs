@@ -1,4 +1,4 @@
-use anyhow::{Context, bail};
+use anyhow::Context;
 use serde::Deserialize;
 
 #[derive(Deserialize, Debug)]
@@ -85,8 +85,8 @@ pub struct OpenAIResults {
 fn deserialize_success(response: &SuccessResponse) -> anyhow::Result<OpenAIResults> {
     let text = match extract_completed_object(response) {
         ContentType::Text(text) => text,
-        ContentType::Refusal(refusal) => bail!("OpenAI returned a refusal: {refusal}"),
-        ContentType::Incomplete => bail!("Query never completed"),
+        ContentType::Refusal(refusal) => anyhow::bail!("OpenAI returned a refusal: {refusal}"),
+        ContentType::Incomplete => anyhow::bail!("Query never completed"),
     };
 
     let structured_output: StructuredOutput =
@@ -107,7 +107,7 @@ pub fn deserialize_json_response(raw_json: String) -> anyhow::Result<OpenAIResul
 
     match response {
         RawResponse::Success(response) => deserialize_success(&response),
-        RawResponse::Error(error) => bail!(error.error.message),
+        RawResponse::Error(error) => anyhow::bail!(error.error.message),
     }
 }
 
