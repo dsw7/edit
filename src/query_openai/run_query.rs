@@ -5,7 +5,7 @@ use serde_json::json;
 
 use crate::utils::load_api_key;
 
-use super::deserialize_response::{OpenAIResults, deserialize_json_response};
+use super::response::{OpenAIResults, deserialize_json_response};
 
 fn get_structured_output_schema() -> serde_json::Value {
     json!({
