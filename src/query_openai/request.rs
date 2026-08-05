@@ -37,8 +37,10 @@ pub fn set_up_request_body(prompt: &String, model: &String) -> serde_json::Value
 
     json!({
         "input": prompt,
-        "model": model,
         "instructions": system_prompt,
+        "max_output_tokens": 64,
+        "model": model,
+        "store": false,
         "text": structured_output_schema,
     })
 }
