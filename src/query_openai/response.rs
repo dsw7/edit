@@ -252,57 +252,12 @@ mod tests {
     }
 
     #[test]
-    fn test_deserialize_success_response_output_text() {
-        let raw_json = r#"{
-            "status": "completed",
-            "output": [{
-                "status": "completed",
-                "content": [{
-                    "type": "output_text",
-                    "text": "{\"code\": \"print('Hello, world!')\", \"description_of_what_was_done\": \"A simple hello world code\"}"
-                }]
-            }],
-            "usage": {"input_tokens": 100, "output_tokens": 50}
-        }"#;
-
-        let response = deserialize_json_response(raw_json.to_string()).unwrap();
-
-        assert_eq!(response.input_tokens, 100);
-        assert_eq!(response.output_tokens, 50);
-        assert_eq!(response.code, "print('Hello, world!')");
-        assert_eq!(
-            response.description_of_what_was_done,
-            "A simple hello world code"
-        );
-    }
-
-    #[test]
-    fn test_deserialize_success_response_output_text_default_usage() {
-        let raw_json = r#"{
-            "status": "completed",
-            "output": [{
-                "status": "completed",
-                "content": [{
-                    "type": "output_text",
-                    "text": "{\"code\": \"print('Hello, world!')\", \"description_of_what_was_done\": \"A simple hello world code\"}"
-                }]
-            }]
-        }"#;
-
-        let response = deserialize_json_response(raw_json.to_string()).unwrap();
-
-        assert_eq!(response.input_tokens, 0);
-        assert_eq!(response.output_tokens, 0);
-    }
-
-    #[test]
     fn test_deserialize_success_response_refusal() {
         let raw_json = r#"{
             "status": "completed",
             "output": [{
                 "status": "completed",
                 "content": [{
-                    "type": "refusal",
                     "refusal": "The query was too long"
                 }]
             }]
@@ -329,5 +284,45 @@ mod tests {
             "output": []
         }"#;
         assert_error_message(raw_json, "Query incomplete: max_output_tokens");
+    }
+
+    #[test]
+    fn test_deserialize_success_response_output_text() {
+        let raw_json = r#"{
+            "status": "completed",
+            "output": [{
+                "status": "completed",
+                "content": [{
+                    "text": "{\"code\": \"print('Hello, world!')\", \"description_of_what_was_done\": \"A simple hello world code\"}"
+                }]
+            }],
+            "usage": {"input_tokens": 100, "output_tokens": 50}
+        }"#;
+
+        let response = deserialize_json_response(raw_json.to_string()).unwrap();
+        assert_eq!(response.input_tokens, 100);
+        assert_eq!(response.output_tokens, 50);
+        assert_eq!(response.code, "print('Hello, world!')");
+        assert_eq!(
+            response.description_of_what_was_done,
+            "A simple hello world code"
+        );
+    }
+
+    #[test]
+    fn test_deserialize_success_response_output_text_default_usage() {
+        let raw_json = r#"{
+            "status": "completed",
+            "output": [{
+                "status": "completed",
+                "content": [{
+                    "text": "{\"code\": \"print('Hello, world!')\", \"description_of_what_was_done\": \"A simple hello world code\"}"
+                }]
+            }]
+        }"#;
+
+        let response = deserialize_json_response(raw_json.to_string()).unwrap();
+        assert_eq!(response.input_tokens, 0);
+        assert_eq!(response.output_tokens, 0);
     }
 }
