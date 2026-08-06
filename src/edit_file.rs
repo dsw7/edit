@@ -2,7 +2,7 @@ use anyhow::Context;
 
 use crate::query_openai::run_query;
 use crate::select_prompt::load_prompt_from_file_or_stdin;
-use crate::structs::{OpenAIParams, OpenAIResults, Parameters};
+use crate::structs::{CliParameters, OpenAIParams, OpenAIResults};
 use crate::utils;
 
 fn update_user_prompt(user_prompt: String, text_to_edit: String) -> String {
@@ -18,7 +18,7 @@ And apply them to the code:
     )
 }
 
-fn extract_user_prompt(cli_params: &Parameters) -> anyhow::Result<String> {
+fn extract_user_prompt(cli_params: &CliParameters) -> anyhow::Result<String> {
     let prompt = match &cli_params.prompt {
         Some(prompt) => prompt.to_string(),
         None => load_prompt_from_file_or_stdin()?,
@@ -33,7 +33,7 @@ fn extract_user_prompt(cli_params: &Parameters) -> anyhow::Result<String> {
     }
 }
 
-fn operate_on_existing_file(cli_params: &Parameters) -> anyhow::Result<OpenAIResults> {
+fn operate_on_existing_file(cli_params: &CliParameters) -> anyhow::Result<OpenAIResults> {
     let user_prompt = extract_user_prompt(cli_params)?;
     let text_to_edit = utils::read_file(&cli_params.input_file)?;
 
@@ -47,7 +47,7 @@ fn operate_on_existing_file(cli_params: &Parameters) -> anyhow::Result<OpenAIRes
     Ok(results)
 }
 
-fn operate_on_new_file(cli_params: &Parameters) -> anyhow::Result<OpenAIResults> {
+fn operate_on_new_file(cli_params: &CliParameters) -> anyhow::Result<OpenAIResults> {
     let user_prompt = extract_user_prompt(cli_params)?;
 
     let params = OpenAIParams {
@@ -62,7 +62,7 @@ fn operate_on_new_file(cli_params: &Parameters) -> anyhow::Result<OpenAIResults>
     Ok(results)
 }
 
-fn operate_on_file(cli_params: &Parameters) -> anyhow::Result<OpenAIResults> {
+fn operate_on_file(cli_params: &CliParameters) -> anyhow::Result<OpenAIResults> {
     if cli_params.input_file.exists() {
         operate_on_existing_file(cli_params)
     } else {
@@ -70,7 +70,7 @@ fn operate_on_file(cli_params: &Parameters) -> anyhow::Result<OpenAIResults> {
     }
 }
 
-pub fn edit_file(cli_params: &Parameters) -> anyhow::Result<()> {
+pub fn edit_file(cli_params: &CliParameters) -> anyhow::Result<()> {
     let results = operate_on_file(cli_params).context("Editing process failed")?;
 
     println!("Input tokens: {}", results.input_tokens);

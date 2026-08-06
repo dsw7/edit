@@ -10,7 +10,7 @@ use std::process::ExitCode;
 use clap::Parser;
 
 use edit_file::edit_file;
-use structs::Parameters;
+use structs::CliParameters;
 
 #[derive(Parser, Debug)]
 #[command(about = "Program for editing individual files using LLMs.", version)]
@@ -33,7 +33,7 @@ struct Cli {
 fn main() -> ExitCode {
     let cli = Cli::parse();
 
-    let params = Parameters {
+    let params = CliParameters {
         input_file: cli.file_to_edit,
         model: cli.model,
         prompt: cli.prompt,
