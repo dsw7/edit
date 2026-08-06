@@ -109,6 +109,10 @@ struct StructuredOutput {
 }
 
 fn unpack_content(content: &[TextOrRefusal]) -> anyhow::Result<StructuredOutput> {
+    if content.is_empty() {
+        anyhow::bail!("Content array is empty");
+    }
+
     let raw_text = match &content[0] {
         TextOrRefusal::Text(text) => &text.text,
         TextOrRefusal::Refusal(refusal) => anyhow::bail!("Query refused: {}", refusal.refusal),
@@ -205,66 +209,6 @@ mod tests {
     }
 
     #[test]
-    fn test_deserialize_success_response_no_output() {
-        let raw_json = r#"{
-            "status": "completed",
-            "output": []
-        }"#;
-
-        let result = deserialize_json_response(raw_json.to_string());
-        assert!(result.is_err());
-
-        let error = result.unwrap_err();
-        assert_eq!(error.to_string(), "Output array is empty");
-    }
-
-    #[test]
-    fn test_deserialize_success_response_output_text() {
-        let raw_json = r#"{
-            "status": "completed",
-            "usage": {"input_tokens": 100, "output_tokens": 50},
-            "output": [{
-                "status": "completed",
-                "content": [{
-                    "type": "output_text",
-                    "text": "{\"code\": \"print('Hello, world!')\", \"description_of_what_was_done\": \"A simple hello world code\"}"
-                }]
-            }]
-        }"#;
-
-        let response = deserialize_json_response(raw_json.to_string()).unwrap();
-
-        assert_eq!(response.input_tokens, 100);
-        assert_eq!(response.output_tokens, 50);
-        assert_eq!(response.code, "print('Hello, world!')");
-        assert_eq!(
-            response.description_of_what_was_done,
-            "A simple hello world code"
-        );
-    }
-
-    #[test]
-    fn test_deserialize_success_response_refusal() {
-        let raw_json = r#"{
-            "status": "completed",
-            "usage": {"input_tokens": 100, "output_tokens": 50},
-            "output": [{
-                "status": "completed",
-                "content": [{
-                    "type": "refusal",
-                    "refusal": "The query was too long"
-                }]
-            }]
-        }"#;
-
-        let result = deserialize_json_response(raw_json.to_string());
-        assert!(result.is_err());
-
-        let error = result.unwrap_err();
-        assert_eq!(error.to_string(), "Query refused: The query was too long");
-    }
-
-    #[test]
     fn test_deserialize_success_response_never_completed() {
         let raw_json = r#"{
             "status": "in_progress",
@@ -282,5 +226,132 @@ mod tests {
             error.to_string(),
             "Query did not finish. Status: in_progress"
         );
+    }
+
+    #[test]
+    fn test_deserialize_success_response_no_output() {
+        let raw_json = r#"{
+            "status": "completed",
+            "output": []
+        }"#;
+
+        let result = deserialize_json_response(raw_json.to_string());
+        assert!(result.is_err());
+
+        let error = result.unwrap_err();
+        assert_eq!(error.to_string(), "Output array is empty");
+    }
+
+    #[test]
+    fn test_deserialize_success_response_completed_not_found() {
+        let raw_json = r#"{
+            "status": "completed",
+            "output": [{
+                "status": "",
+                "content": []
+            }]
+        }"#;
+
+        let result = deserialize_json_response(raw_json.to_string());
+        assert!(result.is_err());
+
+        let error = result.unwrap_err();
+        assert_eq!(
+            error.to_string(),
+            "Query completed but no completed message found!"
+        );
+    }
+
+    #[test]
+    fn test_deserialize_success_response_empty_content() {
+        let raw_json = r#"{
+            "status": "completed",
+            "output": [{
+                "status": "completed",
+                "content": []
+            }]
+        }"#;
+
+        let result = deserialize_json_response(raw_json.to_string());
+        assert!(result.is_err());
+
+        let error = result.unwrap_err();
+        assert_eq!(error.to_string(), "Content array is empty");
+    }
+
+    #[test]
+    fn test_deserialize_success_response_output_text() {
+        let raw_json = r#"{
+            "status": "completed",
+            "output": [{
+                "status": "completed",
+                "content": [{
+                    "type": "output_text",
+                    "text": "{\"code\": \"print('Hello, world!')\", \"description_of_what_was_done\": \"A simple hello world code\"}"
+                }]
+            }],
+            "usage": {"input_tokens": 100, "output_tokens": 50}
+        }"#;
+
+        let response = deserialize_json_response(raw_json.to_string()).unwrap();
+
+        assert_eq!(response.input_tokens, 100);
+        assert_eq!(response.output_tokens, 50);
+        assert_eq!(response.code, "print('Hello, world!')");
+        assert_eq!(
+            response.description_of_what_was_done,
+            "A simple hello world code"
+        );
+    }
+
+    #[test]
+    fn test_deserialize_success_response_refusal() {
+        let raw_json = r#"{
+            "status": "completed",
+            "output": [{
+                "status": "completed",
+                "content": [{
+                    "type": "refusal",
+                    "refusal": "The query was too long"
+                }]
+            }]
+        }"#;
+
+        let result = deserialize_json_response(raw_json.to_string());
+        assert!(result.is_err());
+
+        let error = result.unwrap_err();
+        assert_eq!(error.to_string(), "Query refused: The query was too long");
+    }
+
+    #[test]
+    fn test_deserialize_success_response_incomplete_no_details() {
+        let raw_json = r#"{
+            "status": "incomplete",
+            "output": []
+        }"#;
+
+        let result = deserialize_json_response(raw_json.to_string());
+        assert!(result.is_err());
+
+        let error = result.unwrap_err();
+        assert_eq!(error.to_string(), "Query incomplete. No details provided");
+    }
+
+    #[test]
+    fn test_deserialize_success_response_incomplete() {
+        let raw_json = r#"{
+            "status": "incomplete",
+            "incomplete_details": {
+                "reason": "max_output_tokens"
+            },
+            "output": []
+        }"#;
+
+        let result = deserialize_json_response(raw_json.to_string());
+        assert!(result.is_err());
+
+        let error = result.unwrap_err();
+        assert_eq!(error.to_string(), "Query incomplete: max_output_tokens");
     }
 }
