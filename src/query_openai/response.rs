@@ -1,6 +1,8 @@
 use anyhow::Context;
 use serde::Deserialize;
 
+use crate::structs::OpenAIResults;
+
 #[derive(Deserialize, Debug)]
 #[serde(untagged)]
 enum ApiResponse {
@@ -116,14 +118,6 @@ fn default_usage() -> ResponseUsage {
         input_tokens: 0,
         output_tokens: 0,
     }
-}
-
-#[derive(Debug)]
-pub struct OpenAIResults {
-    pub input_tokens: u32,
-    pub output_tokens: u32,
-    pub code: String,
-    pub description_of_what_was_done: String,
 }
 
 fn unpack_response(response: &Response) -> anyhow::Result<OpenAIResults> {

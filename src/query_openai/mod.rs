@@ -5,10 +5,10 @@ use std::time::Duration;
 
 use reqwest::blocking::Client;
 
+use crate::structs::OpenAIResults;
 use crate::utils::load_api_key;
 
 use request::set_up_request_body;
-pub use response::OpenAIResults;
 use response::deserialize_json_response;
 
 pub fn run_query(prompt: &String, model: &String) -> anyhow::Result<OpenAIResults> {
