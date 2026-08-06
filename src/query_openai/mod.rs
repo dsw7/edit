@@ -5,17 +5,17 @@ use std::time::Duration;
 
 use reqwest::blocking::Client;
 
-use crate::structs::OpenAIResults;
+use crate::structs::{OpenAIParams, OpenAIResults};
 use crate::utils::load_api_key;
 
 use request::set_up_request_body;
 use response::deserialize_json_response;
 
-pub fn run_query(prompt: &String, model: &String) -> anyhow::Result<OpenAIResults> {
+pub fn run_query(params: &OpenAIParams) -> anyhow::Result<OpenAIResults> {
     let api_key = load_api_key("OPENAI_API_KEY")?;
     let client = Client::builder().timeout(Duration::from_secs(10)).build()?;
 
-    let request_body = set_up_request_body(prompt, model);
+    let request_body = set_up_request_body(params);
     let response = client
         .post("https://api.openai.com/v1/responses")
         .header("Content-Type", "application/json")

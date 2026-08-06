@@ -6,6 +6,11 @@ pub struct Parameters {
     pub prompt: Option<String>,
 }
 
+pub struct OpenAIParams {
+    pub prompt: String,
+    pub model: String,
+}
+
 #[derive(Debug)]
 pub struct OpenAIResults {
     pub input_tokens: u32,
