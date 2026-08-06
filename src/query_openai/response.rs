@@ -59,10 +59,10 @@ struct IncompleteDetails {
     reason: String,
 }
 
-fn unpack_incomplete_details(response: &Response) -> anyhow::Result<()> {
+fn unpack_incomplete_details(response: &Response) -> String {
     match &response.incomplete_details {
-        Some(details) => anyhow::bail!("Query incomplete: {}", details.reason),
-        None => anyhow::bail!("Query incomplete. No details provided"),
+        Some(details) => format!("Query incomplete: {}", details.reason),
+        None => String::from("Query incomplete. No details provided"),
     }
 }
 
@@ -120,14 +120,16 @@ fn default_usage() -> ResponseUsage {
 }
 
 fn unpack_response(response: &Response) -> anyhow::Result<String> {
-    match &response.status {
-        Some(status) => match status.as_str() {
-            "completed" => return unpack_output(response),
-            "incomplete" => unpack_incomplete_details(response),
-            "failed" => unpack_error(response),
-            _ => anyhow::bail!(format!("Query did not finish. Status: {status}")),
-        },
+    let status = match &response.status {
+        Some(status) => status,
         None => anyhow::bail!("No status could be found in response"),
+    };
+
+    match status.as_str() {
+        "completed" => return unpack_output(response),
+        "incomplete" => anyhow::bail!(unpack_incomplete_details(response)),
+        "failed" => unpack_error(response),
+        _ => anyhow::bail!(format!("Query did not finish. Status: {status}")),
     }
 }
 
