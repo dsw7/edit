@@ -182,17 +182,19 @@ pub fn deserialize_json_response(raw_json: String) -> anyhow::Result<OpenAIResul
 mod tests {
     use super::deserialize_json_response;
 
+    fn assert_error_message(raw_json: &str, expected_error: &str) {
+        let result = deserialize_json_response(raw_json.to_string());
+        assert!(result.is_err());
+        let error = result.unwrap_err();
+        assert_eq!(error.to_string(), expected_error);
+    }
+
     #[test]
     fn test_deserialize_error_response() {
         let raw_json = r#"{
             "error": {"message": "Model not found"}
         }"#;
-
-        let result = deserialize_json_response(raw_json.to_string());
-        assert!(result.is_err());
-
-        let error = result.unwrap_err();
-        assert_eq!(error.to_string(), "Model not found");
+        assert_error_message(raw_json, "Model not found");
     }
 
     #[test]
@@ -200,12 +202,7 @@ mod tests {
         let raw_json = r#"{
             "output": []
         }"#;
-
-        let result = deserialize_json_response(raw_json.to_string());
-        assert!(result.is_err());
-
-        let error = result.unwrap_err();
-        assert_eq!(error.to_string(), "No status could be found in response");
+        assert_error_message(raw_json, "No status could be found in response");
     }
 
     #[test]
@@ -217,15 +214,7 @@ mod tests {
                 "content": []
             }]
         }"#;
-
-        let result = deserialize_json_response(raw_json.to_string());
-        assert!(result.is_err());
-
-        let error = result.unwrap_err();
-        assert_eq!(
-            error.to_string(),
-            "Query did not finish. Status: in_progress"
-        );
+        assert_error_message(raw_json, "Query did not finish. Status: in_progress");
     }
 
     #[test]
@@ -234,12 +223,7 @@ mod tests {
             "status": "completed",
             "output": []
         }"#;
-
-        let result = deserialize_json_response(raw_json.to_string());
-        assert!(result.is_err());
-
-        let error = result.unwrap_err();
-        assert_eq!(error.to_string(), "Output array is empty");
+        assert_error_message(raw_json, "Output array is empty");
     }
 
     #[test]
@@ -251,15 +235,7 @@ mod tests {
                 "content": []
             }]
         }"#;
-
-        let result = deserialize_json_response(raw_json.to_string());
-        assert!(result.is_err());
-
-        let error = result.unwrap_err();
-        assert_eq!(
-            error.to_string(),
-            "Query completed but no completed message found!"
-        );
+        assert_error_message(raw_json, "Query completed but no completed message found!");
     }
 
     #[test]
@@ -271,12 +247,7 @@ mod tests {
                 "content": []
             }]
         }"#;
-
-        let result = deserialize_json_response(raw_json.to_string());
-        assert!(result.is_err());
-
-        let error = result.unwrap_err();
-        assert_eq!(error.to_string(), "Content array is empty");
+        assert_error_message(raw_json, "Content array is empty");
     }
 
     #[test]
@@ -316,12 +287,7 @@ mod tests {
                 }]
             }]
         }"#;
-
-        let result = deserialize_json_response(raw_json.to_string());
-        assert!(result.is_err());
-
-        let error = result.unwrap_err();
-        assert_eq!(error.to_string(), "Query refused: The query was too long");
+        assert_error_message(raw_json, "Query refused: The query was too long");
     }
 
     #[test]
@@ -330,12 +296,7 @@ mod tests {
             "status": "incomplete",
             "output": []
         }"#;
-
-        let result = deserialize_json_response(raw_json.to_string());
-        assert!(result.is_err());
-
-        let error = result.unwrap_err();
-        assert_eq!(error.to_string(), "Query incomplete. No details provided");
+        assert_error_message(raw_json, "Query incomplete. No details provided");
     }
 
     #[test]
@@ -347,11 +308,6 @@ mod tests {
             },
             "output": []
         }"#;
-
-        let result = deserialize_json_response(raw_json.to_string());
-        assert!(result.is_err());
-
-        let error = result.unwrap_err();
-        assert_eq!(error.to_string(), "Query incomplete: max_output_tokens");
+        assert_error_message(raw_json, "Query incomplete: max_output_tokens");
     }
 }
