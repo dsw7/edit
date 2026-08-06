@@ -89,7 +89,7 @@ struct ResponseOutputRefusal {
     refusal: String,
 }
 
-fn unpack_output(response: &Response) -> anyhow::Result<()> {
+fn unpack_output(response: &Response) -> anyhow::Result<String> {
     for object in &response.output {
         if object.status == "completed" {
             return unpack_content(&object.content);
@@ -99,13 +99,11 @@ fn unpack_output(response: &Response) -> anyhow::Result<()> {
     anyhow::bail!("Query completed but no completed message found!")
 }
 
-fn unpack_content(content: &[TextOrRefusal]) -> anyhow::Result<()> {
+fn unpack_content(content: &[TextOrRefusal]) -> anyhow::Result<String> {
     match &content[0] {
-        TextOrRefusal::Text(text) => println!("{}", text.text),
+        TextOrRefusal::Text(text) => Ok(text.text),
         TextOrRefusal::Refusal(refusal) => anyhow::bail!("Query refused: {}", refusal.refusal),
     }
-
-    Ok(())
 }
 
 #[derive(Deserialize, Debug)]
@@ -121,10 +119,10 @@ fn default_usage() -> ResponseUsage {
     }
 }
 
-fn unpack_response(response: &Response) -> anyhow::Result<()> {
+fn unpack_response(response: &Response) -> anyhow::Result<String> {
     match &response.status {
         Some(status) => match status.as_str() {
-            "completed" => unpack_output(response),
+            "completed" => return unpack_output(response),
             "incomplete" => unpack_incomplete_details(response),
             "failed" => unpack_error(response),
             _ => anyhow::bail!(format!("Query did not finish. Status: {status}")),
@@ -133,14 +131,39 @@ fn unpack_response(response: &Response) -> anyhow::Result<()> {
     }
 }
 
-pub fn deserialize_json_response(raw_json: String) -> anyhow::Result<()> {
+#[derive(Deserialize, Debug)]
+struct StructuredOutput {
+    code: String,
+    description_of_what_was_done: String,
+}
+
+#[derive(Debug)]
+pub struct OpenAIResults {
+    pub input_tokens: u32,
+    pub output_tokens: u32,
+    pub code: String,
+    pub description_of_what_was_done: String,
+}
+
+pub fn deserialize_json_response(raw_json: String) -> anyhow::Result<OpenAIResults> {
     let response =
         serde_json::from_str::<ApiResponse>(&raw_json).context("Failed to deserialize raw JSON")?;
 
-    match response {
+    let structured_output_raw = match response {
         ApiResponse::ErrorResponse(error) => anyhow::bail!(error.error.message),
         ApiResponse::SuccessResponse(response) => unpack_response(&response),
-    }
+    };
+
+    let structured_output = serde_json::from_str::<StructuredOutput>(&structured_output_raw)
+        .context("Failed to deserialize structured output")?;
+
+    let results = OpenAIResults {
+        input_tokens: response.usage.input_tokens,
+        output_tokens: response.usage.output_tokens,
+        code: structured_output.code,
+        description_of_what_was_done: structured_output.description_of_what_was_done,
+    };
+    Ok(results)
 }
 
 #[derive(Deserialize, Debug)]
@@ -208,20 +231,6 @@ fn extract_completed_object(response: &SuccessResponse) -> ContentType {
             _ => None,
         })
         .unwrap_or(ContentType::Incomplete)
-}
-
-#[derive(Deserialize, Debug)]
-struct StructuredOutput {
-    code: String,
-    description_of_what_was_done: String,
-}
-
-#[derive(Debug)]
-pub struct OpenAIResults {
-    pub input_tokens: u32,
-    pub output_tokens: u32,
-    pub code: String,
-    pub description_of_what_was_done: String,
 }
 
 fn deserialize_success(response: &SuccessResponse) -> anyhow::Result<OpenAIResults> {
