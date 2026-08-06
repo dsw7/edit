@@ -191,13 +191,7 @@ mod tests {
     fn test_deserialize_success_response_missing_status() {
         let raw_json = r#"{
             "usage": {"input_tokens": 100, "output_tokens": 50},
-            "output": [{
-                "status": "completed",
-                "content": [{
-                    "type": "output_text",
-                    "text": "{\"code\": \"print('Hello, world!')\", \"description_of_what_was_done\": \"A simple hello world code\"}"
-                }]
-            }]
+            "output": []
         }"#;
 
         let result = deserialize_json_response(raw_json.to_string());
