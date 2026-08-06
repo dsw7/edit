@@ -185,6 +185,7 @@ mod tests {
     fn assert_error_message(raw_json: &str, expected_error: &str) {
         let result = deserialize_json_response(raw_json.to_string());
         assert!(result.is_err());
+
         let error = result.unwrap_err();
         assert_eq!(error.to_string(), expected_error);
     }
@@ -273,6 +274,25 @@ mod tests {
             response.description_of_what_was_done,
             "A simple hello world code"
         );
+    }
+
+    #[test]
+    fn test_deserialize_success_response_output_text_default_usage() {
+        let raw_json = r#"{
+            "status": "completed",
+            "output": [{
+                "status": "completed",
+                "content": [{
+                    "type": "output_text",
+                    "text": "{\"code\": \"print('Hello, world!')\", \"description_of_what_was_done\": \"A simple hello world code\"}"
+                }]
+            }]
+        }"#;
+
+        let response = deserialize_json_response(raw_json.to_string()).unwrap();
+
+        assert_eq!(response.input_tokens, 0);
+        assert_eq!(response.output_tokens, 0);
     }
 
     #[test]
