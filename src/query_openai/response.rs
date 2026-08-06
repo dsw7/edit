@@ -190,6 +190,7 @@ mod tests {
     #[test]
     fn test_deserialize_success_response_output_text() {
         let raw_json = r#"{
+            "status": "completed",
             "usage": {"input_tokens": 100, "output_tokens": 50},
             "output": [{
                 "status": "completed",
@@ -214,6 +215,7 @@ mod tests {
     #[test]
     fn test_deserialize_success_response_refusal() {
         let raw_json = r#"{
+            "status": "completed",
             "usage": {"input_tokens": 100, "output_tokens": 50},
             "output": [{
                 "status": "completed",
@@ -228,18 +230,15 @@ mod tests {
         assert!(result.is_err());
 
         let error = result.unwrap_err();
-        assert_eq!(
-            error.to_string(),
-            "OpenAI returned a refusal: The query was too long"
-        );
+        assert_eq!(error.to_string(), "Query refused: The query was too long");
     }
 
     #[test]
     fn test_deserialize_success_response_never_completed() {
         let raw_json = r#"{
-            "usage": {"input_tokens": 100, "output_tokens": 50},
+            "status": "in_progress",
             "output": [{
-                "status": "in progress",
+                "status": "in_progress",
                 "content": []
             }]
         }"#;
@@ -248,6 +247,9 @@ mod tests {
         assert!(result.is_err());
 
         let error = result.unwrap_err();
-        assert_eq!(error.to_string(), "Query never completed");
+        assert_eq!(
+            error.to_string(),
+            "Query did not finish. Status: in_progress"
+        );
     }
 }
