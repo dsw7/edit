@@ -88,7 +88,7 @@ struct ResponseOutputRefusal {
     refusal: String,
 }
 
-fn unpack_output(response: &Response) -> anyhow::Result<String> {
+fn unpack_output(response: &Response) -> anyhow::Result<StructuredOutput> {
     for object in &response.output {
         if object.status == "completed" {
             return unpack_content(&object.content);
@@ -98,11 +98,22 @@ fn unpack_output(response: &Response) -> anyhow::Result<String> {
     anyhow::bail!("Query completed but no completed message found!")
 }
 
-fn unpack_content(content: &[TextOrRefusal]) -> anyhow::Result<String> {
-    match &content[0] {
-        TextOrRefusal::Text(text) => Ok(text.text),
+#[derive(Deserialize, Debug)]
+struct StructuredOutput {
+    code: String,
+    description_of_what_was_done: String,
+}
+
+fn unpack_content(content: &[TextOrRefusal]) -> anyhow::Result<StructuredOutput> {
+    let raw_text = match &content[0] {
+        TextOrRefusal::Text(text) => &text.text,
         TextOrRefusal::Refusal(refusal) => anyhow::bail!("Query refused: {}", refusal.refusal),
-    }
+    };
+
+    let structured_output = serde_json::from_str::<StructuredOutput>(&raw_text)
+        .context("Failed to deserialize structured output")?;
+
+    Ok(structured_output)
 }
 
 #[derive(Deserialize, Debug)]
@@ -118,7 +129,7 @@ fn default_usage() -> ResponseUsage {
     }
 }
 
-fn unpack_response(response: &Response) -> anyhow::Result<String> {
+fn unpack_response(response: &Response) -> anyhow::Result<StructuredOutput> {
     let status = match &response.status {
         Some(status) => status,
         None => anyhow::bail!("No status could be found in response"),
@@ -134,12 +145,6 @@ fn unpack_response(response: &Response) -> anyhow::Result<String> {
     anyhow::bail!(errmsg)
 }
 
-#[derive(Deserialize, Debug)]
-struct StructuredOutput {
-    code: String,
-    description_of_what_was_done: String,
-}
-
 #[derive(Debug)]
 pub struct OpenAIResults {
     pub input_tokens: u32,
@@ -152,13 +157,10 @@ pub fn deserialize_json_response(raw_json: String) -> anyhow::Result<OpenAIResul
     let response =
         serde_json::from_str::<ApiResponse>(&raw_json).context("Failed to deserialize raw JSON")?;
 
-    let structured_output_raw = match response {
+    let structured_output = match response {
         ApiResponse::ErrorResponse(error) => anyhow::bail!(error.error.message),
         ApiResponse::SuccessResponse(response) => unpack_response(&response),
     };
-
-    let structured_output = serde_json::from_str::<StructuredOutput>(&structured_output_raw)
-        .context("Failed to deserialize structured output")?;
 
     let results = OpenAIResults {
         input_tokens: response.usage.input_tokens,
