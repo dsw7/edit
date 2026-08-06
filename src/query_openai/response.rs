@@ -129,22 +129,6 @@ fn default_usage() -> ResponseUsage {
     }
 }
 
-fn unpack_response(response: &Response) -> anyhow::Result<StructuredOutput> {
-    let status = match &response.status {
-        Some(status) => status,
-        None => anyhow::bail!("No status could be found in response"),
-    };
-
-    let errmsg = match status.as_str() {
-        "completed" => return unpack_output(response),
-        "incomplete" => unpack_incomplete_details(response),
-        "failed" => unpack_error(response),
-        _ => format!("Query did not finish. Status: {status}"),
-    };
-
-    anyhow::bail!(errmsg)
-}
-
 #[derive(Debug)]
 pub struct OpenAIResults {
     pub input_tokens: u32,
@@ -153,13 +137,17 @@ pub struct OpenAIResults {
     pub description_of_what_was_done: String,
 }
 
-pub fn deserialize_json_response(raw_json: String) -> anyhow::Result<OpenAIResults> {
-    let response =
-        serde_json::from_str::<ApiResponse>(&raw_json).context("Failed to deserialize raw JSON")?;
+fn unpack_response(response: &Response) -> anyhow::Result<OpenAIResults> {
+    let status = match &response.status {
+        Some(status) => status,
+        None => anyhow::bail!("No status could be found in response"),
+    };
 
-    let structured_output = match response {
-        ApiResponse::ErrorResponse(error) => anyhow::bail!(error.error.message),
-        ApiResponse::SuccessResponse(response) => unpack_response(&response),
+    let structured_output = match status.as_str() {
+        "completed" => unpack_output(response)?,
+        "incomplete" => anyhow::bail!(unpack_incomplete_details(response)),
+        "failed" => anyhow::bail!(unpack_error(response)),
+        _ => anyhow::bail!(format!("Query did not finish. Status: {status}")),
     };
 
     let results = OpenAIResults {
@@ -168,7 +156,19 @@ pub fn deserialize_json_response(raw_json: String) -> anyhow::Result<OpenAIResul
         code: structured_output.code,
         description_of_what_was_done: structured_output.description_of_what_was_done,
     };
+
     Ok(results)
+}
+
+
+pub fn deserialize_json_response(raw_json: String) -> anyhow::Result<OpenAIResults> {
+    let response =
+        serde_json::from_str::<ApiResponse>(&raw_json).context("Failed to deserialize raw JSON")?;
+
+    match response {
+        ApiResponse::ErrorResponse(error) => anyhow::bail!(error.error.message),
+        ApiResponse::SuccessResponse(response) => unpack_response(&response),
+    }
 }
 
 #[cfg(test)]
