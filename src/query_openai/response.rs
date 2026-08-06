@@ -110,7 +110,7 @@ fn unpack_content(content: &[TextOrRefusal]) -> anyhow::Result<StructuredOutput>
         TextOrRefusal::Refusal(refusal) => anyhow::bail!("Query refused: {}", refusal.refusal),
     };
 
-    let structured_output = serde_json::from_str::<StructuredOutput>(&raw_text)
+    let structured_output = serde_json::from_str::<StructuredOutput>(raw_text)
         .context("Failed to deserialize structured output")?;
 
     Ok(structured_output)
@@ -160,7 +160,6 @@ fn unpack_response(response: &Response) -> anyhow::Result<OpenAIResults> {
     Ok(results)
 }
 
-
 pub fn deserialize_json_response(raw_json: String) -> anyhow::Result<OpenAIResults> {
     let response =
         serde_json::from_str::<ApiResponse>(&raw_json).context("Failed to deserialize raw JSON")?;
@@ -173,7 +172,7 @@ pub fn deserialize_json_response(raw_json: String) -> anyhow::Result<OpenAIResul
 
 #[cfg(test)]
 mod tests {
-    use super::*;
+    use super::deserialize_json_response;
 
     #[test]
     fn test_deserialize_error_response() {
