@@ -124,12 +124,14 @@ fn unpack_response(response: &Response) -> anyhow::Result<String> {
         None => anyhow::bail!("No status could be found in response"),
     };
 
-    match status.as_str() {
+    let errmsg = match status.as_str() {
         "completed" => return unpack_output(response),
-        "incomplete" => anyhow::bail!(unpack_incomplete_details(response)),
-        "failed" => anyhow::bail!(unpack_error(response)),
-        _ => anyhow::bail!(format!("Query did not finish. Status: {status}")),
-    }
+        "incomplete" => unpack_incomplete_details(response),
+        "failed" => unpack_error(response),
+        _ => format!("Query did not finish. Status: {status}"),
+    };
+
+    anyhow::bail!(errmsg)
 }
 
 #[derive(Deserialize, Debug)]
