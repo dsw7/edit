@@ -89,6 +89,10 @@ struct ResponseOutputRefusal {
 }
 
 fn unpack_output(response: &Response) -> anyhow::Result<StructuredOutput> {
+    if response.output.is_empty() {
+        anyhow::bail!("Output array is empty");
+    }
+
     for object in &response.output {
         if object.status == "completed" {
             return unpack_content(&object.content);
@@ -190,7 +194,6 @@ mod tests {
     #[test]
     fn test_deserialize_success_response_missing_status() {
         let raw_json = r#"{
-            "usage": {"input_tokens": 100, "output_tokens": 50},
             "output": []
         }"#;
 
@@ -199,6 +202,20 @@ mod tests {
 
         let error = result.unwrap_err();
         assert_eq!(error.to_string(), "No status could be found in response");
+    }
+
+    #[test]
+    fn test_deserialize_success_response_no_output() {
+        let raw_json = r#"{
+            "status": "completed",
+            "output": []
+        }"#;
+
+        let result = deserialize_json_response(raw_json.to_string());
+        assert!(result.is_err());
+
+        let error = result.unwrap_err();
+        assert_eq!(error.to_string(), "Output array is empty");
     }
 
     #[test]
