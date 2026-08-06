@@ -1,9 +1,8 @@
 use anyhow::Context;
 
-use crate::params::Parameters;
 use crate::query_openai::run_query;
 use crate::select_prompt::load_prompt_from_file_or_stdin;
-use crate::structs::OpenAIResults;
+use crate::structs::{OpenAIResults, Parameters};
 use crate::utils;
 
 fn update_user_prompt(user_prompt: String, text_to_edit: String) -> String {
