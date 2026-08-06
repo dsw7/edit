@@ -43,14 +43,13 @@ struct ResponseError {
     message: String,
 }
 
-fn unpack_error(response: &Response) -> anyhow::Result<()> {
+fn unpack_error(response: &Response) -> String {
     match &response.error {
-        Some(details) => anyhow::bail!(
+        Some(details) => format!(
             "Query failed with code `{}` and message `{}`",
-            details.code,
-            details.message
+            details.code, details.message
         ),
-        None => anyhow::bail!("Query failed. No details provided"),
+        None => String::from("Query failed. No details provided"),
     }
 }
 
@@ -128,7 +127,7 @@ fn unpack_response(response: &Response) -> anyhow::Result<String> {
     match status.as_str() {
         "completed" => return unpack_output(response),
         "incomplete" => anyhow::bail!(unpack_incomplete_details(response)),
-        "failed" => unpack_error(response),
+        "failed" => anyhow::bail!(unpack_error(response)),
         _ => anyhow::bail!(format!("Query did not finish. Status: {status}")),
     }
 }
