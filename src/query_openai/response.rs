@@ -4,12 +4,12 @@ use serde::Deserialize;
 #[derive(Deserialize, Debug)]
 #[serde(untagged)]
 enum ApiResponse {
-    ErrorResponse(ErrorResponse),
+    ErrorResponse(ResponseError),
     SuccessResponse(Response),
 }
 
 #[derive(Deserialize, Debug)]
-struct ErrorResponse {
+struct ResponseError {
     error: Error,
 }
 
@@ -23,9 +23,6 @@ struct Response {
     // ResponseStatus string may or may not exist
     status: Option<String>,
 
-    // will always exist as ResponseError object or null
-    error: Option<ResponseError>,
-
     // will always exist as object or null
     incomplete_details: Option<IncompleteDetails>,
 
@@ -35,22 +32,6 @@ struct Response {
     // ResponseUsage object may or may not exist - populate with defaults
     #[serde(default = "default_usage")]
     usage: ResponseUsage,
-}
-
-#[derive(Deserialize, Debug)]
-struct ResponseError {
-    code: String,
-    message: String,
-}
-
-fn unpack_error(response: &Response) -> String {
-    match &response.error {
-        Some(details) => format!(
-            "Query failed with code `{}` and message `{}`",
-            details.code, details.message
-        ),
-        None => String::from("Query failed. No details provided"),
-    }
 }
 
 #[derive(Deserialize, Debug)]
@@ -154,7 +135,6 @@ fn unpack_response(response: &Response) -> anyhow::Result<OpenAIResults> {
     let structured_output = match status.as_str() {
         "completed" => unpack_output(response)?,
         "incomplete" => anyhow::bail!(unpack_incomplete_details(response)),
-        "failed" => anyhow::bail!(unpack_error(response)),
         _ => anyhow::bail!(format!("Query did not finish. Status: {status}")),
     };
 
@@ -173,7 +153,7 @@ pub fn deserialize_json_response(raw_json: String) -> anyhow::Result<OpenAIResul
         serde_json::from_str::<ApiResponse>(&raw_json).context("Failed to deserialize raw JSON")?;
 
     match response {
-        ApiResponse::ErrorResponse(error) => anyhow::bail!(error.error.message),
+        ApiResponse::ErrorResponse(response) => anyhow::bail!(response.error.message),
         ApiResponse::SuccessResponse(response) => unpack_response(&response),
     }
 }
