@@ -5,19 +5,6 @@ use crate::query_openai;
 use crate::select_prompt::load_prompt_from_file_or_stdin;
 use crate::utils;
 
-fn update_user_prompt(user_prompt: String, text_to_edit: String) -> String {
-    format!(
-        "Take the instructions:
-```plaintext
-{user_prompt}
-```
-And apply them to the code:
-```
-{text_to_edit}
-```"
-    )
-}
-
 fn extract_user_prompt(cli_params: &CliParameters) -> anyhow::Result<String> {
     let prompt = match &cli_params.prompt {
         Some(prompt) => prompt.to_string(),
@@ -31,6 +18,19 @@ fn extract_user_prompt(cli_params: &CliParameters) -> anyhow::Result<String> {
     } else {
         Ok(prompt)
     }
+}
+
+fn update_user_prompt(user_prompt: String, text_to_edit: String) -> String {
+    format!(
+        "Take the instructions:
+```plaintext
+{user_prompt}
+```
+And apply them to the code:
+```
+{text_to_edit}
+```"
+    )
 }
 
 fn operate_on_existing_file(
