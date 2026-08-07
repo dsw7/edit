@@ -13,11 +13,11 @@ use response::deserialize_json_response;
 
 pub use structs::{OpenAIParams, OpenAIResults};
 
-pub fn run_query(params: &OpenAIParams) -> anyhow::Result<OpenAIResults> {
+pub fn run_query(params: OpenAIParams) -> anyhow::Result<OpenAIResults> {
     let api_key = load_api_key("OPENAI_API_KEY")?;
     let client = Client::builder().timeout(Duration::from_secs(10)).build()?;
 
-    let request_body = set_up_request_body(params);
+    let request_body = set_up_request_body(&params);
     let response = client
         .post("https://api.openai.com/v1/responses")
         .header("Content-Type", "application/json")

@@ -10,8 +10,7 @@ pub fn create_new_file(
         model: cli_params.model,
         prompt: user_prompt,
     };
-
-    let results = query_openai::run_query(&params)?;
+    let results = query_openai::run_query(params)?;
 
     utils::write_to_file(&cli_params.input_file, &results.code)?;
     println!("Created new file `{}`", &cli_params.input_file.display());

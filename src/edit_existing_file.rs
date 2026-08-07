@@ -25,8 +25,7 @@ pub fn edit_existing_file(
         model: cli_params.model,
         prompt: update_user_prompt(user_prompt, text_to_edit),
     };
-
-    let results = query_openai::run_query(&params)?;
+    let results = query_openai::run_query(params)?;
 
     utils::write_to_file(&cli_params.input_file, &results.code)?;
     Ok(results)
