@@ -1,7 +1,7 @@
 use anyhow::Context;
 
 use crate::params::CliParameters;
-use crate::query_openai::{OpenAIParams, OpenAIResults, run_query};
+use crate::query_openai;
 use crate::select_prompt::load_prompt_from_file_or_stdin;
 use crate::utils;
 
@@ -33,28 +33,30 @@ fn extract_user_prompt(cli_params: &CliParameters) -> anyhow::Result<String> {
     }
 }
 
-fn operate_on_existing_file(cli_params: &CliParameters) -> anyhow::Result<OpenAIResults> {
+fn operate_on_existing_file(
+    cli_params: &CliParameters,
+) -> anyhow::Result<query_openai::OpenAIResults> {
     let user_prompt = extract_user_prompt(cli_params)?;
     let text_to_edit = utils::read_file(&cli_params.input_file)?;
 
-    let params = OpenAIParams {
+    let params = query_openai::OpenAIParams {
         model: cli_params.model.clone(),
         prompt: update_user_prompt(user_prompt, text_to_edit),
     };
-    let results = run_query(&params)?;
+    let results = query_openai::run_query(&params)?;
 
     utils::write_to_file(&cli_params.input_file, &results.code)?;
     Ok(results)
 }
 
-fn operate_on_new_file(cli_params: &CliParameters) -> anyhow::Result<OpenAIResults> {
+fn operate_on_new_file(cli_params: &CliParameters) -> anyhow::Result<query_openai::OpenAIResults> {
     let user_prompt = extract_user_prompt(cli_params)?;
 
-    let params = OpenAIParams {
+    let params = query_openai::OpenAIParams {
         model: cli_params.model.clone(),
         prompt: user_prompt,
     };
-    let results = run_query(&params)?;
+    let results = query_openai::run_query(&params)?;
 
     utils::write_to_file(&cli_params.input_file, &results.code)?;
     println!("Created new file `{}`", &cli_params.input_file.display());
@@ -62,7 +64,7 @@ fn operate_on_new_file(cli_params: &CliParameters) -> anyhow::Result<OpenAIResul
     Ok(results)
 }
 
-fn operate_on_file(cli_params: &CliParameters) -> anyhow::Result<OpenAIResults> {
+fn operate_on_file(cli_params: &CliParameters) -> anyhow::Result<query_openai::OpenAIResults> {
     if cli_params.input_file.exists() {
         operate_on_existing_file(cli_params)
     } else {
