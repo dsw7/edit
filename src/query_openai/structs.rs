@@ -4,10 +4,7 @@ pub struct OpenAIParams {
 }
 
 impl OpenAIParams {
-    pub fn new(model: String, prompt: String) -> Self {
-        OpenAIParams { model, prompt }
-    }
-
+    #[cfg(test)]
     pub fn from_str(model: &str, prompt: &str) -> Self {
         OpenAIParams {
             model: model.to_string(),
