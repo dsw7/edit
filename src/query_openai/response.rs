@@ -1,7 +1,7 @@
 use anyhow::Context;
 use serde::Deserialize;
 
-use crate::structs::OpenAIResults;
+use super::structs::OpenAIResults;
 
 #[derive(Deserialize, Debug)]
 #[serde(untagged)]

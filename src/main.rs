@@ -1,7 +1,7 @@
 mod edit_file;
+mod params;
 mod query_openai;
 mod select_prompt;
-mod structs;
 mod utils;
 
 use std::path::PathBuf;
@@ -10,7 +10,7 @@ use std::process::ExitCode;
 use clap::Parser;
 
 use edit_file::edit_file;
-use structs::CliParameters;
+use params::CliParameters;
 
 #[derive(Parser, Debug)]
 #[command(about = "Program for editing individual files using LLMs.", version)]

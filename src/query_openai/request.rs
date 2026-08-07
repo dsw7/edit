@@ -1,6 +1,6 @@
 use serde_json::json;
 
-use crate::structs::OpenAIParams;
+use super::structs::OpenAIParams;
 
 fn get_structured_output_schema() -> serde_json::Value {
     json!({

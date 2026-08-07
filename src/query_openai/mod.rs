@@ -1,15 +1,17 @@
 mod request;
 mod response;
+mod structs;
 
 use std::time::Duration;
 
 use reqwest::blocking::Client;
 
-use crate::structs::{OpenAIParams, OpenAIResults};
 use crate::utils::load_api_key;
 
 use request::set_up_request_body;
 use response::deserialize_json_response;
+
+pub use structs::{OpenAIParams, OpenAIResults};
 
 pub fn run_query(params: &OpenAIParams) -> anyhow::Result<OpenAIResults> {
     let api_key = load_api_key("OPENAI_API_KEY")?;
