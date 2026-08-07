@@ -19,9 +19,6 @@ struct Cli {
     #[arg(value_name = "FILE-TO-EDIT")]
     file_to_edit: PathBuf,
 
-    #[arg(short, long, help = "Specify prompt via command line")]
-    prompt: Option<String>,
-
     #[arg(
         short,
         long,
@@ -37,7 +34,6 @@ fn main() -> ExitCode {
     let params = CliParameters {
         input_file: cli.file_to_edit,
         model: cli.model,
-        prompt: cli.prompt,
     };
 
     match edit_file(params) {

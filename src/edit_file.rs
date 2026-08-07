@@ -38,23 +38,13 @@ fn load_prompt_from_file_or_stdin() -> anyhow::Result<String> {
     }
 }
 
-fn select_prompt(cli_params: &CliParameters) -> anyhow::Result<String> {
-    let prompt = match &cli_params.prompt {
-        Some(prompt) => prompt.to_string(),
-        None => load_prompt_from_file_or_stdin()?,
-    };
-
-    let prompt = prompt.trim().to_string();
-
-    if prompt.is_empty() {
-        anyhow::bail!("The prompt is empty")
-    } else {
-        Ok(prompt)
-    }
-}
-
 fn operate_on_file(cli_params: CliParameters) -> anyhow::Result<OpenAIResults> {
-    let user_prompt = select_prompt(&cli_params)?;
+    let user_prompt = load_prompt_from_file_or_stdin()?;
+    let user_prompt = user_prompt.trim().to_string();
+
+    if user_prompt.is_empty() {
+        anyhow::bail!("The user prompt is empty")
+    }
 
     if cli_params.input_file.exists() {
         edit_existing_file(cli_params, user_prompt)
