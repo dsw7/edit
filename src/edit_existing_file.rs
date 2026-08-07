@@ -22,9 +22,10 @@ pub fn edit_existing_file(
     let text_to_edit = utils::read_file(&cli_params.input_file)?;
 
     let params = query_openai::OpenAIParams {
-        model: cli_params.model.clone(),
+        model: cli_params.model,
         prompt: update_user_prompt(user_prompt, text_to_edit),
     };
+
     let results = query_openai::run_query(&params)?;
 
     utils::write_to_file(&cli_params.input_file, &results.code)?;

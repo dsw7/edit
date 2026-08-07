@@ -7,8 +7,8 @@ pub fn create_new_file(
     user_prompt: String,
 ) -> anyhow::Result<query_openai::OpenAIResults> {
     let params = query_openai::OpenAIParams {
-        model: cli_params.model.clone(),
-        prompt: user_prompt.clone(),
+        model: cli_params.model,
+        prompt: user_prompt,
     };
 
     let results = query_openai::run_query(&params)?;
