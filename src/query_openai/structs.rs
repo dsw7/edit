@@ -1,6 +1,19 @@
 pub struct OpenAIParams {
-    pub prompt: String,
     pub model: String,
+    pub prompt: String,
+}
+
+impl OpenAIParams {
+    pub fn new(model: String, prompt: String) -> Self {
+        OpenAIParams { model, prompt }
+    }
+
+    pub fn from_str(model: &str, prompt: &str) -> Self {
+        OpenAIParams {
+            model: model.to_string(),
+            prompt: prompt.to_string(),
+        }
+    }
 }
 
 #[derive(Debug)]
