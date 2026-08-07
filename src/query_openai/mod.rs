@@ -44,6 +44,15 @@ mod tests {
     #[test]
     fn test_invalid_model() {
         let params = OpenAIParams {
+            model: "foobar".to_string(),
+            prompt: "What is 3 + 5?".to_string(),
+        };
+        assert_error_message(&params, "The requested model 'foobar' does not exist.");
+    }
+
+    #[test]
+    fn test_incompatible_model() {
+        let params = OpenAIParams {
             model: "gpt-3.5-turbo".to_string(),
             prompt: "What is 3 + 5?".to_string(),
         };
