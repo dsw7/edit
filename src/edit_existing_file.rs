@@ -34,7 +34,7 @@ fn get_delimited_block(
     let inner_end = end_idx - DELIM_EDIT_CODE.len();
     let inner_content = &file_content[inner_start..inner_end];
 
-    if inner_content.is_empty() {
+    if inner_content.trim().is_empty() {
         anyhow::bail!("Delimited content is empty")
     } else {
         Ok(inner_content)
@@ -133,6 +133,15 @@ mod tests {
     fn test_handle_empty_delimited_block() {
         let file_contents = "@@@\n@@@\n\nfoo()";
         let block = get_delimited_block(file_contents, 0, 8);
+
+        assert!(block.is_err());
+        assert_eq!(block.unwrap_err().to_string(), "Delimited content is empty");
+    }
+
+    #[test]
+    fn test_handle_empty_delimited_block_2() {
+        let file_contents = "@@@\n  \n@@@\n\nfoo()";
+        let block = get_delimited_block(file_contents, 0, 11);
 
         assert!(block.is_err());
         assert_eq!(block.unwrap_err().to_string(), "Delimited content is empty");
