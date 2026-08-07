@@ -1,45 +1,13 @@
 use anyhow::Context;
 
-use crate::params::CliParameters;
-use crate::query_openai;
-use crate::select_prompt::select_prompt;
-use crate::utils;
 use crate::create_new_file::create_new_file;
+use crate::edit_existing_file::edit_existing_file;
+use crate::params::CliParameters;
+use crate::query_openai::OpenAIResults;
 
-
-fn update_user_prompt(user_prompt: String, text_to_edit: String) -> String {
-    format!(
-        "Take the instructions:
-```plaintext
-{user_prompt}
-```
-And apply them to the code:
-```
-{text_to_edit}
-```"
-    )
-}
-
-fn operate_on_existing_file(
-    cli_params: &CliParameters,
-) -> anyhow::Result<query_openai::OpenAIResults> {
-    let user_prompt = select_prompt(cli_params)?;
-    let text_to_edit = utils::read_file(&cli_params.input_file)?;
-
-    let params = query_openai::OpenAIParams {
-        model: cli_params.model.clone(),
-        prompt: update_user_prompt(user_prompt, text_to_edit),
-    };
-    let results = query_openai::run_query(&params)?;
-
-    utils::write_to_file(&cli_params.input_file, &results.code)?;
-    Ok(results)
-}
-
-
-fn operate_on_file(cli_params: &CliParameters) -> anyhow::Result<query_openai::OpenAIResults> {
+fn operate_on_file(cli_params: &CliParameters) -> anyhow::Result<OpenAIResults> {
     if cli_params.input_file.exists() {
-        operate_on_existing_file(cli_params)
+        edit_existing_file(cli_params)
     } else {
         create_new_file(cli_params)
     }

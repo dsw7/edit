@@ -3,9 +3,8 @@ use std::path::Path;
 
 use anyhow::Context;
 
-use crate::utils;
 use crate::params::CliParameters;
-
+use crate::utils;
 
 fn load_prompt_from_stdin() -> anyhow::Result<String> {
     print!(">>> ");
