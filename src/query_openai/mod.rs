@@ -28,3 +28,25 @@ pub fn run_query(params: &OpenAIParams) -> anyhow::Result<OpenAIResults> {
     let raw_json = response.text()?;
     deserialize_json_response(raw_json)
 }
+
+#[cfg(test)]
+mod tests {
+    use super::{OpenAIParams, run_query};
+
+    #[test]
+    fn test_invalid_model() {
+        let params = OpenAIParams {
+            model: "gpt-3.5-turbo".to_string(),
+            prompt: "What is 3 + 5?".to_string(),
+        };
+
+        let result = run_query(&params);
+        assert!(result.is_err());
+
+        let error = result.unwrap_err();
+        assert_eq!(
+            error.to_string(),
+            "Invalid parameter: 'text.format' of type 'json_schema' is not supported with model version `gpt-3.5-turbo`."
+        );
+    }
+}
