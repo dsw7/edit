@@ -7,6 +7,24 @@ use crate::params::CliParameters;
 use crate::query_openai;
 use crate::utils;
 
+const DELIM_EDIT_CODE: &str = "@@@\n";
+const EDIT_START: &str = ">>>>>>>\n";
+const EDIT_END: &str = "<<<<<<<\n";
+
+fn get_delim_indices(file_content: &str) -> anyhow::Result<(usize, usize)> {
+    let start_idx = match file_content.find(DELIM_EDIT_CODE) {
+        Some(idx) => idx,
+        None => anyhow::bail!("Opening delimiter not found"),
+    };
+
+    let end_idx = match file_content[start_idx + DELIM_EDIT_CODE.len()..].find(DELIM_EDIT_CODE) {
+        Some(idx) => start_idx + DELIM_EDIT_CODE.len() + idx + DELIM_EDIT_CODE.len(),
+        None => anyhow::bail!("Closing delimiter not found"),
+    };
+
+    Ok((start_idx, end_idx))
+}
+
 fn update_user_prompt(user_prompt: String, text_to_edit: &str) -> String {
     format!(
         "Take the instructions:
@@ -20,25 +38,13 @@ And apply them to the code:
     )
 }
 
-const DELIM_EDIT_CODE: &str = "@@@\n";
-const EDIT_START: &str = ">>>>>>>\n";
-const EDIT_END: &str = "<<<<<<<\n";
-
 pub fn edit_existing_file(
     cli_params: CliParameters,
     user_prompt: String,
 ) -> anyhow::Result<query_openai::OpenAIResults> {
     let mut file_content = utils::read_file(&cli_params.input_file)?;
 
-    let start_idx = match file_content.find(DELIM_EDIT_CODE) {
-        Some(idx) => idx,
-        None => anyhow::bail!("Opening delimiter not found"),
-    };
-
-    let end_idx = match file_content[start_idx + DELIM_EDIT_CODE.len()..].find(DELIM_EDIT_CODE) {
-        Some(idx) => start_idx + DELIM_EDIT_CODE.len() + idx + DELIM_EDIT_CODE.len(),
-        None => anyhow::bail!("Closing delimiter not found"),
-    };
+    let (start_idx, end_idx) = get_delim_indices(&file_content)?;
 
     let inner_start = start_idx + DELIM_EDIT_CODE.len();
     let inner_end = end_idx - DELIM_EDIT_CODE.len();
@@ -67,4 +73,38 @@ pub fn edit_existing_file(
         &cli_params.input_file.display()
     ))?;
     Ok(results)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::get_delim_indices;
+
+    #[test]
+    fn test_missing_start_delim() {
+        let file_contents = "def foo(): pass\n";
+
+        let result = get_delim_indices(file_contents);
+        assert!(result.is_err());
+        let error = result.unwrap_err();
+        assert_eq!(error.to_string(), "Opening delimiter not found");
+    }
+
+    #[test]
+    fn test_missing_end_delim() {
+        let file_contents = "@@@\nprint('Hello world')\n";
+
+        let result = get_delim_indices(file_contents);
+        assert!(result.is_err());
+        let error = result.unwrap_err();
+        assert_eq!(error.to_string(), "Closing delimiter not found");
+    }
+
+    #[test]
+    fn test_valid_start_end_delim() {
+        let file_contents = "@@@\ndef foo(): pass\n@@@\n\nfoo()";
+
+        let (start_idx, end_idx) = get_delim_indices(file_contents).unwrap();
+        assert_eq!(start_idx, 0);
+        assert_eq!(end_idx, 24);
+    }
 }
