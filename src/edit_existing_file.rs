@@ -25,6 +25,22 @@ fn get_delim_indices(file_content: &str) -> anyhow::Result<(usize, usize)> {
     Ok((start_idx, end_idx))
 }
 
+fn get_delimited_block(
+    file_content: &str,
+    start_idx: usize,
+    end_idx: usize,
+) -> anyhow::Result<&str> {
+    let inner_start = start_idx + DELIM_EDIT_CODE.len();
+    let inner_end = end_idx - DELIM_EDIT_CODE.len();
+    let inner_content = &file_content[inner_start..inner_end];
+
+    if inner_content.is_empty() {
+        anyhow::bail!("Delimited content is empty")
+    } else {
+        Ok(inner_content)
+    }
+}
+
 fn update_user_prompt(user_prompt: String, text_to_edit: &str) -> String {
     format!(
         "Take the instructions:
@@ -45,10 +61,7 @@ pub fn edit_existing_file(
     let mut file_content = utils::read_file(&cli_params.input_file)?;
 
     let (start_idx, end_idx) = get_delim_indices(&file_content)?;
-
-    let inner_start = start_idx + DELIM_EDIT_CODE.len();
-    let inner_end = end_idx - DELIM_EDIT_CODE.len();
-    let inner_content = &mut file_content[inner_start..inner_end];
+    let inner_content = get_delimited_block(&file_content, start_idx, end_idx)?;
 
     let params = query_openai::OpenAIParams {
         model: cli_params.model,
@@ -72,12 +85,13 @@ pub fn edit_existing_file(
         "Failed to write to file `{}`",
         &cli_params.input_file.display()
     ))?;
+
     Ok(results)
 }
 
 #[cfg(test)]
 mod tests {
-    use super::get_delim_indices;
+    use super::{get_delim_indices, get_delimited_block};
 
     #[test]
     fn test_missing_start_delim() {
@@ -106,5 +120,21 @@ mod tests {
         let (start_idx, end_idx) = get_delim_indices(file_contents).unwrap();
         assert_eq!(start_idx, 0);
         assert_eq!(end_idx, 24);
+    }
+
+    #[test]
+    fn test_get_delimited_block() {
+        let file_contents = "@@@\ndef foo(): pass\n@@@\n\nfoo()";
+        let block = get_delimited_block(file_contents, 0, 24).unwrap();
+        assert_eq!(block, "def foo(): pass\n");
+    }
+
+    #[test]
+    fn test_handle_empty_delimited_block() {
+        let file_contents = "@@@\n@@@\n\nfoo()";
+        let block = get_delimited_block(file_contents, 0, 8);
+
+        assert!(block.is_err());
+        assert_eq!(block.unwrap_err().to_string(), "Delimited content is empty");
     }
 }
