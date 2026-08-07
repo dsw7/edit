@@ -41,7 +41,7 @@ fn main() -> ExitCode {
         prompt: cli.prompt,
     };
 
-    match edit_file(&params) {
+    match edit_file(params) {
         Ok(()) => ExitCode::SUCCESS,
         Err(error) => {
             eprintln!("{error:?}");

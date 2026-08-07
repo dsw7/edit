@@ -1,6 +1,5 @@
 use crate::params::CliParameters;
 use crate::query_openai;
-use crate::select_prompt::select_prompt;
 use crate::utils;
 
 fn update_user_prompt(user_prompt: String, text_to_edit: String) -> String {
@@ -17,9 +16,9 @@ And apply them to the code:
 }
 
 pub fn edit_existing_file(
-    cli_params: &CliParameters,
+    cli_params: CliParameters,
+    user_prompt: String,
 ) -> anyhow::Result<query_openai::OpenAIResults> {
-    let user_prompt = select_prompt(cli_params)?;
     let text_to_edit = utils::read_file(&cli_params.input_file)?;
 
     let params = query_openai::OpenAIParams {

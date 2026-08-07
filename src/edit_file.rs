@@ -4,16 +4,19 @@ use crate::create_new_file::create_new_file;
 use crate::edit_existing_file::edit_existing_file;
 use crate::params::CliParameters;
 use crate::query_openai::OpenAIResults;
+use crate::select_prompt::select_prompt;
 
-fn operate_on_file(cli_params: &CliParameters) -> anyhow::Result<OpenAIResults> {
+fn operate_on_file(cli_params: CliParameters) -> anyhow::Result<OpenAIResults> {
+    let user_prompt = select_prompt(cli_params)?;
+
     if cli_params.input_file.exists() {
-        edit_existing_file(cli_params)
+        edit_existing_file(cli_params, user_prompt)
     } else {
-        create_new_file(cli_params)
+        create_new_file(cli_params, user_prompt)
     }
 }
 
-pub fn edit_file(cli_params: &CliParameters) -> anyhow::Result<()> {
+pub fn edit_file(cli_params: CliParameters) -> anyhow::Result<()> {
     let results = operate_on_file(cli_params).context("Editing process failed")?;
 
     println!("Input tokens: {}", results.input_tokens);
