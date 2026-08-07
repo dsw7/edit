@@ -2,23 +2,9 @@ use anyhow::Context;
 
 use crate::params::CliParameters;
 use crate::query_openai;
-use crate::select_prompt::load_prompt_from_file_or_stdin;
+use crate::select_prompt::select_prompt;
 use crate::utils;
 
-fn extract_user_prompt(cli_params: &CliParameters) -> anyhow::Result<String> {
-    let prompt = match &cli_params.prompt {
-        Some(prompt) => prompt.to_string(),
-        None => load_prompt_from_file_or_stdin()?,
-    };
-
-    let prompt = prompt.trim().to_string();
-
-    if prompt.is_empty() {
-        anyhow::bail!("The prompt is empty")
-    } else {
-        Ok(prompt)
-    }
-}
 
 fn update_user_prompt(user_prompt: String, text_to_edit: String) -> String {
     format!(
@@ -36,7 +22,7 @@ And apply them to the code:
 fn operate_on_existing_file(
     cli_params: &CliParameters,
 ) -> anyhow::Result<query_openai::OpenAIResults> {
-    let user_prompt = extract_user_prompt(cli_params)?;
+    let user_prompt = select_prompt(cli_params)?;
     let text_to_edit = utils::read_file(&cli_params.input_file)?;
 
     let params = query_openai::OpenAIParams {
@@ -50,7 +36,7 @@ fn operate_on_existing_file(
 }
 
 fn operate_on_new_file(cli_params: &CliParameters) -> anyhow::Result<query_openai::OpenAIResults> {
-    let user_prompt = extract_user_prompt(cli_params)?;
+    let user_prompt = select_prompt(cli_params)?;
 
     let params = query_openai::OpenAIParams {
         model: cli_params.model.clone(),
