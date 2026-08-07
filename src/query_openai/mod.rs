@@ -55,4 +55,11 @@ mod tests {
             "Invalid parameter: 'text.format' of type 'json_schema' is not supported with model version `gpt-3.5-turbo`.",
         );
     }
+
+    #[test]
+    fn test_valid_query() {
+        let params = OpenAIParams::from_str("gpt-4o", "Print 'hello world' in Python.");
+        let result = run_query(&params).unwrap();
+        assert_eq!(result.code, "print('hello world')");
+    }
 }
