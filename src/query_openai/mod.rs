@@ -60,6 +60,9 @@ mod tests {
     fn test_valid_query() {
         let params = OpenAIParams::from_str("gpt-4o", "Print 'hello world' in Python.");
         let result = run_query(&params).unwrap();
+        assert!(result.input_tokens > 0);
+        assert!(result.output_tokens > 0);
+        assert!(!result.description_of_what_was_done.is_empty());
         assert_eq!(result.code, "print('hello world')");
     }
 }
