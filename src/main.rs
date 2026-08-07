@@ -1,4 +1,5 @@
 mod edit_file;
+mod create_new_file;
 mod params;
 mod query_openai;
 mod select_prompt;

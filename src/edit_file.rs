@@ -4,6 +4,7 @@ use crate::params::CliParameters;
 use crate::query_openai;
 use crate::select_prompt::select_prompt;
 use crate::utils;
+use crate::create_new_file::create_new_file;
 
 
 fn update_user_prompt(user_prompt: String, text_to_edit: String) -> String {
@@ -35,26 +36,12 @@ fn operate_on_existing_file(
     Ok(results)
 }
 
-fn operate_on_new_file(cli_params: &CliParameters) -> anyhow::Result<query_openai::OpenAIResults> {
-    let user_prompt = select_prompt(cli_params)?;
-
-    let params = query_openai::OpenAIParams {
-        model: cli_params.model.clone(),
-        prompt: user_prompt,
-    };
-    let results = query_openai::run_query(&params)?;
-
-    utils::write_to_file(&cli_params.input_file, &results.code)?;
-    println!("Created new file `{}`", &cli_params.input_file.display());
-
-    Ok(results)
-}
 
 fn operate_on_file(cli_params: &CliParameters) -> anyhow::Result<query_openai::OpenAIResults> {
     if cli_params.input_file.exists() {
         operate_on_existing_file(cli_params)
     } else {
-        operate_on_new_file(cli_params)
+        create_new_file(cli_params)
     }
 }
 
