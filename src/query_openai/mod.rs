@@ -33,8 +33,8 @@ pub fn run_query(params: OpenAIParams) -> anyhow::Result<OpenAIResults> {
 mod tests {
     use super::{OpenAIParams, run_query};
 
-    fn assert_error_message(params: &OpenAIParams, expected_error: &str) {
-        let result = run_query(&params);
+    fn assert_error_message(params: OpenAIParams, expected_error: &str) {
+        let result = run_query(params);
         assert!(result.is_err());
 
         let error = result.unwrap_err();
@@ -44,14 +44,14 @@ mod tests {
     #[test]
     fn test_invalid_model() {
         let params = OpenAIParams::from_str("foobar", "What is 3 + 5?");
-        assert_error_message(&params, "The requested model 'foobar' does not exist.");
+        assert_error_message(params, "The requested model 'foobar' does not exist.");
     }
 
     #[test]
     fn test_incompatible_model() {
         let params = OpenAIParams::from_str("gpt-3.5-turbo", "What is 3 + 5?");
         assert_error_message(
-            &params,
+            params,
             "Invalid parameter: 'text.format' of type 'json_schema' is not supported with model version `gpt-3.5-turbo`.",
         );
     }
@@ -59,7 +59,7 @@ mod tests {
     #[test]
     fn test_valid_query() {
         let params = OpenAIParams::from_str("gpt-4o", "Print 'hello world' in Python.");
-        let result = run_query(&params).unwrap();
+        let result = run_query(params).unwrap();
         assert!(result.input_tokens > 0);
         assert!(result.output_tokens > 0);
         assert!(!result.description_of_what_was_done.is_empty());
