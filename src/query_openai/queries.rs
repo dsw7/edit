@@ -1,4 +1,12 @@
+use std::time::Duration;
+
+use reqwest::blocking::Client;
 use serde_json::json;
+
+use crate::utils::load_api_key;
+
+use super::response::deserialize_json_response;
+use super::structs::OpenAIResults;
 
 fn get_structured_output_schema() -> serde_json::Value {
     json!({
@@ -31,15 +39,25 @@ Output:
 "
 }
 
-pub fn set_up_request_body(model: &str, prompt: &str) -> serde_json::Value {
-    let structured_output_schema = get_structured_output_schema();
-    let system_prompt = get_system_prompt();
+pub fn write_new_code(model: String, prompt: String) -> anyhow::Result<OpenAIResults> {
+    let api_key = load_api_key("OPENAI_API_KEY")?;
 
-    json!({
+    let request_body = json!({
         "input": prompt,
-        "instructions": system_prompt,
+        "instructions": get_system_prompt(),
         "model": model,
         "store": false,
-        "text": structured_output_schema,
-    })
+        "text": get_structured_output_schema(),
+    });
+
+    let client = Client::builder().timeout(Duration::from_secs(10)).build()?;
+    let response = client
+        .post("https://api.openai.com/v1/responses")
+        .header("Content-Type", "application/json")
+        .header("Authorization", format!("Bearer {api_key}"))
+        .json(&request_body)
+        .send()?;
+
+    let raw_json = response.text()?;
+    deserialize_json_response(raw_json)
 }
