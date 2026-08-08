@@ -103,7 +103,7 @@ pub fn edit_code_block(
 
 #[cfg(test)]
 mod tests {
-    use super::write_new_code;
+    use super::{edit_code_block, write_new_code};
 
     #[test]
     fn test_write_new_code_invalid_model() {
@@ -140,6 +140,18 @@ mod tests {
         let model = "gpt-4o";
         let prompt = "Print 'hello world' in Python.";
         let result = write_new_code(model.to_string(), prompt.to_string()).unwrap();
+        assert!(result.input_tokens > 0);
+        assert!(result.output_tokens > 0);
+        assert!(!result.description_of_what_was_done.is_empty());
+        assert_eq!(result.code, "print('hello world')");
+    }
+
+    #[test]
+    fn test_edit_code_block_valid_query() {
+        let model = "gpt-4o";
+        let prompt = "Fix the code such that it prints 'hello world'";
+        let code_block = "print('hello world'";
+        let result = edit_code_block(model.to_string(), prompt.to_string(), code_block).unwrap();
         assert!(result.input_tokens > 0);
         assert!(result.output_tokens > 0);
         assert!(!result.description_of_what_was_done.is_empty());
