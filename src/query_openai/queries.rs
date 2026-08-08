@@ -8,7 +8,7 @@ use crate::utils::load_api_key;
 use super::response::deserialize_json_response;
 use super::structs::OpenAIResults;
 
-fn get_structured_output_schema() -> serde_json::Value {
+fn schema_structured_output_code_generation() -> serde_json::Value {
     json!({
         "format": {
             "type": "json_schema",
@@ -27,7 +27,7 @@ fn get_structured_output_schema() -> serde_json::Value {
     })
 }
 
-fn get_system_prompt() -> &'static str {
+fn system_prompt_code_generation() -> &'static str {
     "You are a helpful programming assistant.
 
 IMPORTANT: Do not wrap your response in backticks (```). Output the code
@@ -44,10 +44,10 @@ pub fn write_new_code(model: String, prompt: String) -> anyhow::Result<OpenAIRes
 
     let request_body = json!({
         "input": prompt,
-        "instructions": get_system_prompt(),
+        "instructions": system_prompt_code_generation(),
         "model": model,
         "store": false,
-        "text": get_structured_output_schema(),
+        "text": schema_structured_output_code_generation(),
     });
 
     let client = Client::builder().timeout(Duration::from_secs(10)).build()?;
