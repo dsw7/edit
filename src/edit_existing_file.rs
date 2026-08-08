@@ -77,7 +77,7 @@ pub fn edit_existing_file(
     let (start_idx, end_idx) = get_delim_indices(&file_content)?;
     let inner_content = get_delimited_block(&file_content, start_idx, end_idx)?;
 
-    let results = query_openai::run_query(
+    let results = query_openai::write_new_code(
         cli_params.model,
         update_user_prompt(user_prompt, inner_content),
     )

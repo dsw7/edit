@@ -13,7 +13,7 @@ use response::deserialize_json_response;
 
 pub use structs::OpenAIResults;
 
-pub fn run_query(model: String, prompt: String) -> anyhow::Result<OpenAIResults> {
+pub fn write_new_code(model: String, prompt: String) -> anyhow::Result<OpenAIResults> {
     let api_key = load_api_key("OPENAI_API_KEY")?;
     let client = Client::builder().timeout(Duration::from_secs(10)).build()?;
 
@@ -31,10 +31,10 @@ pub fn run_query(model: String, prompt: String) -> anyhow::Result<OpenAIResults>
 
 #[cfg(test)]
 mod tests {
-    use super::run_query;
+    use super::write_new_code;
 
     fn assert_error_message(model: &str, prompt: &str, expected_error: &str) {
-        let result = run_query(model.to_string(), prompt.to_string());
+        let result = write_new_code(model.to_string(), prompt.to_string());
         assert!(result.is_err());
 
         let error = result.unwrap_err();
@@ -63,7 +63,7 @@ mod tests {
     fn test_valid_query() {
         let model = String::from("gpt-4o");
         let prompt = String::from("Print 'hello world' in Python.");
-        let result = run_query(model, prompt).unwrap();
+        let result = write_new_code(model, prompt).unwrap();
         assert!(result.input_tokens > 0);
         assert!(result.output_tokens > 0);
         assert!(!result.description_of_what_was_done.is_empty());
