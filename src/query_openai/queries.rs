@@ -61,3 +61,43 @@ pub fn write_new_code(model: String, prompt: String) -> anyhow::Result<OpenAIRes
     let raw_json = response.text()?;
     deserialize_json_response(raw_json)
 }
+
+fn user_prompt_code_edit(prompt: String, code_block: &str) -> String {
+    format!(
+        "Take the instructions:
+```plaintext
+{prompt}
+```
+And apply them to the code:
+```
+{code_block}
+```"
+    )
+}
+
+pub fn edit_code_block(
+    model: String,
+    prompt: String,
+    code_block: &str,
+) -> anyhow::Result<OpenAIResults> {
+    let api_key = load_api_key("OPENAI_API_KEY")?;
+
+    let request_body = json!({
+        "input": user_prompt_code_edit(prompt, code_block),
+        "instructions": system_prompt_code_generation(),
+        "model": model,
+        "store": false,
+        "text": schema_structured_output_code_generation(),
+    });
+
+    let client = Client::builder().timeout(Duration::from_secs(10)).build()?;
+    let response = client
+        .post("https://api.openai.com/v1/responses")
+        .header("Content-Type", "application/json")
+        .header("Authorization", format!("Bearer {api_key}"))
+        .json(&request_body)
+        .send()?;
+
+    let raw_json = response.text()?;
+    deserialize_json_response(raw_json)
+}

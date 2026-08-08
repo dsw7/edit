@@ -42,19 +42,6 @@ fn get_delimited_block(
     }
 }
 
-fn update_user_prompt(user_prompt: String, text_to_edit: &str) -> String {
-    format!(
-        "Take the instructions:
-```plaintext
-{user_prompt}
-```
-And apply them to the code:
-```
-{text_to_edit}
-```"
-    )
-}
-
 fn overwrite_file(filename: &PathBuf, content: String) -> anyhow::Result<()> {
     let mut file = OpenOptions::new()
         .write(true)
@@ -77,11 +64,7 @@ pub fn edit_existing_file(
     let (start_idx, end_idx) = get_delim_indices(&file_content)?;
     let inner_content = get_delimited_block(&file_content, start_idx, end_idx)?;
 
-    let results = query_openai::write_new_code(
-        cli_params.model,
-        update_user_prompt(user_prompt, inner_content),
-    )
-    .context("Failed to edit text using OpenAI")?;
+    let results = query_openai::edit_code_block(cli_params.model, user_prompt, inner_content)?;
 
     let new_text = format!("{}{}{}", EDIT_START, results.code, EDIT_END);
     file_content.replace_range(start_idx..end_idx, &new_text);
