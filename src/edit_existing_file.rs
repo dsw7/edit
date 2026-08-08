@@ -57,7 +57,7 @@ fn overwrite_file(filename: &PathBuf, content: String) -> anyhow::Result<()> {
 
 pub fn edit_existing_file(
     cli_params: CliParameters,
-    user_prompt: String,
+    user_prompt: &str,
 ) -> anyhow::Result<query_openai::OpenAIResults> {
     let mut file_content = utils::read_file(&cli_params.input_file)?;
 

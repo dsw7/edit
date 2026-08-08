@@ -47,7 +47,7 @@ fn operate_on_file(cli_params: CliParameters) -> anyhow::Result<OpenAIResults> {
     }
 
     if cli_params.input_file.exists() {
-        edit_existing_file(cli_params, user_prompt)
+        edit_existing_file(cli_params, &user_prompt)
     } else {
         create_new_file(cli_params, user_prompt)
     }

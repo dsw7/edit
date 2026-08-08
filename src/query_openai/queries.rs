@@ -71,7 +71,7 @@ pub fn write_new_code(model: String, prompt: String) -> anyhow::Result<OpenAIRes
     deserialize_json_response(raw_json)
 }
 
-fn user_prompt_code_edit(prompt: String, code_block: &str) -> String {
+fn user_prompt_code_edit(prompt: &str, code_block: &str) -> String {
     format!(
         "Take the instructions:
 ```plaintext
@@ -86,7 +86,7 @@ And apply them to the code:
 
 pub fn edit_code_block(
     model: String,
-    prompt: String,
+    prompt: &str,
     code_block: &str,
 ) -> anyhow::Result<OpenAIResults> {
     let request_body = json!({
@@ -151,7 +151,7 @@ mod tests {
         let model = "gpt-4o";
         let prompt = "Fix the code such that it prints 'hello world'";
         let code_block = "print('hello world'";
-        let result = edit_code_block(model.to_string(), prompt.to_string(), code_block).unwrap();
+        let result = edit_code_block(model.to_string(), prompt, code_block).unwrap();
         assert!(result.input_tokens > 0);
         assert!(result.output_tokens > 0);
         assert!(!result.description_of_what_was_done.is_empty());
