@@ -77,11 +77,11 @@ pub fn edit_existing_file(
     let (start_idx, end_idx) = get_delim_indices(&file_content)?;
     let inner_content = get_delimited_block(&file_content, start_idx, end_idx)?;
 
-    let params = query_openai::OpenAIParams {
-        model: cli_params.model,
-        prompt: update_user_prompt(user_prompt, inner_content),
-    };
-    let results = query_openai::run_query(params).context("Failed to edit text using OpenAI")?;
+    let results = query_openai::run_query(
+        cli_params.model,
+        update_user_prompt(user_prompt, inner_content),
+    )
+    .context("Failed to edit text using OpenAI")?;
 
     let new_text = format!("{}{}{}", EDIT_START, results.code, EDIT_END);
     file_content.replace_range(start_idx..end_idx, &new_text);
