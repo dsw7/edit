@@ -42,7 +42,7 @@ fn get_delimited_block(
     }
 }
 
-fn overwrite_file(filename: &PathBuf, content: String) -> anyhow::Result<()> {
+fn overwrite_file(filename: &PathBuf, content: &str) -> anyhow::Result<()> {
     let mut file = OpenOptions::new()
         .write(true)
         .truncate(true)
@@ -69,7 +69,7 @@ pub fn edit_existing_file(
     let new_text = format!("{}{}{}", EDIT_START, results.code, EDIT_END);
     file_content.replace_range(start_idx..end_idx, &new_text);
 
-    overwrite_file(&cli_params.input_file, file_content)?;
+    overwrite_file(&cli_params.input_file, &file_content)?;
     Ok(results)
 }
 
