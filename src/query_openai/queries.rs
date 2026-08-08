@@ -85,7 +85,7 @@ And apply them to the code:
 }
 
 pub fn edit_code_block(
-    model: String,
+    model: &str,
     prompt: &str,
     code_block: &str,
 ) -> anyhow::Result<OpenAIResults> {
@@ -151,7 +151,7 @@ mod tests {
         let model = "gpt-4o";
         let prompt = "Fix the code such that it prints 'hello world'";
         let code_block = "print('hello world'";
-        let result = edit_code_block(model.to_string(), prompt, code_block).unwrap();
+        let result = edit_code_block(model, prompt, code_block).unwrap();
         assert!(result.input_tokens > 0);
         assert!(result.output_tokens > 0);
         assert!(!result.description_of_what_was_done.is_empty());
