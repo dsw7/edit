@@ -2,6 +2,7 @@ use anyhow::Context;
 
 use std::fs::OpenOptions;
 use std::io::Write;
+use std::path::PathBuf;
 
 use crate::params::CliParameters;
 use crate::query_openai;
@@ -54,6 +55,19 @@ And apply them to the code:
     )
 }
 
+fn overwrite_file(filename: &PathBuf, content: String) -> anyhow::Result<()> {
+    let mut file = OpenOptions::new()
+        .write(true)
+        .truncate(true)
+        .open(filename)
+        .context(format!("Failed to open file `{}`", &filename.display()))?;
+
+    file.write_all(content.as_bytes())
+        .context(format!("Failed to write to file `{}`", &filename.display()))?;
+
+    Ok(())
+}
+
 pub fn edit_existing_file(
     cli_params: CliParameters,
     user_prompt: String,
@@ -72,20 +86,7 @@ pub fn edit_existing_file(
     let new_text = format!("{}{}{}", EDIT_START, results.code, EDIT_END);
     file_content.replace_range(start_idx..end_idx, &new_text);
 
-    let mut file = OpenOptions::new()
-        .write(true)
-        .truncate(true)
-        .open(&cli_params.input_file)
-        .context(format!(
-            "Failed to open file `{}`",
-            &cli_params.input_file.display()
-        ))?;
-
-    file.write_all(file_content.as_bytes()).context(format!(
-        "Failed to write to file `{}`",
-        &cli_params.input_file.display()
-    ))?;
-
+    overwrite_file(&cli_params.input_file, file_content)?;
     Ok(results)
 }
 
