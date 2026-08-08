@@ -58,7 +58,7 @@ fn query_responses_api(request_body: serde_json::Value) -> anyhow::Result<String
     Ok(raw_json)
 }
 
-pub fn write_new_code(model: String, prompt: &str) -> anyhow::Result<OpenAIResults> {
+pub fn write_new_code(model: &str, prompt: &str) -> anyhow::Result<OpenAIResults> {
     let request_body = json!({
         "input": prompt,
         "instructions": system_prompt_code_generation(),
@@ -110,7 +110,7 @@ mod tests {
         let model = "foobar";
         let prompt = "What is 3 + 5?";
 
-        let result = write_new_code(model.to_string(), prompt);
+        let result = write_new_code(model, prompt);
         assert!(result.is_err());
 
         let error = result.unwrap_err();
@@ -125,7 +125,7 @@ mod tests {
         let model = "gpt-3.5-turbo";
         let prompt = "What is 3 + 5?";
 
-        let result = write_new_code(model.to_string(), prompt);
+        let result = write_new_code(model, prompt);
         assert!(result.is_err());
 
         let error = result.unwrap_err();
@@ -139,7 +139,7 @@ mod tests {
     fn test_write_new_code_valid_query() {
         let model = "gpt-4o";
         let prompt = "Print 'hello world' in Python.";
-        let result = write_new_code(model.to_string(), prompt).unwrap();
+        let result = write_new_code(model, prompt).unwrap();
         assert!(result.input_tokens > 0);
         assert!(result.output_tokens > 0);
         assert!(!result.description_of_what_was_done.is_empty());
