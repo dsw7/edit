@@ -1,7 +1,5 @@
 use serde_json::json;
 
-use super::structs::OpenAIParams;
-
 fn get_structured_output_schema() -> serde_json::Value {
     json!({
         "format": {
@@ -33,14 +31,14 @@ Output:
 "
 }
 
-pub fn set_up_request_body(params: &OpenAIParams) -> serde_json::Value {
+pub fn set_up_request_body(model: &str, prompt: &str) -> serde_json::Value {
     let structured_output_schema = get_structured_output_schema();
     let system_prompt = get_system_prompt();
 
     json!({
-        "input": params.prompt,
+        "input": prompt,
         "instructions": system_prompt,
-        "model": params.model,
+        "model": model,
         "store": false,
         "text": structured_output_schema,
     })
