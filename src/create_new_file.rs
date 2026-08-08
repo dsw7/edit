@@ -4,7 +4,7 @@ use crate::utils;
 
 pub fn create_new_file(
     cli_params: CliParameters,
-    user_prompt: String,
+    user_prompt: &str,
 ) -> anyhow::Result<query_openai::OpenAIResults> {
     let results = query_openai::write_new_code(cli_params.model, user_prompt)?;
 
