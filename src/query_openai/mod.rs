@@ -11,13 +11,13 @@ use crate::utils::load_api_key;
 use request::set_up_request_body;
 use response::deserialize_json_response;
 
-pub use structs::{OpenAIParams, OpenAIResults};
+pub use structs::OpenAIResults;
 
-pub fn run_query(params: OpenAIParams) -> anyhow::Result<OpenAIResults> {
+pub fn run_query(model: String, prompt: String) -> anyhow::Result<OpenAIResults> {
     let api_key = load_api_key("OPENAI_API_KEY")?;
     let client = Client::builder().timeout(Duration::from_secs(10)).build()?;
 
-    let request_body = set_up_request_body(&params);
+    let request_body = set_up_request_body(&model, &prompt);
     let response = client
         .post("https://api.openai.com/v1/responses")
         .header("Content-Type", "application/json")
@@ -31,10 +31,10 @@ pub fn run_query(params: OpenAIParams) -> anyhow::Result<OpenAIResults> {
 
 #[cfg(test)]
 mod tests {
-    use super::{OpenAIParams, run_query};
+    use super::run_query;
 
-    fn assert_error_message(params: OpenAIParams, expected_error: &str) {
-        let result = run_query(params);
+    fn assert_error_message(model: String, prompt: String, expected_error: &str) {
+        let result = run_query(model, prompt);
         assert!(result.is_err());
 
         let error = result.unwrap_err();
@@ -43,23 +43,29 @@ mod tests {
 
     #[test]
     fn test_invalid_model() {
-        let params = OpenAIParams::from_str("foobar", "What is 3 + 5?");
-        assert_error_message(params, "The requested model 'foobar' does not exist.");
+        assert_error_message(
+            "foobar".to_string(),
+            "What is 3 + 5?".to_string(),
+            "The requested model 'foobar' does not exist.",
+        );
     }
 
     #[test]
     fn test_incompatible_model() {
-        let params = OpenAIParams::from_str("gpt-3.5-turbo", "What is 3 + 5?");
         assert_error_message(
-            params,
+            "gpt-3.5-turbo".to_string(),
+            "What is 3 + 5?".to_string(),
             "Invalid parameter: 'text.format' of type 'json_schema' is not supported with model version `gpt-3.5-turbo`.",
         );
     }
 
     #[test]
     fn test_valid_query() {
-        let params = OpenAIParams::from_str("gpt-4o", "Print 'hello world' in Python.");
-        let result = run_query(params).unwrap();
+        let result = run_query(
+            "gpt-4o".to_string(),
+            "Print 'hello world' in Python.".to_string(),
+        )
+        .unwrap();
         assert!(result.input_tokens > 0);
         assert!(result.output_tokens > 0);
         assert!(!result.description_of_what_was_done.is_empty());
