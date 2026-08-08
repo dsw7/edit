@@ -81,7 +81,7 @@ pub fn edit_existing_file(
         model: cli_params.model,
         prompt: update_user_prompt(user_prompt, inner_content),
     };
-    let results = query_openai::run_query(params).context("OpenAI query failed")?;
+    let results = query_openai::run_query(params).context("Failed to edit text using OpenAI")?;
 
     let new_text = format!("{}{}{}", EDIT_START, results.code, EDIT_END);
     file_content.replace_range(start_idx..end_idx, &new_text);
