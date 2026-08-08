@@ -33,8 +33,8 @@ pub fn run_query(model: String, prompt: String) -> anyhow::Result<OpenAIResults>
 mod tests {
     use super::run_query;
 
-    fn assert_error_message(model: String, prompt: String, expected_error: &str) {
-        let result = run_query(model, prompt);
+    fn assert_error_message(model: &str, prompt: &str, expected_error: &str) {
+        let result = run_query(model.to_string(), prompt.to_string());
         assert!(result.is_err());
 
         let error = result.unwrap_err();
@@ -44,8 +44,8 @@ mod tests {
     #[test]
     fn test_invalid_model() {
         assert_error_message(
-            "foobar".to_string(),
-            "What is 3 + 5?".to_string(),
+            "foobar",
+            "What is 3 + 5?",
             "The requested model 'foobar' does not exist.",
         );
     }
@@ -53,19 +53,17 @@ mod tests {
     #[test]
     fn test_incompatible_model() {
         assert_error_message(
-            "gpt-3.5-turbo".to_string(),
-            "What is 3 + 5?".to_string(),
+            "gpt-3.5-turbo",
+            "What is 3 + 5?",
             "Invalid parameter: 'text.format' of type 'json_schema' is not supported with model version `gpt-3.5-turbo`.",
         );
     }
 
     #[test]
     fn test_valid_query() {
-        let result = run_query(
-            "gpt-4o".to_string(),
-            "Print 'hello world' in Python.".to_string(),
-        )
-        .unwrap();
+        let model = String::from("gpt-4o");
+        let prompt = String::from("Print 'hello world' in Python.");
+        let result = run_query(model, prompt).unwrap();
         assert!(result.input_tokens > 0);
         assert!(result.output_tokens > 0);
         assert!(!result.description_of_what_was_done.is_empty());
