@@ -1,5 +1,6 @@
 use std::time::Duration;
 
+use anyhow::Context;
 use reqwest::blocking::Client;
 use serde_json::json;
 
@@ -39,16 +40,8 @@ Output:
 "
 }
 
-pub fn write_new_code(model: String, prompt: String) -> anyhow::Result<OpenAIResults> {
+fn query_responses_api(request_body: serde_json::Value) -> anyhow::Result<String> {
     let api_key = load_api_key("OPENAI_API_KEY")?;
-
-    let request_body = json!({
-        "input": prompt,
-        "instructions": system_prompt_code_generation(),
-        "model": model,
-        "store": false,
-        "text": schema_structured_output_code_generation(),
-    });
 
     let client = Client::builder().timeout(Duration::from_secs(10)).build()?;
     let response = client
@@ -58,7 +51,23 @@ pub fn write_new_code(model: String, prompt: String) -> anyhow::Result<OpenAIRes
         .json(&request_body)
         .send()?;
 
-    let raw_json = response.text()?;
+    let raw_json = response
+        .text()
+        .context("Failed to decode response body to string")?;
+
+    Ok(raw_json)
+}
+
+pub fn write_new_code(model: String, prompt: String) -> anyhow::Result<OpenAIResults> {
+    let request_body = json!({
+        "input": prompt,
+        "instructions": system_prompt_code_generation(),
+        "model": model,
+        "store": false,
+        "text": schema_structured_output_code_generation(),
+    });
+
+    let raw_json = query_responses_api(request_body).context("Failed to write code with OpenAI")?;
     deserialize_json_response(raw_json)
 }
 
@@ -80,8 +89,6 @@ pub fn edit_code_block(
     prompt: String,
     code_block: &str,
 ) -> anyhow::Result<OpenAIResults> {
-    let api_key = load_api_key("OPENAI_API_KEY")?;
-
     let request_body = json!({
         "input": user_prompt_code_edit(prompt, code_block),
         "instructions": system_prompt_code_generation(),
@@ -90,14 +97,6 @@ pub fn edit_code_block(
         "text": schema_structured_output_code_generation(),
     });
 
-    let client = Client::builder().timeout(Duration::from_secs(10)).build()?;
-    let response = client
-        .post("https://api.openai.com/v1/responses")
-        .header("Content-Type", "application/json")
-        .header("Authorization", format!("Bearer {api_key}"))
-        .json(&request_body)
-        .send()?;
-
-    let raw_json = response.text()?;
+    let raw_json = query_responses_api(request_body).context("Failed to edit code with OpenAI")?;
     deserialize_json_response(raw_json)
 }
