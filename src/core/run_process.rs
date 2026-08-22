@@ -10,6 +10,8 @@ use crate::query_openai::OpenAIResults;
 use crate::utils;
 
 fn load_prompt_from_stdin() -> anyhow::Result<String> {
+    utils::print_sep()?;
+
     print!(">>> ");
     io::stdout().flush().context("Failed to flush stdout")?;
 
@@ -41,6 +43,7 @@ fn load_prompt_from_file_or_stdin() -> anyhow::Result<String> {
 fn operate_on_file(cli_params: CliParameters) -> anyhow::Result<OpenAIResults> {
     let user_prompt = load_prompt_from_file_or_stdin()?;
     let user_prompt = user_prompt.trim().to_string();
+    utils::print_sep()?;
 
     if user_prompt.is_empty() {
         anyhow::bail!("The user prompt is empty")
