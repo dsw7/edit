@@ -3,8 +3,8 @@ use std::path::Path;
 
 use anyhow::Context;
 
-use crate::create_new_file::create_new_file;
-use crate::edit_existing_file::edit_existing_file;
+use super::create_new_file::create_new_file;
+use super::edit_existing_file::edit_existing_file;
 use crate::params::CliParameters;
 use crate::query_openai::OpenAIResults;
 use crate::utils;
@@ -53,7 +53,7 @@ fn operate_on_file(cli_params: CliParameters) -> anyhow::Result<OpenAIResults> {
     }
 }
 
-pub fn edit_file(cli_params: CliParameters) -> anyhow::Result<()> {
+pub fn run_process(cli_params: CliParameters) -> anyhow::Result<()> {
     let results = operate_on_file(cli_params).context("Editing process failed")?;
 
     println!("Input tokens: {}", results.input_tokens);

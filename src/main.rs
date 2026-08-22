@@ -1,6 +1,4 @@
-mod create_new_file;
-mod edit_existing_file;
-mod edit_file;
+mod core;
 mod params;
 mod query_openai;
 mod utils;
@@ -10,7 +8,6 @@ use std::process::ExitCode;
 
 use clap::Parser;
 
-use edit_file::edit_file;
 use params::CliParameters;
 
 #[derive(Parser, Debug)]
@@ -36,7 +33,7 @@ fn main() -> ExitCode {
         model: cli.model,
     };
 
-    match edit_file(params) {
+    match core::run_process(params) {
         Ok(()) => ExitCode::SUCCESS,
         Err(error) => {
             eprintln!("{error:?}");
