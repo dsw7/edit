@@ -2,6 +2,7 @@ use std::io::{self, Write};
 use std::path::Path;
 
 use anyhow::Context;
+use crossterm::style::Stylize;
 
 use super::create_new_file::create_new_file;
 use super::edit_existing_file::edit_existing_file;
@@ -59,8 +60,14 @@ fn operate_on_file(cli_params: CliParameters) -> anyhow::Result<OpenAIResults> {
 pub fn run_process(cli_params: CliParameters) -> anyhow::Result<()> {
     let results = operate_on_file(cli_params).context("Editing process failed")?;
 
-    println!("Input tokens: {}", results.input_tokens);
-    println!("Output tokens: {}", results.output_tokens);
+    print!("Input tokens: ");
+    let input_tokens = format!("{}", results.input_tokens);
+    println!("{}", input_tokens.green());
+
+    print!("Output tokens: ");
+    let output_tokens = format!("{}", results.output_tokens);
+    println!("{}", output_tokens.green());
+
     println!(
         "Description of what was done: {}",
         results.description_of_what_was_done
