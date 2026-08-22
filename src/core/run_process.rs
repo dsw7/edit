@@ -60,18 +60,17 @@ fn operate_on_file(cli_params: CliParameters) -> anyhow::Result<OpenAIResults> {
 pub fn run_process(cli_params: CliParameters) -> anyhow::Result<()> {
     let results = operate_on_file(cli_params).context("Editing process failed")?;
 
-    print!("Input tokens: ");
+    println!();
+    print!("● ");
+    println!("{}", results.description_of_what_was_done.dark_grey());
+
+    print!("● Input tokens: ");
     let input_tokens = format!("{}", results.input_tokens);
     println!("{}", input_tokens.green());
 
-    print!("Output tokens: ");
+    print!("● Output tokens: ");
     let output_tokens = format!("{}", results.output_tokens);
     println!("{}", output_tokens.green());
-
-    println!(
-        "Description of what was done: {}",
-        results.description_of_what_was_done
-    );
 
     Ok(())
 }
