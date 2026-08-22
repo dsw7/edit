@@ -2,6 +2,8 @@ use crate::params::CliParameters;
 use crate::query_openai;
 use crate::utils;
 
+use crossterm::style::Stylize;
+
 pub fn create_new_file(
     cli_params: CliParameters,
     user_prompt: &str,
@@ -9,7 +11,10 @@ pub fn create_new_file(
     let results = query_openai::write_new_code(&cli_params.model, user_prompt)?;
 
     utils::write_to_file(&cli_params.input_file, &results.code)?;
-    println!("Created new file `{}`", &cli_params.input_file.display());
+
+    print!("Created new file ");
+    let input_file = format!("{}", &cli_params.input_file.display());
+    println!("{}", input_file.blue());
 
     Ok(results)
 }
