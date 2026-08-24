@@ -1,6 +1,7 @@
 use std::path::PathBuf;
 
-pub struct CliParameters {
+pub struct Parameters {
     pub input_file: PathBuf,
     pub model: String,
+    pub provider: String,
 }
