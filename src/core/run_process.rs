@@ -10,6 +10,16 @@ use crate::params::Parameters;
 use crate::query_openai::OpenAIResults;
 use crate::utils;
 
+fn print_provider_info(params: &Parameters) {
+    let provider = style(&params.provider).green();
+    print!("● Using provider ");
+    println!("{provider}");
+
+    let model = style(&params.model).green();
+    print!("● Using model ");
+    println!("{model}");
+}
+
 fn load_prompt_from_stdin() -> anyhow::Result<String> {
     print!(">>> ");
     io::stdout().flush().context("failed to flush stdout")?;
@@ -32,17 +42,11 @@ fn load_prompt_from_file(input_file: &Path) -> anyhow::Result<String> {
 fn load_prompt_from_file_or_stdin() -> anyhow::Result<String> {
     let input_file = Path::new("Inputfile");
 
-    if input_file.exists() {
-        load_prompt_from_file(input_file)
+    let user_prompt = if input_file.exists() {
+        load_prompt_from_file(input_file)?
     } else {
-        load_prompt_from_stdin()
-    }
-}
-
-fn operate_on_file(params: Parameters) -> anyhow::Result<OpenAIResults> {
-    utils::print_sep()?;
-    let user_prompt = load_prompt_from_file_or_stdin()?;
-    utils::print_sep()?;
+        load_prompt_from_stdin()?
+    };
 
     let user_prompt = user_prompt.trim().to_string();
 
@@ -50,21 +54,15 @@ fn operate_on_file(params: Parameters) -> anyhow::Result<OpenAIResults> {
         anyhow::bail!("the user prompt is empty")
     }
 
+    Ok(user_prompt)
+}
+
+fn operate_on_file(params: Parameters, user_prompt: String) -> anyhow::Result<OpenAIResults> {
     if params.input_file.exists() {
         edit_existing_file(params, &user_prompt)
     } else {
         create_new_file(params, &user_prompt)
     }
-}
-
-fn print_provider_info(params: &Parameters) {
-    let provider = style(&params.provider).green();
-    print!("● Using provider ");
-    println!("{provider}");
-
-    let model = style(&params.model).green();
-    print!("● Using model ");
-    println!("{model}");
 }
 
 fn print_query_info(results: OpenAIResults) {
@@ -83,7 +81,12 @@ fn print_query_info(results: OpenAIResults) {
 
 pub fn run_process(params: Parameters) -> anyhow::Result<()> {
     print_provider_info(&params);
-    let results = operate_on_file(params).context("editing process failed")?;
+
+    utils::print_sep()?;
+    let user_prompt = load_prompt_from_file_or_stdin()?;
+    utils::print_sep()?;
+
+    let results = operate_on_file(params, user_prompt).context("editing process failed")?;
 
     print_query_info(results);
     utils::print_sep()?;
