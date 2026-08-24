@@ -1,3 +1,4 @@
+mod configs;
 mod core;
 mod params;
 mod program_files;
@@ -9,6 +10,7 @@ use std::process::ExitCode;
 
 use clap::Parser;
 
+use configs::load_configs;
 use params::CliParameters;
 
 #[derive(Parser, Debug)]
@@ -29,9 +31,17 @@ struct Cli {
 fn main() -> ExitCode {
     let cli = Cli::parse();
 
+    let configs = match load_configs() {
+        Ok(configs) => configs,
+        Err(error) => {
+            eprintln!("{error}");
+            return ExitCode::FAILURE;
+        }
+    };
+
     let params = CliParameters {
         input_file: cli.file_to_edit,
-        model: cli.model,
+        model: configs.openai.model,
     };
 
     match core::run_process(params) {
