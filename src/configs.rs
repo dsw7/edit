@@ -12,7 +12,7 @@ where
     let value = String::deserialize(deserializer)?;
 
     if value.is_empty() {
-        Err(serde::de::Error::custom("String cannot be empty"))
+        Err(serde::de::Error::custom("string cannot be empty"))
     } else {
         Ok(value)
     }
@@ -37,10 +37,10 @@ pub fn load_configs() -> anyhow::Result<Configs> {
     let config_file = program_files::get_config_file(&app_dir);
 
     let toml_str = fs::read_to_string(&config_file)
-        .context(format!("Cannot read {}", config_file.display()))?;
+        .context(format!("cannot read {}", config_file.display()))?;
 
     let configs = toml::from_str::<Configs>(&toml_str)
-        .context(format!("Failed to parse {}", config_file.display()))?;
+        .context(format!("failed to parse {}", config_file.display()))?;
 
     Ok(configs)
 }

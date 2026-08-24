@@ -12,12 +12,12 @@ use crate::utils;
 
 fn load_prompt_from_stdin() -> anyhow::Result<String> {
     print!(">>> ");
-    io::stdout().flush().context("Failed to flush stdout")?;
+    io::stdout().flush().context("failed to flush stdout")?;
 
     let mut prompt = String::new();
     io::stdin()
         .read_line(&mut prompt)
-        .context("Failed to read line from stdin")?;
+        .context("failed to read line from stdin")?;
 
     Ok(prompt)
 }
@@ -47,7 +47,7 @@ fn operate_on_file(params: Parameters) -> anyhow::Result<OpenAIResults> {
     let user_prompt = user_prompt.trim().to_string();
 
     if user_prompt.is_empty() {
-        anyhow::bail!("The user prompt is empty")
+        anyhow::bail!("the user prompt is empty")
     }
 
     if params.input_file.exists() {
@@ -66,7 +66,7 @@ pub fn run_process(params: Parameters) -> anyhow::Result<()> {
     print!("● Using model ");
     println!("{model}");
 
-    let results = operate_on_file(params).context("Editing process failed")?;
+    let results = operate_on_file(params).context("editing process failed")?;
 
     println!();
     print!("● ");
