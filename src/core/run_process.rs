@@ -12,21 +12,15 @@ use crate::utils;
 
 fn print_provider_info(params: &Parameters) {
     let provider = style(&params.provider).green();
-    print!("● Using provider ");
-    println!("{provider}");
+    println!("● Using provider {provider}");
 
     let model = style(&params.model).green();
-    print!("● Using model ");
-    println!("{model}");
+    println!("● Using model {model}");
 
     println!();
-    print!("Type ");
-    let instructions = "q";
-    print!("{}", instructions.dark_grey());
-    print!(" | ");
-    let instructions = "quit";
-    print!("{}", instructions.dark_grey());
-    println!(" to quit");
+    let q = "q";
+    let quit = "quit";
+    println!("Type {} | {} to quit", q.dark_grey(), quit.dark_grey());
 }
 
 fn load_prompt_from_stdin() -> anyhow::Result<String> {
