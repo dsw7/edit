@@ -28,20 +28,30 @@ struct Cli {
     model: String,
 }
 
-fn main() -> ExitCode {
+fn load_params() -> anyhow::Result<CliParameters> {
     let cli = Cli::parse();
+    let configs = load_configs()?;
 
-    let configs = match load_configs() {
-        Ok(configs) => configs,
-        Err(error) => {
-            eprintln!("{error}");
-            return ExitCode::FAILURE;
-        }
+    let model = match configs.provider.as_str() {
+        "openai" => configs.openai.model,
+        _ => anyhow::bail!(format!("Invalid provider: `{}`", configs.provider)),
     };
 
     let params = CliParameters {
         input_file: cli.file_to_edit,
-        model: configs.openai.model,
+        model,
+    };
+
+    Ok(params)
+}
+
+fn main() -> ExitCode {
+    let params = match load_params() {
+        Ok(params) => params,
+        Err(error) => {
+            eprintln!("{error}");
+            return ExitCode::FAILURE;
+        }
     };
 
     match core::run_process(params) {

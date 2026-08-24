@@ -20,8 +20,9 @@ where
 
 #[derive(Deserialize, Debug)]
 pub struct Configs {
-    // #[serde(deserialize_with = "check_not_empty")]
-    // pub source: String,
+    #[serde(deserialize_with = "check_not_empty")]
+    pub provider: String,
+
     pub openai: OpenAI,
 }
 
