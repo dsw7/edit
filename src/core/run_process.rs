@@ -57,11 +57,11 @@ fn load_prompt_from_file_or_stdin() -> anyhow::Result<String> {
     Ok(user_prompt)
 }
 
-fn operate_on_file(params: Parameters, user_prompt: String) -> anyhow::Result<OpenAIResults> {
+fn operate_on_file(params: Parameters, user_prompt: &str) -> anyhow::Result<OpenAIResults> {
     if params.input_file.exists() {
-        edit_existing_file(params, &user_prompt)
+        edit_existing_file(params, user_prompt)
     } else {
-        create_new_file(params, &user_prompt)
+        create_new_file(params, user_prompt)
     }
 }
 
@@ -86,7 +86,7 @@ pub fn run_process(params: Parameters) -> anyhow::Result<()> {
     let user_prompt = load_prompt_from_file_or_stdin()?;
     utils::print_sep()?;
 
-    let results = operate_on_file(params, user_prompt).context("editing process failed")?;
+    let results = operate_on_file(params, &user_prompt).context("editing process failed")?;
 
     print_query_info(results);
     utils::print_sep()?;
