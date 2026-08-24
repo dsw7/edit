@@ -19,22 +19,22 @@ struct Cli {
     #[arg(value_name = "FILE-TO-EDIT")]
     file_to_edit: PathBuf,
 
-    #[arg(
-        short,
-        long,
-        default_value = "gpt-4o",
-        help = "Specify provider specific LLM"
-    )]
-    model: String,
+    #[arg(short, long, help = "Specify provider (openai, ...)")]
+    provider: Option<String>,
 }
 
 fn load_params() -> anyhow::Result<CliParameters> {
     let cli = Cli::parse();
     let configs = load_configs()?;
 
-    let model = match configs.provider.as_str() {
+    let provider = match cli.provider {
+        Some(provider) => provider,
+        None => configs.provider,
+    };
+
+    let model = match provider.as_str() {
         "openai" => configs.openai.model,
-        _ => anyhow::bail!(format!("Invalid provider: `{}`", configs.provider)),
+        _ => anyhow::bail!(format!("Invalid provider: `{provider}`")),
     };
 
     let params = CliParameters {
