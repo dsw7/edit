@@ -39,7 +39,7 @@ fn load_prompt_from_file_or_stdin() -> anyhow::Result<String> {
     }
 }
 
-fn operate_on_file(cli_params: Parameters) -> anyhow::Result<OpenAIResults> {
+fn operate_on_file(params: Parameters) -> anyhow::Result<OpenAIResults> {
     utils::print_sep()?;
     let user_prompt = load_prompt_from_file_or_stdin()?;
     utils::print_sep()?;
@@ -50,23 +50,23 @@ fn operate_on_file(cli_params: Parameters) -> anyhow::Result<OpenAIResults> {
         anyhow::bail!("The user prompt is empty")
     }
 
-    if cli_params.input_file.exists() {
-        edit_existing_file(cli_params, &user_prompt)
+    if params.input_file.exists() {
+        edit_existing_file(params, &user_prompt)
     } else {
-        create_new_file(cli_params, &user_prompt)
+        create_new_file(params, &user_prompt)
     }
 }
 
-pub fn run_process(cli_params: Parameters) -> anyhow::Result<()> {
-    let provider = style(&cli_params.provider).green();
+pub fn run_process(params: Parameters) -> anyhow::Result<()> {
+    let provider = style(&params.provider).green();
     print!("● Using provider ");
     println!("{provider}");
 
-    let model = style(&cli_params.model).green();
+    let model = style(&params.model).green();
     print!("● Using model ");
     println!("{model}");
 
-    let results = operate_on_file(cli_params).context("Editing process failed")?;
+    let results = operate_on_file(params).context("Editing process failed")?;
 
     println!();
     print!("● ");

@@ -56,20 +56,20 @@ fn overwrite_file(filename: &PathBuf, content: &str) -> anyhow::Result<()> {
 }
 
 pub fn edit_existing_file(
-    cli_params: Parameters,
+    params: Parameters,
     user_prompt: &str,
 ) -> anyhow::Result<query_openai::OpenAIResults> {
-    let mut file_content = utils::read_file(&cli_params.input_file)?;
+    let mut file_content = utils::read_file(&params.input_file)?;
 
     let (start_idx, end_idx) = get_delim_indices(&file_content)?;
     let inner_content = get_delimited_block(&file_content, start_idx, end_idx)?;
 
-    let results = query_openai::edit_code_block(&cli_params.model, user_prompt, inner_content)?;
+    let results = query_openai::edit_code_block(&params.model, user_prompt, inner_content)?;
 
     let new_text = format!("{}{}{}", EDIT_START, results.code, EDIT_END);
     file_content.replace_range(start_idx..end_idx, &new_text);
 
-    overwrite_file(&cli_params.input_file, &file_content)?;
+    overwrite_file(&params.input_file, &file_content)?;
     Ok(results)
 }
 
