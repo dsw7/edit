@@ -43,8 +43,8 @@ struct IncompleteDetails {
 
 fn unpack_incomplete_details(response: &Response) -> String {
     match &response.incomplete_details {
-        Some(details) => format!("Query incomplete: {}", details.reason),
-        None => String::from("Query incomplete. No details provided"),
+        Some(details) => format!("query incomplete: {}", details.reason),
+        None => String::from("query incomplete: no details provided"),
     }
 }
 
@@ -73,7 +73,7 @@ struct ResponseOutputRefusal {
 
 fn unpack_output(response: &Response) -> anyhow::Result<StructuredOutput> {
     if response.output.is_empty() {
-        anyhow::bail!("Output array is empty");
+        anyhow::bail!("output array is empty");
     }
 
     for object in &response.output {
@@ -82,7 +82,7 @@ fn unpack_output(response: &Response) -> anyhow::Result<StructuredOutput> {
         }
     }
 
-    anyhow::bail!("Query completed but no completed message found!")
+    anyhow::bail!("query completed but no completed message found")
 }
 
 #[derive(Deserialize, Debug)]
@@ -93,16 +93,16 @@ struct StructuredOutput {
 
 fn unpack_content(content: &[TextOrRefusal]) -> anyhow::Result<StructuredOutput> {
     if content.is_empty() {
-        anyhow::bail!("Content array is empty");
+        anyhow::bail!("content array is empty");
     }
 
     let raw_text = match &content[0] {
         TextOrRefusal::Text(text) => &text.text,
-        TextOrRefusal::Refusal(refusal) => anyhow::bail!("Query refused: {}", refusal.refusal),
+        TextOrRefusal::Refusal(refusal) => anyhow::bail!("query refused: {}", refusal.refusal),
     };
 
     let structured_output = serde_json::from_str::<StructuredOutput>(raw_text)
-        .context("Failed to deserialize structured output")?;
+        .context("failed to deserialize structured output")?;
 
     Ok(structured_output)
 }
@@ -123,13 +123,13 @@ fn default_usage() -> ResponseUsage {
 fn unpack_response(response: &Response) -> anyhow::Result<OpenAIResults> {
     let status = match &response.status {
         Some(status) => status,
-        None => anyhow::bail!("No status could be found in response"),
+        None => anyhow::bail!("no status could be found in response"),
     };
 
     let structured_output = match status.as_str() {
         "completed" => unpack_output(response)?,
         "incomplete" => anyhow::bail!(unpack_incomplete_details(response)),
-        _ => anyhow::bail!(format!("Query did not finish. Status: {status}")),
+        _ => anyhow::bail!(format!("query did not finish: {status}")),
     };
 
     let results = OpenAIResults {
@@ -144,7 +144,7 @@ fn unpack_response(response: &Response) -> anyhow::Result<OpenAIResults> {
 
 pub fn deserialize_json_response(raw_json: String) -> anyhow::Result<OpenAIResults> {
     let response =
-        serde_json::from_str::<ApiResponse>(&raw_json).context("Failed to deserialize raw JSON")?;
+        serde_json::from_str::<ApiResponse>(&raw_json).context("failed to deserialize raw json")?;
 
     match response {
         ApiResponse::ErrorResponse(response) => anyhow::bail!(response.error.message),
@@ -177,7 +177,7 @@ mod tests {
         let raw_json = r#"{
             "output": []
         }"#;
-        assert_error_message(raw_json, "No status could be found in response");
+        assert_error_message(raw_json, "no status could be found in response");
     }
 
     #[test]
@@ -189,7 +189,7 @@ mod tests {
                 "content": []
             }]
         }"#;
-        assert_error_message(raw_json, "Query did not finish. Status: in_progress");
+        assert_error_message(raw_json, "query did not finish: in_progress");
     }
 
     #[test]
@@ -198,7 +198,7 @@ mod tests {
             "status": "completed",
             "output": []
         }"#;
-        assert_error_message(raw_json, "Output array is empty");
+        assert_error_message(raw_json, "output array is empty");
     }
 
     #[test]
@@ -210,7 +210,7 @@ mod tests {
                 "content": []
             }]
         }"#;
-        assert_error_message(raw_json, "Query completed but no completed message found!");
+        assert_error_message(raw_json, "query completed but no completed message found");
     }
 
     #[test]
@@ -222,7 +222,7 @@ mod tests {
                 "content": []
             }]
         }"#;
-        assert_error_message(raw_json, "Content array is empty");
+        assert_error_message(raw_json, "content array is empty");
     }
 
     #[test]
@@ -236,7 +236,7 @@ mod tests {
                 }]
             }]
         }"#;
-        assert_error_message(raw_json, "Query refused: The query was too long");
+        assert_error_message(raw_json, "query refused: The query was too long");
     }
 
     #[test]
@@ -245,7 +245,7 @@ mod tests {
             "status": "incomplete",
             "output": []
         }"#;
-        assert_error_message(raw_json, "Query incomplete. No details provided");
+        assert_error_message(raw_json, "query incomplete: no details provided");
     }
 
     #[test]
@@ -257,7 +257,7 @@ mod tests {
             },
             "output": []
         }"#;
-        assert_error_message(raw_json, "Query incomplete: max_output_tokens");
+        assert_error_message(raw_json, "query incomplete: max_output_tokens");
     }
 
     #[test]

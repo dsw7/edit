@@ -15,12 +15,12 @@ const EDIT_END: &str = "<<<<<<<\n";
 fn get_delim_indices(file_content: &str) -> anyhow::Result<(usize, usize)> {
     let start_idx = match file_content.find(DELIM_EDIT_CODE) {
         Some(idx) => idx,
-        None => anyhow::bail!("Opening delimiter not found"),
+        None => anyhow::bail!("opening delimiter not found"),
     };
 
     let end_idx = match file_content[start_idx + DELIM_EDIT_CODE.len()..].find(DELIM_EDIT_CODE) {
         Some(idx) => start_idx + DELIM_EDIT_CODE.len() + idx + DELIM_EDIT_CODE.len(),
-        None => anyhow::bail!("Closing delimiter not found"),
+        None => anyhow::bail!("closing delimiter not found"),
     };
 
     Ok((start_idx, end_idx))
@@ -36,7 +36,7 @@ fn get_delimited_block(
     let inner_content = &file_content[inner_start..inner_end];
 
     if inner_content.trim().is_empty() {
-        anyhow::bail!("Delimited content is empty")
+        anyhow::bail!("delimited content is empty")
     } else {
         Ok(inner_content)
     }
@@ -47,10 +47,10 @@ fn overwrite_file(filename: &PathBuf, content: &str) -> anyhow::Result<()> {
         .write(true)
         .truncate(true)
         .open(filename)
-        .context(format!("Failed to open file `{}`", &filename.display()))?;
+        .context(format!("failed to open file `{}`", &filename.display()))?;
 
     file.write_all(content.as_bytes())
-        .context(format!("Failed to write to file `{}`", &filename.display()))?;
+        .context(format!("failed to write to file `{}`", &filename.display()))?;
 
     Ok(())
 }
@@ -84,7 +84,7 @@ mod tests {
         let result = get_delim_indices(file_contents);
         assert!(result.is_err());
         let error = result.unwrap_err();
-        assert_eq!(error.to_string(), "Opening delimiter not found");
+        assert_eq!(error.to_string(), "opening delimiter not found");
     }
 
     #[test]
@@ -94,7 +94,7 @@ mod tests {
         let result = get_delim_indices(file_contents);
         assert!(result.is_err());
         let error = result.unwrap_err();
-        assert_eq!(error.to_string(), "Closing delimiter not found");
+        assert_eq!(error.to_string(), "closing delimiter not found");
     }
 
     #[test]
@@ -119,7 +119,7 @@ mod tests {
         let block = get_delimited_block(file_contents, 0, 8);
 
         assert!(block.is_err());
-        assert_eq!(block.unwrap_err().to_string(), "Delimited content is empty");
+        assert_eq!(block.unwrap_err().to_string(), "delimited content is empty");
     }
 
     #[test]
@@ -128,6 +128,6 @@ mod tests {
         let block = get_delimited_block(file_contents, 0, 11);
 
         assert!(block.is_err());
-        assert_eq!(block.unwrap_err().to_string(), "Delimited content is empty");
+        assert_eq!(block.unwrap_err().to_string(), "delimited content is empty");
     }
 }

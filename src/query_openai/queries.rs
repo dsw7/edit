@@ -53,7 +53,7 @@ fn query_responses_api(request_body: serde_json::Value) -> anyhow::Result<String
 
     let raw_json = response
         .text()
-        .context("Failed to decode response body to string")?;
+        .context("failed to decode response body to string")?;
 
     Ok(raw_json)
 }
@@ -67,7 +67,7 @@ pub fn write_new_code(model: &str, prompt: &str) -> anyhow::Result<OpenAIResults
         "text": schema_structured_output_code_generation(),
     });
 
-    let raw_json = query_responses_api(request_body).context("Failed to write code with OpenAI")?;
+    let raw_json = query_responses_api(request_body).context("failed to write code with OpenAI")?;
     deserialize_json_response(raw_json)
 }
 
@@ -97,7 +97,7 @@ pub fn edit_code_block(
         "text": schema_structured_output_code_generation(),
     });
 
-    let raw_json = query_responses_api(request_body).context("Failed to edit code with OpenAI")?;
+    let raw_json = query_responses_api(request_body).context("failed to edit code with OpenAI")?;
     deserialize_json_response(raw_json)
 }
 

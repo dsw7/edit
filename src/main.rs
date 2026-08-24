@@ -34,7 +34,7 @@ fn load_params() -> anyhow::Result<Parameters> {
 
     let model = match provider.as_str() {
         "openai" => configs.openai.model,
-        _ => anyhow::bail!(format!("Invalid provider: `{provider}`")),
+        _ => anyhow::bail!(format!("invalid provider: `{provider}`")),
     };
 
     let params = Parameters {
