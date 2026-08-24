@@ -1,0 +1,45 @@
+use std::fs;
+
+use anyhow::Context;
+use serde::{Deserialize, Deserializer};
+
+use crate::program_files;
+
+fn check_not_empty<'de, D>(deserializer: D) -> Result<String, D::Error>
+where
+    D: Deserializer<'de>,
+{
+    let value = String::deserialize(deserializer)?;
+
+    if value.is_empty() {
+        Err(serde::de::Error::custom("String cannot be empty"))
+    } else {
+        Ok(value)
+    }
+}
+
+#[derive(Deserialize, Debug)]
+pub struct Configs {
+    // #[serde(deserialize_with = "check_not_empty")]
+    // pub source: String,
+    pub openai: OpenAI,
+}
+
+#[derive(Deserialize, Debug)]
+pub struct OpenAI {
+    #[serde(deserialize_with = "check_not_empty")]
+    pub model: String,
+}
+
+pub fn load_configs() -> anyhow::Result<Configs> {
+    let app_dir = program_files::get_app_dir()?;
+    let config_file = program_files::get_config_file(&app_dir);
+
+    let toml_str = fs::read_to_string(&config_file)
+        .context(format!("Cannot read {}", config_file.display()))?;
+
+    let configs = toml::from_str::<Configs>(&toml_str)
+        .context(format!("Failed to parse {}", config_file.display()))?;
+
+    Ok(configs)
+}
