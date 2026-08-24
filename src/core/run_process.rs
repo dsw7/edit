@@ -74,16 +74,13 @@ fn operate_on_file(params: Parameters, user_prompt: &str) -> anyhow::Result<Open
 
 fn print_query_info(results: OpenAIResults) {
     println!();
-    print!("● ");
-    println!("{}", results.description_of_what_was_done.dark_grey());
+    println!("● {}", results.description_of_what_was_done.dark_grey());
 
-    print!("● Input tokens: ");
     let input_tokens = format!("{}", results.input_tokens);
-    println!("{}", input_tokens.green());
+    println!("● Input tokens: {}", input_tokens.green());
 
-    print!("● Output tokens: ");
     let output_tokens = format!("{}", results.output_tokens);
-    println!("{}", output_tokens.green());
+    println!("● Output tokens: {}", output_tokens.green());
 }
 
 pub fn run_process(params: Parameters) -> anyhow::Result<()> {
