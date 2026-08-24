@@ -58,6 +58,10 @@ fn operate_on_file(cli_params: Parameters) -> anyhow::Result<OpenAIResults> {
 }
 
 pub fn run_process(cli_params: Parameters) -> anyhow::Result<()> {
+    let provider = style(&cli_params.provider).green();
+    print!("● Using provider ");
+    println!("{provider}");
+
     let model = style(&cli_params.model).green();
     print!("● Using model ");
     println!("{model}");

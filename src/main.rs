@@ -40,6 +40,7 @@ fn load_params() -> anyhow::Result<Parameters> {
     let params = Parameters {
         input_file: cli.file_to_edit,
         model,
+        provider,
     };
 
     Ok(params)
