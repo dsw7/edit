@@ -50,7 +50,7 @@ fn main() -> ExitCode {
     let params = match load_params() {
         Ok(params) => params,
         Err(error) => {
-            eprintln!("{error}");
+            eprintln!("{error:?}");
             return ExitCode::FAILURE;
         }
     };
