@@ -18,6 +18,15 @@ fn print_provider_info(params: &Parameters) {
     let model = style(&params.model).green();
     print!("● Using model ");
     println!("{model}");
+
+    println!();
+    print!("Type ");
+    let instructions = "q";
+    print!("{}", instructions.dark_grey());
+    print!(" | ");
+    let instructions = "quit";
+    print!("{}", instructions.dark_grey());
+    println!(" to quit");
 }
 
 fn load_prompt_from_stdin() -> anyhow::Result<String> {
@@ -57,6 +66,10 @@ fn load_prompt_from_file_or_stdin() -> anyhow::Result<String> {
     Ok(user_prompt)
 }
 
+fn should_exit_program(user_prompt: &str) -> bool {
+    matches!(user_prompt, "quit" | "q")
+}
+
 fn operate_on_file(params: Parameters, user_prompt: &str) -> anyhow::Result<OpenAIResults> {
     if params.input_file.exists() {
         edit_existing_file(params, user_prompt)
@@ -85,6 +98,10 @@ pub fn run_process(params: Parameters) -> anyhow::Result<()> {
     utils::print_sep()?;
     let user_prompt = load_prompt_from_file_or_stdin()?;
     utils::print_sep()?;
+
+    if should_exit_program(&user_prompt) {
+        return Ok(());
+    }
 
     let results = operate_on_file(params, &user_prompt).context("editing process failed")?;
 
