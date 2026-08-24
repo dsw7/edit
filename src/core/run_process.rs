@@ -6,7 +6,7 @@ use crossterm::style::{Stylize, style};
 
 use super::create_new_file::create_new_file;
 use super::edit_existing_file::edit_existing_file;
-use crate::params::CliParameters;
+use crate::params::Parameters;
 use crate::query_openai::OpenAIResults;
 use crate::utils;
 
@@ -39,7 +39,7 @@ fn load_prompt_from_file_or_stdin() -> anyhow::Result<String> {
     }
 }
 
-fn operate_on_file(cli_params: CliParameters) -> anyhow::Result<OpenAIResults> {
+fn operate_on_file(cli_params: Parameters) -> anyhow::Result<OpenAIResults> {
     utils::print_sep()?;
     let user_prompt = load_prompt_from_file_or_stdin()?;
     utils::print_sep()?;
@@ -57,7 +57,7 @@ fn operate_on_file(cli_params: CliParameters) -> anyhow::Result<OpenAIResults> {
     }
 }
 
-pub fn run_process(cli_params: CliParameters) -> anyhow::Result<()> {
+pub fn run_process(cli_params: Parameters) -> anyhow::Result<()> {
     let model = style(&cli_params.model).green();
     print!("● Using model ");
     println!("{model}");
