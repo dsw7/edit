@@ -67,10 +67,7 @@ fn print_provider_info(params: &Parameters) {
     println!("{model}");
 }
 
-pub fn run_process(params: Parameters) -> anyhow::Result<()> {
-    print_provider_info(&params);
-    let results = operate_on_file(params).context("editing process failed")?;
-
+fn print_query_info(results: OpenAIResults) {
     println!();
     print!("● ");
     println!("{}", results.description_of_what_was_done.dark_grey());
@@ -82,7 +79,13 @@ pub fn run_process(params: Parameters) -> anyhow::Result<()> {
     print!("● Output tokens: ");
     let output_tokens = format!("{}", results.output_tokens);
     println!("{}", output_tokens.green());
+}
 
+pub fn run_process(params: Parameters) -> anyhow::Result<()> {
+    print_provider_info(&params);
+    let results = operate_on_file(params).context("editing process failed")?;
+
+    print_query_info(results);
     utils::print_sep()?;
     Ok(())
 }
