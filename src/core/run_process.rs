@@ -3,12 +3,25 @@ use std::path::Path;
 
 use anyhow::Context;
 use crossterm::style::{Stylize, style};
+use crossterm::terminal;
 
 use super::create_new_file::create_new_file;
 use super::edit_existing_file::edit_existing_file;
 use crate::params::Parameters;
 use crate::query_openai::OpenAIResults;
 use crate::utils;
+
+pub fn get_term_width() -> anyhow::Result<usize> {
+    let (width, _) = terminal::size().context("failed to get terminal size")?;
+    Ok(usize::from(width))
+}
+
+macro_rules! separator {
+    ($width:expr) => {{
+        let separator = "─".repeat($width);
+        println!("{}", separator);
+    }};
+}
 
 fn print_provider_info(params: &Parameters) {
     let provider = style(&params.provider).green();
@@ -86,9 +99,10 @@ fn print_query_info(results: OpenAIResults) {
 pub fn run_process(params: Parameters) -> anyhow::Result<()> {
     print_provider_info(&params);
 
-    utils::print_sep()?;
+    let term_width = get_term_width()?;
+    separator!(term_width);
     let user_prompt = load_prompt_from_file_or_stdin()?;
-    utils::print_sep()?;
+    separator!(term_width);
 
     if should_exit_program(&user_prompt) {
         return Ok(());
@@ -97,6 +111,6 @@ pub fn run_process(params: Parameters) -> anyhow::Result<()> {
     let results = operate_on_file(params, &user_prompt).context("editing process failed")?;
 
     print_query_info(results);
-    utils::print_sep()?;
+    separator!(term_width);
     Ok(())
 }
