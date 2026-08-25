@@ -11,9 +11,14 @@ use crate::params::Parameters;
 use crate::query_openai::OpenAIResults;
 use crate::utils;
 
-pub fn get_term_width() -> anyhow::Result<usize> {
-    let (width, _) = terminal::size().context("failed to get terminal size")?;
-    Ok(usize::from(width))
+fn get_term_width() -> usize {
+    match terminal::size() {
+        Ok(dimensions) => {
+            let (width, _) = dimensions;
+            usize::from(width)
+        }
+        Err(_) => 25,
+    }
 }
 
 macro_rules! separator {
@@ -99,8 +104,9 @@ fn print_query_info(results: OpenAIResults) {
 pub fn run_process(params: Parameters) -> anyhow::Result<()> {
     print_provider_info(&params);
 
-    let term_width = get_term_width()?;
+    let term_width = get_term_width();
     separator!(term_width);
+
     let user_prompt = load_prompt_from_file_or_stdin()?;
     separator!(term_width);
 
