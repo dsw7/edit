@@ -4,6 +4,9 @@ use anyhow::Context;
 use reqwest::blocking::Client;
 use serde_json::json;
 
+use super::response::deserialize_json_response;
+use super::structs::ValidationResults;
+
 fn schema_structured_output_validate_prompt() -> serde_json::Value {
     json!({
         "type": "object",
@@ -47,7 +50,7 @@ fn query_generate_api(request_body: serde_json::Value) -> anyhow::Result<String>
     Ok(raw_json)
 }
 
-pub fn is_valid_prompt(model: &str, prompt: &str) -> anyhow::Result<()> {
+pub fn is_valid_prompt(model: &str, prompt: &str) -> anyhow::Result<ValidationResults> {
     let request_body = json!({
         "format": schema_structured_output_validate_prompt(),
         "keep_alive": "30m",
@@ -57,6 +60,6 @@ pub fn is_valid_prompt(model: &str, prompt: &str) -> anyhow::Result<()> {
         "system": system_prompt_validate_prompt(),
     });
 
-    let _ = query_generate_api(request_body).context("failed to query Ollama")?;
-    Ok(())
+    let raw_json = query_generate_api(request_body).context("failed to query Ollama")?;
+    deserialize_json_response(raw_json)
 }
