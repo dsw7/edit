@@ -2,6 +2,7 @@ mod configs;
 mod core;
 mod params;
 mod program_files;
+mod query_ollama;
 mod query_openai;
 mod utils;
 
