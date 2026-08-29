@@ -92,8 +92,12 @@ fn prompt_is_invalid(user_prompt: &str) -> anyhow::Result<bool> {
         return Ok(false);
     }
 
-    println!("● {}", result_validation.reasoning);
-    println!("● Validation took {} s", result_validation.total_duration);
+    let errmsg = "Instructions failed validation";
+    println!("! {}", errmsg.red());
+    println!("! {}", result_validation.reasoning.dark_grey());
+
+    let msg_duration = format!("Validation took {} s", result_validation.total_duration);
+    println!("! {}", msg_duration.dark_grey());
 
     Ok(true)
 }
