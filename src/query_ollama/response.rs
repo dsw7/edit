@@ -27,12 +27,16 @@ struct StructuredOutput {
     valid_instructions: bool,
 }
 
+fn nanoseconds_to_seconds(ns: u32) -> f32 {
+    ns as f32 / 1_000_000_000.0
+}
+
 fn unpack_response(response: &Response) -> anyhow::Result<ValidationResults> {
     let structured_output = serde_json::from_str::<StructuredOutput>(&response.response)
         .context("failed to deserialize structured output")?;
 
     let results = ValidationResults {
-        total_duration: response.total_duration,
+        total_duration: nanoseconds_to_seconds(response.total_duration),
         reasoning: structured_output.reasoning,
         valid_instructions: structured_output.valid_instructions,
     };
