@@ -1,3 +1,4 @@
+mod response;
 mod structs;
 mod validate_prompt;
 
