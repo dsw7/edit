@@ -6,6 +6,7 @@ use serde_json::json;
 
 use super::response::deserialize_json_response;
 use super::structs::ValidationResults;
+use crate::params::Parameters;
 
 fn schema_structured_output_validate_prompt() -> serde_json::Value {
     json!({
@@ -32,11 +33,13 @@ Output:
 "
 }
 
-fn query_generate_api(request_body: serde_json::Value) -> anyhow::Result<String> {
-    let host = "localhost";
-    let port = 11434;
-
+fn query_generate_api(
+    host: &str,
+    port: u16,
+    request_body: serde_json::Value,
+) -> anyhow::Result<String> {
     let client = Client::builder().timeout(Duration::from_secs(10)).build()?;
+
     let response = client
         .post(format!("http://{host}:{port}/api/generate"))
         .header("Content-Type", "application/json")
@@ -50,11 +53,11 @@ fn query_generate_api(request_body: serde_json::Value) -> anyhow::Result<String>
     Ok(raw_json)
 }
 
-pub fn is_valid_prompt(model: &str, prompt: &str) -> anyhow::Result<ValidationResults> {
+pub fn is_valid_prompt(params: &Parameters, prompt: &str) -> anyhow::Result<ValidationResults> {
     let request_body = json!({
         "format": schema_structured_output_validate_prompt(),
         "keep_alive": "30m",
-        "model": model,
+        "model": params.ollama_validation_model,
         "prompt": prompt,
         "stream": false,
         "system": system_prompt_validate_prompt(),
@@ -63,6 +66,8 @@ pub fn is_valid_prompt(model: &str, prompt: &str) -> anyhow::Result<ValidationRe
         },
     });
 
-    let raw_json = query_generate_api(request_body).context("failed to query Ollama")?;
+    let raw_json = query_generate_api(&params.ollama_host, params.ollama_port, request_body)
+        .context("failed to query Ollama")?;
+
     deserialize_json_response(raw_json)
 }
