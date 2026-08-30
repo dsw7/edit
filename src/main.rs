@@ -40,6 +40,7 @@ fn load_params() -> anyhow::Result<Parameters> {
     };
 
     let params = Parameters {
+        enable_prompt_validation: configs.enable_prompt_validation,
         input_file: cli.file_to_edit,
         model,
         provider,

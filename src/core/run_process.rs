@@ -134,7 +134,7 @@ pub fn run_process(params: Parameters) -> anyhow::Result<()> {
         return Ok(());
     }
 
-    if prompt_is_invalid(&user_prompt)? {
+    if params.enable_prompt_validation && prompt_is_invalid(&user_prompt)? {
         return Ok(());
     }
 
