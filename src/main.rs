@@ -10,6 +10,7 @@ use std::path::PathBuf;
 use std::process::ExitCode;
 
 use clap::Parser;
+use crossterm::style::Stylize;
 
 use configs::load_configs;
 use params::Parameters;
@@ -59,7 +60,8 @@ fn main() -> ExitCode {
     match core::run_process(params) {
         Ok(()) => ExitCode::SUCCESS,
         Err(error) => {
-            eprintln!("{error:?}");
+            let errmsg = format!("{error:?}");
+            eprintln!("{}", errmsg.red());
             ExitCode::FAILURE
         }
     }
