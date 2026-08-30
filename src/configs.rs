@@ -24,7 +24,20 @@ pub struct Configs {
     pub provider: String,
 
     pub enable_prompt_validation: bool,
+
+    pub ollama: Ollama,
     pub openai: OpenAI,
+}
+
+#[derive(Deserialize, Debug)]
+pub struct Ollama {
+    pub ollama_port: u16,
+
+    #[serde(deserialize_with = "check_not_empty")]
+    pub ollama_host: String,
+
+    #[serde(deserialize_with = "check_not_empty")]
+    pub ollama_validation_model: String,
 }
 
 #[derive(Deserialize, Debug)]

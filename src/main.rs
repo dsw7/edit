@@ -44,6 +44,9 @@ fn load_params() -> anyhow::Result<Parameters> {
         input_file: cli.file_to_edit,
         model,
         provider,
+        ollama_host: configs.ollama.ollama_host,
+        ollama_port: configs.ollama.ollama_port,
+        ollama_validation_model: configs.ollama.ollama_validation_model,
     };
 
     Ok(params)
