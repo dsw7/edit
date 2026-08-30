@@ -47,6 +47,7 @@ fn load_params() -> anyhow::Result<Parameters> {
         ollama_host: configs.ollama.ollama_host,
         ollama_port: configs.ollama.ollama_port,
         ollama_validation_model: configs.ollama.ollama_validation_model,
+        validation_context_window: configs.ollama.validation_context_window,
     };
 
     Ok(params)

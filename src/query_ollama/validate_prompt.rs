@@ -63,7 +63,8 @@ pub fn is_valid_prompt(params: &Parameters, prompt: &str) -> anyhow::Result<Vali
         "stream": false,
         "system": system_prompt_validate_prompt(),
         "options": {
-            "temperature": 0
+            "temperature": 0.1,
+            "num_ctx": params.validation_context_window,
         },
     });
 

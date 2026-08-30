@@ -32,6 +32,7 @@ pub struct Configs {
 #[derive(Deserialize, Debug)]
 pub struct Ollama {
     pub ollama_port: u16,
+    pub validation_context_window: u16,
 
     #[serde(deserialize_with = "check_not_empty")]
     pub ollama_host: String,

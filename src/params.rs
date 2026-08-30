@@ -10,4 +10,5 @@ pub struct Parameters {
     pub ollama_host: String,
     pub ollama_port: u16,
     pub ollama_validation_model: String,
+    pub validation_context_window: u16,
 }
