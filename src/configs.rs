@@ -23,7 +23,7 @@ pub struct Configs {
     #[serde(deserialize_with = "check_not_empty")]
     pub provider: String,
 
-    pub enable_prompt_validation: bool,
+    pub disable_prompt_validation: bool,
 
     pub ollama: Ollama,
     pub openai: OpenAI,

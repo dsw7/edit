@@ -84,6 +84,10 @@ fn should_exit_program(user_prompt: &str) -> bool {
 }
 
 fn prompt_is_invalid(params: &Parameters, user_prompt: &str) -> anyhow::Result<bool> {
+    if params.disable_prompt_validation {
+        return Ok(true);
+    }
+
     let result_validation =
         is_valid_prompt(params, user_prompt).context("prompt validation process failed")?;
 
@@ -138,7 +142,7 @@ pub fn run_process(params: Parameters) -> anyhow::Result<()> {
         return Ok(());
     }
 
-    if params.enable_prompt_validation && prompt_is_invalid(&params, &user_prompt)? {
+    if prompt_is_invalid(&params, &user_prompt)? {
         return Ok(());
     }
 
