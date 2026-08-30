@@ -8,7 +8,7 @@ use crossterm::terminal;
 use super::create_new_file::create_new_file;
 use super::edit_existing_file::edit_existing_file;
 use crate::params::Parameters;
-use crate::query_ollama::is_valid_prompt;
+use crate::query_ollama::{ValidationResults, is_valid_prompt};
 use crate::query_openai::OpenAIResults;
 use crate::utils;
 
@@ -83,31 +83,43 @@ fn should_exit_program(user_prompt: &str) -> bool {
     matches!(user_prompt, "quit" | "q")
 }
 
+fn print_validation_success(results: ValidationResults) {
+    let msg_usage = format!(
+        "Validation took {} s | Input tokens: {} | Output tokens: {}",
+        results.total_duration, results.input_tokens, results.output_tokens
+    );
+
+    println!("● {}", msg_usage.dark_grey());
+}
+
+fn print_validation_failure(results: ValidationResults) {
+    let errmsg = "Instructions failed validation";
+    println!("! {}", errmsg.red());
+    println!("! {}", results.reasoning.dark_grey());
+
+    let msg_usage = format!(
+        "Validation took {} s | Input tokens: {} | Output tokens: {}",
+        results.total_duration, results.input_tokens, results.output_tokens
+    );
+
+    println!("! {}", msg_usage.dark_grey());
+}
+
 fn prompt_is_invalid(params: &Parameters, user_prompt: &str) -> anyhow::Result<bool> {
     if params.disable_prompt_validation {
         return Ok(true);
     }
 
-    let result_validation =
+    let results =
         is_valid_prompt(params, user_prompt).context("prompt validation process failed")?;
 
-    if result_validation.valid_instructions {
-        return Ok(false);
+    if results.valid_instructions {
+        print_validation_success(results);
+        Ok(false)
+    } else {
+        print_validation_failure(results);
+        Ok(true)
     }
-
-    let errmsg = "Instructions failed validation";
-    println!("! {}", errmsg.red());
-    println!("! {}", result_validation.reasoning.dark_grey());
-
-    let msg_usage = format!(
-        "Validation took {} s | Input tokens: {} | Output tokens: {}",
-        result_validation.total_duration,
-        result_validation.input_tokens,
-        result_validation.output_tokens
-    );
-
-    println!("! {}", msg_usage.dark_grey());
-    Ok(true)
 }
 
 fn operate_on_file(params: Parameters, user_prompt: &str) -> anyhow::Result<OpenAIResults> {
