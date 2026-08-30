@@ -17,6 +17,8 @@ struct Error {
 
 #[derive(Deserialize, Debug)]
 struct Response {
+    eval_count: u32,
+    prompt_eval_count: u32,
     response: String,
     total_duration: u32,
 }
@@ -39,6 +41,8 @@ fn unpack_response(response: &Response) -> anyhow::Result<ValidationResults> {
         total_duration: nanoseconds_to_seconds(response.total_duration),
         reasoning: structured_output.reasoning,
         valid_instructions: structured_output.valid_instructions,
+        input_tokens: response.prompt_eval_count,
+        output_tokens: response.eval_count,
     };
 
     Ok(results)

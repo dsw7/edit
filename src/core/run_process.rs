@@ -95,9 +95,14 @@ fn prompt_is_invalid(params: &Parameters, user_prompt: &str) -> anyhow::Result<b
     println!("! {}", errmsg.red());
     println!("! {}", result_validation.reasoning.dark_grey());
 
-    let msg_duration = format!("Validation took {} s", result_validation.total_duration);
-    println!("! {}", msg_duration.dark_grey());
+    let msg_usage = format!(
+        "Validation took {} s | Input tokens: {} | Output tokens: {}",
+        result_validation.total_duration,
+        result_validation.input_tokens,
+        result_validation.output_tokens
+    );
 
+    println!("! {}", msg_usage.dark_grey());
     Ok(true)
 }
 
