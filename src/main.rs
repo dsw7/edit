@@ -2,6 +2,7 @@ mod configs;
 mod core;
 mod params;
 mod program_files;
+mod query_ollama;
 mod query_openai;
 mod utils;
 
@@ -9,6 +10,7 @@ use std::path::PathBuf;
 use std::process::ExitCode;
 
 use clap::Parser;
+use crossterm::style::Stylize;
 
 use configs::load_configs;
 use params::Parameters;
@@ -32,15 +34,19 @@ fn load_params() -> anyhow::Result<Parameters> {
         None => configs.provider,
     };
 
-    let model = match provider.as_str() {
-        "openai" => configs.openai.model,
+    let code_edit_model = match provider.as_str() {
+        "openai" => configs.openai.code_edit_model,
         _ => anyhow::bail!(format!("invalid provider: `{provider}`")),
     };
 
     let params = Parameters {
+        enable_prompt_validation: configs.enable_prompt_validation,
         input_file: cli.file_to_edit,
-        model,
+        code_edit_model,
         provider,
+        ollama_host: configs.ollama.ollama_host,
+        ollama_port: configs.ollama.ollama_port,
+        ollama_validation_model: configs.ollama.ollama_validation_model,
     };
 
     Ok(params)
@@ -58,7 +64,8 @@ fn main() -> ExitCode {
     match core::run_process(params) {
         Ok(()) => ExitCode::SUCCESS,
         Err(error) => {
-            eprintln!("{error:?}");
+            let errmsg = format!("{error:?}");
+            eprintln!("{}", errmsg.red());
             ExitCode::FAILURE
         }
     }

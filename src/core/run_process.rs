@@ -2,12 +2,13 @@ use std::io::{self, Write};
 use std::path::Path;
 
 use anyhow::Context;
-use crossterm::style::{Stylize, style};
+use crossterm::style::Stylize;
 use crossterm::terminal;
 
 use super::create_new_file::create_new_file;
 use super::edit_existing_file::edit_existing_file;
 use crate::params::Parameters;
+use crate::query_ollama::is_valid_prompt;
 use crate::query_openai::OpenAIResults;
 use crate::utils;
 
@@ -29,11 +30,11 @@ macro_rules! separator {
 }
 
 fn print_provider_info(params: &Parameters) {
-    let provider = style(&params.provider).green();
-    println!("● Using provider {provider}");
+    let editor = format!("{}:{}", &params.provider, &params.code_edit_model);
+    println!("● Using {} for code editing", editor.green());
 
-    let model = style(&params.model).green();
-    println!("● Using model {model}");
+    let validator = format!("ollama:{}", &params.ollama_validation_model);
+    println!("● Using {} for prompt validation", validator.green());
 
     println!();
     let q = "q";
@@ -82,6 +83,24 @@ fn should_exit_program(user_prompt: &str) -> bool {
     matches!(user_prompt, "quit" | "q")
 }
 
+fn prompt_is_invalid(params: &Parameters, user_prompt: &str) -> anyhow::Result<bool> {
+    let result_validation =
+        is_valid_prompt(params, user_prompt).context("prompt validation process failed")?;
+
+    if result_validation.valid_instructions {
+        return Ok(false);
+    }
+
+    let errmsg = "Instructions failed validation";
+    println!("! {}", errmsg.red());
+    println!("! {}", result_validation.reasoning.dark_grey());
+
+    let msg_duration = format!("Validation took {} s", result_validation.total_duration);
+    println!("! {}", msg_duration.dark_grey());
+
+    Ok(true)
+}
+
 fn operate_on_file(params: Parameters, user_prompt: &str) -> anyhow::Result<OpenAIResults> {
     if params.input_file.exists() {
         edit_existing_file(params, user_prompt)
@@ -111,6 +130,10 @@ pub fn run_process(params: Parameters) -> anyhow::Result<()> {
     separator!(term_width);
 
     if should_exit_program(&user_prompt) {
+        return Ok(());
+    }
+
+    if params.enable_prompt_validation && prompt_is_invalid(&params, &user_prompt)? {
         return Ok(());
     }
 

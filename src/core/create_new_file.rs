@@ -8,7 +8,7 @@ pub fn create_new_file(
     params: Parameters,
     user_prompt: &str,
 ) -> anyhow::Result<query_openai::OpenAIResults> {
-    let results = query_openai::write_new_code(&params.model, user_prompt)?;
+    let results = query_openai::write_new_code(&params.code_edit_model, user_prompt)?;
 
     utils::write_to_file(&params.input_file, &results.code)?;
 
