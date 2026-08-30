@@ -34,15 +34,15 @@ fn load_params() -> anyhow::Result<Parameters> {
         None => configs.provider,
     };
 
-    let model = match provider.as_str() {
-        "openai" => configs.openai.model,
+    let code_edit_model = match provider.as_str() {
+        "openai" => configs.openai.code_edit_model,
         _ => anyhow::bail!(format!("invalid provider: `{provider}`")),
     };
 
     let params = Parameters {
         enable_prompt_validation: configs.enable_prompt_validation,
         input_file: cli.file_to_edit,
-        model,
+        code_edit_model,
         provider,
         ollama_host: configs.ollama.ollama_host,
         ollama_port: configs.ollama.ollama_port,

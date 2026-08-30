@@ -33,8 +33,8 @@ fn print_provider_info(params: &Parameters) {
     let provider = style(&params.provider).green();
     println!("● Using provider {provider}");
 
-    let model = style(&params.model).green();
-    println!("● Using model {model}");
+    let model = style(&params.code_edit_model).green();
+    println!("● Using model {model} for code editing");
 
     println!();
     let q = "q";

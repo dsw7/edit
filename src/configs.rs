@@ -43,7 +43,7 @@ pub struct Ollama {
 #[derive(Deserialize, Debug)]
 pub struct OpenAI {
     #[serde(deserialize_with = "check_not_empty")]
-    pub model: String,
+    pub code_edit_model: String,
 }
 
 pub fn load_configs() -> anyhow::Result<Configs> {

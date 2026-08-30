@@ -1,9 +1,9 @@
 use std::path::PathBuf;
 
 pub struct Parameters {
+    pub code_edit_model: String,
     pub enable_prompt_validation: bool,
     pub input_file: PathBuf,
-    pub model: String,
     pub provider: String,
 
     // Validation
