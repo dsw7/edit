@@ -38,7 +38,8 @@ fn query_generate_api(
     port: u16,
     request_body: serde_json::Value,
 ) -> anyhow::Result<String> {
-    let client = Client::builder().timeout(Duration::from_secs(10)).build()?;
+    let connection_timeout = Duration::from_secs(60);
+    let client = Client::builder().timeout(connection_timeout).build()?;
 
     let response = client
         .post(format!("http://{host}:{port}/api/generate"))
