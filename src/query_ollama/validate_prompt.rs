@@ -58,6 +58,9 @@ pub fn is_valid_prompt(model: &str, prompt: &str) -> anyhow::Result<ValidationRe
         "prompt": prompt,
         "stream": false,
         "system": system_prompt_validate_prompt(),
+        "options": {
+            "temperature": 0
+        },
     });
 
     let raw_json = query_generate_api(request_body).context("failed to query Ollama")?;
