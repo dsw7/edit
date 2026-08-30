@@ -2,7 +2,7 @@ use std::io::{self, Write};
 use std::path::Path;
 
 use anyhow::Context;
-use crossterm::style::{Stylize, style};
+use crossterm::style::Stylize;
 use crossterm::terminal;
 
 use super::create_new_file::create_new_file;
@@ -30,11 +30,11 @@ macro_rules! separator {
 }
 
 fn print_provider_info(params: &Parameters) {
-    let provider = style(&params.provider).green();
-    println!("● Using provider {provider}");
+    let editor = format!("{}:{}", &params.provider, &params.code_edit_model);
+    println!("● Using {} for code editing", editor.green());
 
-    let model = style(&params.code_edit_model).green();
-    println!("● Using model {model} for code editing");
+    let validator = format!("ollama:{}", &params.ollama_validation_model);
+    println!("● Using {} for prompt validation", validator.green());
 
     println!();
     let q = "q";
