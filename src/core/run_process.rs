@@ -83,10 +83,9 @@ fn should_exit_program(user_prompt: &str) -> bool {
     matches!(user_prompt, "quit" | "q")
 }
 
-fn prompt_is_invalid(user_prompt: &str) -> anyhow::Result<bool> {
-    let model = "gemma3:latest";
+fn prompt_is_invalid(params: &Parameters, user_prompt: &str) -> anyhow::Result<bool> {
     let result_validation =
-        is_valid_prompt(model, user_prompt).context("prompt validation process failed")?;
+        is_valid_prompt(params, user_prompt).context("prompt validation process failed")?;
 
     if result_validation.valid_instructions {
         return Ok(false);
@@ -134,7 +133,7 @@ pub fn run_process(params: Parameters) -> anyhow::Result<()> {
         return Ok(());
     }
 
-    if params.enable_prompt_validation && prompt_is_invalid(&user_prompt)? {
+    if params.enable_prompt_validation && prompt_is_invalid(&params, &user_prompt)? {
         return Ok(());
     }
 
