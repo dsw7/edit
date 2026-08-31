@@ -6,6 +6,7 @@ use clap::Parser;
 
 use super::configs_from_cli::ConfigsFromCli;
 use super::configs_from_file::ConfigsFromFile;
+
 use crate::program_files;
 
 pub struct Configs {
@@ -38,28 +39,28 @@ fn load_configs_from_file() -> anyhow::Result<ConfigsFromFile> {
 }
 
 pub fn load_configs() -> anyhow::Result<Configs> {
-    let cli = ConfigsFromCli::parse();
-    let configs = load_configs_from_file()?;
+    let cfgs_cli = ConfigsFromCli::parse();
+    let cfgs_file = load_configs_from_file()?;
 
-    let provider = match cli.provider {
+    let provider = match cfgs_cli.provider {
         Some(provider) => provider,
-        None => configs.provider,
+        None => cfgs_file.provider,
     };
 
     let code_edit_model = match provider.as_str() {
-        "openai" => configs.openai.code_edit_model,
+        "openai" => cfgs_file.openai.code_edit_model,
         _ => anyhow::bail!(format!("invalid provider: `{provider}`")),
     };
 
     let params = Configs {
-        disable_prompt_validation: configs.disable_prompt_validation,
-        input_file: cli.file_to_edit,
+        disable_prompt_validation: cfgs_file.disable_prompt_validation,
+        input_file: cfgs_cli.file_to_edit,
         code_edit_model,
         provider,
-        ollama_host: configs.ollama.ollama_host,
-        ollama_port: configs.ollama.ollama_port,
-        ollama_validation_model: configs.ollama.ollama_validation_model,
-        validation_context_window: configs.ollama.validation_context_window,
+        ollama_host: cfgs_file.ollama.ollama_host,
+        ollama_port: cfgs_file.ollama.ollama_port,
+        ollama_validation_model: cfgs_file.ollama.ollama_validation_model,
+        validation_context_window: cfgs_file.ollama.validation_context_window,
     };
 
     Ok(params)
