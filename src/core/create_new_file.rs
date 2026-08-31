@@ -1,11 +1,11 @@
-use crate::configurations::Parameters;
+use crate::configurations::Configs;
 use crate::query_openai;
 use crate::utils;
 
 use crossterm::style::Stylize;
 
 pub fn create_new_file(
-    params: Parameters,
+    params: Configs,
     user_prompt: &str,
 ) -> anyhow::Result<query_openai::OpenAIResults> {
     let results = query_openai::write_new_code(&params.code_edit_model, user_prompt)?;

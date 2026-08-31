@@ -7,7 +7,7 @@ use crossterm::terminal;
 
 use super::create_new_file::create_new_file;
 use super::edit_existing_file::edit_existing_file;
-use crate::configurations::Parameters;
+use crate::configurations::Configs;
 use crate::query_ollama::{ValidationResults, is_valid_prompt};
 use crate::query_openai::OpenAIResults;
 use crate::utils;
@@ -29,7 +29,7 @@ macro_rules! separator {
     }};
 }
 
-fn print_provider_info(params: &Parameters) {
+fn print_provider_info(params: &Configs) {
     let editor = format!("{}:{}", &params.provider, &params.code_edit_model);
     println!("● Using {} for code editing", editor.green());
 
@@ -105,7 +105,7 @@ fn print_validation_failure(results: ValidationResults) {
     println!("! {}", msg_usage.dark_grey());
 }
 
-fn prompt_is_invalid(params: &Parameters, user_prompt: &str) -> anyhow::Result<bool> {
+fn prompt_is_invalid(params: &Configs, user_prompt: &str) -> anyhow::Result<bool> {
     if params.disable_prompt_validation {
         return Ok(true);
     }
@@ -122,7 +122,7 @@ fn prompt_is_invalid(params: &Parameters, user_prompt: &str) -> anyhow::Result<b
     }
 }
 
-fn operate_on_file(params: Parameters, user_prompt: &str) -> anyhow::Result<OpenAIResults> {
+fn operate_on_file(params: Configs, user_prompt: &str) -> anyhow::Result<OpenAIResults> {
     if params.input_file.exists() {
         edit_existing_file(params, user_prompt)
     } else {
@@ -141,7 +141,7 @@ fn print_query_info(results: OpenAIResults) {
     println!("● Output tokens: {}", output_tokens.green());
 }
 
-pub fn run_process(params: Parameters) -> anyhow::Result<()> {
+pub fn run_process(params: Configs) -> anyhow::Result<()> {
     print_provider_info(&params);
 
     let term_width = get_term_width();

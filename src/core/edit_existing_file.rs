@@ -4,7 +4,7 @@ use std::fs::OpenOptions;
 use std::io::Write;
 use std::path::PathBuf;
 
-use crate::configurations::Parameters;
+use crate::configurations::Configs;
 use crate::query_openai;
 use crate::utils;
 
@@ -56,7 +56,7 @@ fn overwrite_file(filename: &PathBuf, content: &str) -> anyhow::Result<()> {
 }
 
 pub fn edit_existing_file(
-    params: Parameters,
+    params: Configs,
     user_prompt: &str,
 ) -> anyhow::Result<query_openai::OpenAIResults> {
     let mut file_content = utils::read_file(&params.input_file)?;

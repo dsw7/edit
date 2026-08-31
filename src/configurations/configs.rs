@@ -1,6 +1,6 @@
 use std::path::PathBuf;
 
-pub struct Parameters {
+pub struct Configs {
     pub code_edit_model: String,
     pub disable_prompt_validation: bool,
     pub input_file: PathBuf,

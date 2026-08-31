@@ -11,7 +11,7 @@ use std::process::ExitCode;
 use clap::Parser;
 use crossterm::style::Stylize;
 
-use configurations::{Parameters, load_configs};
+use configurations::{Configs, load_configs};
 
 #[derive(Parser, Debug)]
 #[command(about = "Program for editing individual files using LLMs.", version)]
@@ -23,7 +23,7 @@ struct Cli {
     provider: Option<String>,
 }
 
-fn load_params() -> anyhow::Result<Parameters> {
+fn load_params() -> anyhow::Result<Configs> {
     let cli = Cli::parse();
     let configs = load_configs()?;
 
@@ -37,7 +37,7 @@ fn load_params() -> anyhow::Result<Parameters> {
         _ => anyhow::bail!(format!("invalid provider: `{provider}`")),
     };
 
-    let params = Parameters {
+    let params = Configs {
         disable_prompt_validation: configs.disable_prompt_validation,
         input_file: cli.file_to_edit,
         code_edit_model,

@@ -6,7 +6,7 @@ use serde_json::json;
 
 use super::response::deserialize_json_response;
 use super::structs::ValidationResults;
-use crate::configurations::Parameters;
+use crate::configurations::Configs;
 
 fn schema_structured_output_validate_prompt() -> serde_json::Value {
     json!({
@@ -54,7 +54,7 @@ fn query_generate_api(
     Ok(raw_json)
 }
 
-pub fn is_valid_prompt(params: &Parameters, prompt: &str) -> anyhow::Result<ValidationResults> {
+pub fn is_valid_prompt(params: &Configs, prompt: &str) -> anyhow::Result<ValidationResults> {
     let request_body = json!({
         "format": schema_structured_output_validate_prompt(),
         "keep_alive": "30m",
