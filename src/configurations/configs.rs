@@ -38,7 +38,7 @@ fn load_configs_from_file() -> anyhow::Result<ConfigsFromFile> {
     Ok(configs)
 }
 
-pub fn load_configs() -> anyhow::Result<Configs> {
+pub fn setup_configurations() -> anyhow::Result<Configs> {
     let cfgs_cli = ConfigsFromCli::parse();
     let cfgs_file = load_configs_from_file()?;
 

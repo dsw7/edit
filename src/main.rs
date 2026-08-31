@@ -9,10 +9,10 @@ use std::process::ExitCode;
 
 use crossterm::style::Stylize;
 
-use configurations::load_configs;
+use configurations::setup_configurations;
 
 fn main() -> ExitCode {
-    let configs = match load_configs() {
+    let configs = match setup_configurations() {
         Ok(configs) => configs,
         Err(error) => {
             eprintln!("{error:?}");
