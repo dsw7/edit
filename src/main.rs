@@ -5,26 +5,15 @@ mod query_ollama;
 mod query_openai;
 mod utils;
 
-use std::path::PathBuf;
 use std::process::ExitCode;
 
 use clap::Parser;
 use crossterm::style::Stylize;
 
-use configurations::{Configs, load_configs};
-
-#[derive(Parser, Debug)]
-#[command(about = "Program for editing individual files using LLMs.", version)]
-struct Cli {
-    #[arg(value_name = "FILE-TO-EDIT")]
-    file_to_edit: PathBuf,
-
-    #[arg(short, long, help = "Specify provider (openai, ...)")]
-    provider: Option<String>,
-}
+use configurations::{Configs, ConfigsFromCli, load_configs};
 
 fn load_params() -> anyhow::Result<Configs> {
-    let cli = Cli::parse();
+    let cli = ConfigsFromCli::parse();
     let configs = load_configs()?;
 
     let provider = match cli.provider {
