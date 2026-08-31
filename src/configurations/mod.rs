@@ -1,5 +1,5 @@
 mod configs;
-mod params;
+mod load_configs_from_file;
 
-pub use configs::load_configs;
-pub use params::Parameters;
+pub use configs::Parameters;
+pub use load_configs_from_file::load_configs;
