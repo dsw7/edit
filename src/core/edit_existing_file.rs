@@ -67,7 +67,12 @@ pub fn edit_existing_file(
     let results =
         query_openai::edit_code_block(&params.code_edit_model, user_prompt, inner_content)?;
 
-    let new_text = format!("{}{}{}", EDIT_START, results.code, EDIT_END);
+    let new_text = if results.code.ends_with('\n') {
+        format!("{}{}{}", EDIT_START, results.code, EDIT_END)
+    } else {
+        format!("{}{}\n{}", EDIT_START, results.code, EDIT_END)
+    };
+
     file_content.replace_range(start_idx..end_idx, &new_text);
 
     overwrite_file(&params.input_file, &file_content)?;
