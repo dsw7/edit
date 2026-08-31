@@ -7,7 +7,7 @@ use crossterm::terminal;
 
 use super::create_new_file::create_new_file;
 use super::edit_existing_file::edit_existing_file;
-use crate::params::Parameters;
+use crate::configurations::Parameters;
 use crate::query_ollama::{ValidationResults, is_valid_prompt};
 use crate::query_openai::OpenAIResults;
 use crate::utils;

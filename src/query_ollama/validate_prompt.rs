@@ -6,7 +6,7 @@ use serde_json::json;
 
 use super::response::deserialize_json_response;
 use super::structs::ValidationResults;
-use crate::params::Parameters;
+use crate::configurations::Parameters;
 
 fn schema_structured_output_validate_prompt() -> serde_json::Value {
     json!({

@@ -1,4 +1,4 @@
-use crate::params::Parameters;
+use crate::configurations::Parameters;
 use crate::query_openai;
 use crate::utils;
 

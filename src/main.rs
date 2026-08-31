@@ -1,6 +1,5 @@
-mod configs;
+mod configurations;
 mod core;
-mod params;
 mod program_files;
 mod query_ollama;
 mod query_openai;
@@ -12,8 +11,7 @@ use std::process::ExitCode;
 use clap::Parser;
 use crossterm::style::Stylize;
 
-use configs::load_configs;
-use params::Parameters;
+use configurations::{Parameters, load_configs};
 
 #[derive(Parser, Debug)]
 #[command(about = "Program for editing individual files using LLMs.", version)]

@@ -4,7 +4,7 @@ use std::fs::OpenOptions;
 use std::io::Write;
 use std::path::PathBuf;
 
-use crate::params::Parameters;
+use crate::configurations::Parameters;
 use crate::query_openai;
 use crate::utils;
 
