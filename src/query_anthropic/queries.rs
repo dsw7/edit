@@ -123,30 +123,12 @@ mod tests {
         assert!(result.is_err());
 
         let error = result.unwrap_err();
-        assert_eq!(
-            error.to_string(),
-            "The requested model 'foobar' does not exist."
-        );
-    }
-
-    #[test]
-    fn test_write_new_code_incompatible_model() {
-        let model = "gpt-3.5-turbo";
-        let prompt = "What is 3 + 5?";
-
-        let result = write_new_code(model, prompt);
-        assert!(result.is_err());
-
-        let error = result.unwrap_err();
-        assert_eq!(
-            error.to_string(),
-            "Invalid parameter: 'text.format' of type 'json_schema' is not supported with model version `gpt-3.5-turbo`."
-        );
+        assert_eq!(error.to_string(), "model: foobar");
     }
 
     #[test]
     fn test_write_new_code_valid_query() {
-        let model = "gpt-4o";
+        let model = "claude-haiku-4-5";
         let prompt = "Print 'hello world' in Python.";
         let result = write_new_code(model, prompt).unwrap();
         assert!(result.input_tokens > 0);
@@ -157,7 +139,7 @@ mod tests {
 
     #[test]
     fn test_edit_code_block_valid_query() {
-        let model = "gpt-4o";
+        let model = "claude-haiku-4-5";
         let prompt = "Fix the code such that it prints 'hello world'";
         let code_block = "print('hello world'";
         let result = edit_code_block(model, prompt, code_block).unwrap();
