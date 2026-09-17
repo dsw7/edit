@@ -13,8 +13,6 @@ fn schema_structured_output_code_generation() -> serde_json::Value {
     json!({
         "format": {
             "type": "json_schema",
-            "name": "updated_code",
-            "strict": true,
             "schema": {
                 "type": "object",
                 "properties": {
@@ -73,12 +71,11 @@ pub fn write_new_code(model: &str, prompt: &str) -> anyhow::Result<AnthropicResu
     let request_body = json!({
         "messages": vec![message_param(prompt)],
         "model": model,
-        "stream": false,
+        "output_config": schema_structured_output_code_generation(),
         "system": vec![text_block_param(system_prompt_code_generation())],
-        "text": schema_structured_output_code_generation(),
     });
 
-    let raw_json = query_responses_api(request_body).context("failed to write code with OpenAI")?;
+    let raw_json = query_responses_api(request_body).context("failed to write code")?;
     deserialize_json_response(raw_json)
 }
 
@@ -103,12 +100,11 @@ pub fn edit_code_block(
     let request_body = json!({
         "messages": vec![message_param(&user_prompt_code_edit(prompt, code_block))],
         "model": model,
-        "stream": false,
+        "output_config": schema_structured_output_code_generation(),
         "system": vec![text_block_param(system_prompt_code_generation())],
-        "text": schema_structured_output_code_generation(),
     });
 
-    let raw_json = query_responses_api(request_body).context("failed to edit code with OpenAI")?;
+    let raw_json = query_responses_api(request_body).context("failed to edit code")?;
     deserialize_json_response(raw_json)
 }
 
