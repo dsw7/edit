@@ -59,16 +59,22 @@ fn query_responses_api(request_body: serde_json::Value) -> anyhow::Result<String
     Ok(raw_json)
 }
 
-fn user_message(prompt: &str) -> serde_json::Value {
-    json!({"content": prompt, "role": "user"})
+fn message_param(user_prompt: &str) -> serde_json::Value {
+    // see https://platform.claude.com/docs/en/api/http/messages#message_param
+    json!({"content": user_prompt, "role": "user"})
+}
+
+fn text_block_param(system_prompt: &str) -> serde_json::Value {
+    // see https://platform.claude.com/docs/en/api/http/messages#text_block_param
+    json!({"text": system_prompt, "type": "text"})
 }
 
 pub fn write_new_code(model: &str, prompt: &str) -> anyhow::Result<AnthropicResults> {
     let request_body = json!({
-        "messages": vec![user_message(prompt)],
-        "instructions": system_prompt_code_generation(),
+        "messages": vec![message_param(prompt)],
         "model": model,
         "stream": false,
+        "system": vec![text_block_param(system_prompt_code_generation())],
         "text": schema_structured_output_code_generation(),
     });
 
@@ -95,10 +101,10 @@ pub fn edit_code_block(
     code_block: &str,
 ) -> anyhow::Result<AnthropicResults> {
     let request_body = json!({
-        "messages": vec![user_prompt_code_edit(prompt, code_block)],
-        "instructions": system_prompt_code_generation(),
+        "messages": vec![message_param(&user_prompt_code_edit(prompt, code_block))],
         "model": model,
         "stream": false,
+        "system": vec![text_block_param(system_prompt_code_generation())],
         "text": schema_structured_output_code_generation(),
     });
 
