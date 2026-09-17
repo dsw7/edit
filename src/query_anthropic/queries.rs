@@ -41,13 +41,14 @@ Output:
 }
 
 fn query_responses_api(request_body: serde_json::Value) -> anyhow::Result<String> {
-    let api_key = load_api_key("OPENAI_API_KEY")?;
+    let api_key = load_api_key("ANTHROPIC_API_KEY")?;
 
     let client = Client::builder().timeout(Duration::from_secs(10)).build()?;
     let response = client
-        .post("https://api.openai.com/v1/responses")
+        .post("https://api.anthropic.com/v1/messages")
         .header("Content-Type", "application/json")
-        .header("Authorization", format!("Bearer {api_key}"))
+        .header("anthropic-version", "2023-06-01")
+        .header(format!("X-Api-Key: {api_key}"))
         .json(&request_body)
         .send()?;
 
