@@ -1,6 +1,7 @@
 mod configurations;
 mod core;
 mod program_files;
+mod query_anthropic;
 mod query_ollama;
 mod query_openai;
 mod utils;
