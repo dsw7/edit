@@ -48,7 +48,7 @@ fn text_block_param(system_prompt: &str) -> serde_json::Value {
     json!({"text": system_prompt, "type": "text"})
 }
 
-fn query_responses_api(request_body: serde_json::Value) -> anyhow::Result<String> {
+fn query_messages_api(request_body: serde_json::Value) -> anyhow::Result<String> {
     let api_key = load_api_key("ANTHROPIC_API_KEY")?;
 
     let client = Client::builder().timeout(Duration::from_secs(10)).build()?;
@@ -75,7 +75,7 @@ pub fn write_new_code(model: &str, prompt: &str) -> anyhow::Result<AnthropicResu
         "system": vec![text_block_param(system_prompt_code_generation())],
     });
 
-    let raw_json = query_responses_api(request_body).context("failed to write code")?;
+    let raw_json = query_messages_api(request_body).context("failed to write code")?;
     deserialize_json_response(raw_json)
 }
 
@@ -104,7 +104,7 @@ pub fn edit_code_block(
         "system": vec![text_block_param(system_prompt_code_generation())],
     });
 
-    let raw_json = query_responses_api(request_body).context("failed to edit code")?;
+    let raw_json = query_messages_api(request_body).context("failed to edit code")?;
     deserialize_json_response(raw_json)
 }
 
