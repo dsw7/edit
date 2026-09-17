@@ -38,6 +38,16 @@ Output:
 "
 }
 
+fn message_param(user_prompt: &str) -> serde_json::Value {
+    // see https://platform.claude.com/docs/en/api/http/messages#message_param
+    json!({"content": user_prompt, "role": "user"})
+}
+
+fn text_block_param(system_prompt: &str) -> serde_json::Value {
+    // see https://platform.claude.com/docs/en/api/http/messages#text_block_param
+    json!({"text": system_prompt, "type": "text"})
+}
+
 fn query_responses_api(request_body: serde_json::Value) -> anyhow::Result<String> {
     let api_key = load_api_key("ANTHROPIC_API_KEY")?;
 
@@ -55,16 +65,6 @@ fn query_responses_api(request_body: serde_json::Value) -> anyhow::Result<String
         .context("failed to decode response body to string")?;
 
     Ok(raw_json)
-}
-
-fn message_param(user_prompt: &str) -> serde_json::Value {
-    // see https://platform.claude.com/docs/en/api/http/messages#message_param
-    json!({"content": user_prompt, "role": "user"})
-}
-
-fn text_block_param(system_prompt: &str) -> serde_json::Value {
-    // see https://platform.claude.com/docs/en/api/http/messages#text_block_param
-    json!({"text": system_prompt, "type": "text"})
 }
 
 pub fn write_new_code(model: &str, prompt: &str) -> anyhow::Result<AnthropicResults> {
