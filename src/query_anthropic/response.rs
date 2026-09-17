@@ -17,6 +17,9 @@ struct ResponseError {
 
 #[derive(Deserialize, Debug)]
 struct Error {
+    #[serde(rename = "type")]
+    error_type: String,
+
     message: String,
 }
 
