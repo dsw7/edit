@@ -5,7 +5,7 @@ use std::io::Write;
 use std::path::PathBuf;
 
 use crate::configurations::Configs;
-use crate::query_openai;
+use crate::query_anthropic::{AnthropicResults, edit_code_block};
 use crate::utils;
 
 const DELIM_EDIT_CODE: &str = "@@@\n";
@@ -55,17 +55,13 @@ fn overwrite_file(filename: &PathBuf, content: &str) -> anyhow::Result<()> {
     Ok(())
 }
 
-pub fn edit_existing_file(
-    params: Configs,
-    user_prompt: &str,
-) -> anyhow::Result<query_openai::OpenAIResults> {
+pub fn edit_existing_file(params: Configs, user_prompt: &str) -> anyhow::Result<AnthropicResults> {
     let mut file_content = utils::read_file(&params.input_file)?;
 
     let (start_idx, end_idx) = get_delim_indices(&file_content)?;
     let inner_content = get_delimited_block(&file_content, start_idx, end_idx)?;
 
-    let results =
-        query_openai::edit_code_block(&params.code_edit_model, user_prompt, inner_content)?;
+    let results = edit_code_block(&params.code_edit_model, user_prompt, inner_content)?;
 
     let new_text = if results.code.ends_with('\n') {
         format!("{}{}{}", EDIT_START, results.code, EDIT_END)

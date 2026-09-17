@@ -17,9 +17,6 @@ struct ResponseError {
 
 #[derive(Deserialize, Debug)]
 struct Error {
-    #[serde(rename = "type")]
-    error_type: String,
-
     message: String,
 }
 
@@ -55,7 +52,7 @@ struct StructuredOutput {
 }
 
 fn unpack_structured_output(text: &str) -> anyhow::Result<StructuredOutput> {
-    let structured_output = serde_json::from_str::<StructuredOutput>(&text)
+    let structured_output = serde_json::from_str::<StructuredOutput>(text)
         .context("failed to deserialize structured output")?;
 
     Ok(structured_output)

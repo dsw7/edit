@@ -8,8 +8,8 @@ use crossterm::terminal;
 use super::create_new_file::create_new_file;
 use super::edit_existing_file::edit_existing_file;
 use crate::configurations::Configs;
+use crate::query_anthropic::AnthropicResults;
 use crate::query_ollama::{ValidationResults, is_valid_prompt};
-use crate::query_openai::OpenAIResults;
 use crate::utils;
 
 fn get_term_width() -> usize {
@@ -122,7 +122,7 @@ fn prompt_is_invalid(params: &Configs, user_prompt: &str) -> anyhow::Result<bool
     }
 }
 
-fn operate_on_file(params: Configs, user_prompt: &str) -> anyhow::Result<OpenAIResults> {
+fn operate_on_file(params: Configs, user_prompt: &str) -> anyhow::Result<AnthropicResults> {
     if params.input_file.exists() {
         edit_existing_file(params, user_prompt)
     } else {
@@ -130,7 +130,7 @@ fn operate_on_file(params: Configs, user_prompt: &str) -> anyhow::Result<OpenAIR
     }
 }
 
-fn print_query_info(results: OpenAIResults) {
+fn print_query_info(results: AnthropicResults) {
     println!();
     println!("● {}", results.description_of_what_was_done.dark_grey());
 

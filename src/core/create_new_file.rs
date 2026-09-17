@@ -1,14 +1,11 @@
 use crate::configurations::Configs;
-use crate::query_openai;
+use crate::query_anthropic::{AnthropicResults, write_new_code};
 use crate::utils;
 
 use crossterm::style::Stylize;
 
-pub fn create_new_file(
-    params: Configs,
-    user_prompt: &str,
-) -> anyhow::Result<query_openai::OpenAIResults> {
-    let results = query_openai::write_new_code(&params.code_edit_model, user_prompt)?;
+pub fn create_new_file(params: Configs, user_prompt: &str) -> anyhow::Result<AnthropicResults> {
+    let results = write_new_code(&params.code_edit_model, user_prompt)?;
 
     utils::write_to_file(&params.input_file, &results.code)?;
 
