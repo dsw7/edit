@@ -69,6 +69,7 @@ fn query_messages_api(request_body: serde_json::Value) -> anyhow::Result<String>
 
 pub fn write_new_code(model: &str, prompt: &str) -> anyhow::Result<AnthropicResults> {
     let request_body = json!({
+        "max_tokens": 4096,
         "messages": vec![message_param(prompt)],
         "model": model,
         "output_config": schema_structured_output_code_generation(),
@@ -98,6 +99,7 @@ pub fn edit_code_block(
     code_block: &str,
 ) -> anyhow::Result<AnthropicResults> {
     let request_body = json!({
+        "max_tokens": 4096,
         "messages": vec![message_param(&user_prompt_code_edit(prompt, code_block))],
         "model": model,
         "output_config": schema_structured_output_code_generation(),
