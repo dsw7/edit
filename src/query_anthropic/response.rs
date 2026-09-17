@@ -83,8 +83,8 @@ fn unpack_response(response: &Response) -> anyhow::Result<AnthropicResults> {
         ))
     }
 
-    let structured_output = unpack_text_block(response)
-        .context("something went wrong when unpacking structured output")?;
+    let structured_output = unpack_text_block(response)?;
+    //.context("something went wrong when unpacking structured output")?;
 
     let results = AnthropicResults {
         input_tokens: response.usage.input_tokens,
@@ -119,112 +119,32 @@ mod tests {
     }
 
     #[test]
+    fn test_deserialize_broken_json() {
+        let raw_json = r#"{
+            "error": {
+        }"#;
+        assert_error_message(raw_json, "failed to deserialize raw json");
+    }
+
+    #[test]
     fn test_deserialize_error_response() {
         let raw_json = r#"{
-            "error": {"message": "Model not found"}
+            "error": {"message": "Something went wrong"}
         }"#;
-        assert_error_message(raw_json, "Model not found");
+        assert_error_message(raw_json, "Something went wrong");
     }
 
     #[test]
-    fn test_deserialize_success_response_missing_status() {
+    fn test_deserialize_success_response() {
         let raw_json = r#"{
-            "output": []
-        }"#;
-        assert_error_message(raw_json, "no status could be found in response");
-    }
-
-    #[test]
-    fn test_deserialize_success_response_never_completed() {
-        let raw_json = r#"{
-            "status": "in_progress",
-            "output": [{
-                "status": "in_progress",
-                "content": []
-            }]
-        }"#;
-        assert_error_message(raw_json, "query did not finish: in_progress");
-    }
-
-    #[test]
-    fn test_deserialize_success_response_no_output() {
-        let raw_json = r#"{
-            "status": "completed",
-            "output": []
-        }"#;
-        assert_error_message(raw_json, "output array is empty");
-    }
-
-    #[test]
-    fn test_deserialize_success_response_completed_not_found() {
-        let raw_json = r#"{
-            "status": "completed",
-            "output": [{
-                "status": "",
-                "content": []
-            }]
-        }"#;
-        assert_error_message(raw_json, "query completed but no completed message found");
-    }
-
-    #[test]
-    fn test_deserialize_success_response_empty_content() {
-        let raw_json = r#"{
-            "status": "completed",
-            "output": [{
-                "status": "completed",
-                "content": []
-            }]
-        }"#;
-        assert_error_message(raw_json, "content array is empty");
-    }
-
-    #[test]
-    fn test_deserialize_success_response_refusal() {
-        let raw_json = r#"{
-            "status": "completed",
-            "output": [{
-                "status": "completed",
-                "content": [{
-                    "refusal": "The query was too long"
-                }]
-            }]
-        }"#;
-        assert_error_message(raw_json, "query refused: The query was too long");
-    }
-
-    #[test]
-    fn test_deserialize_success_response_incomplete_no_details() {
-        let raw_json = r#"{
-            "status": "incomplete",
-            "output": []
-        }"#;
-        assert_error_message(raw_json, "query incomplete: no details provided");
-    }
-
-    #[test]
-    fn test_deserialize_success_response_incomplete() {
-        let raw_json = r#"{
-            "status": "incomplete",
-            "incomplete_details": {
-                "reason": "max_output_tokens"
-            },
-            "output": []
-        }"#;
-        assert_error_message(raw_json, "query incomplete: max_output_tokens");
-    }
-
-    #[test]
-    fn test_deserialize_success_response_output_text() {
-        let raw_json = r#"{
-            "status": "completed",
-            "output": [{
-                "status": "completed",
-                "content": [{
+            "content": [
+                {
+                    "type": "text",
                     "text": "{\"code\": \"print('Hello, world!')\", \"description_of_what_was_done\": \"A simple hello world code\"}"
-                }]
-            }],
-            "usage": {"input_tokens": 100, "output_tokens": 50}
+                }
+            ],
+            "stop_reason": "end_turn",
+            "usage": { "input_tokens": 100, "output_tokens": 50 }
         }"#;
 
         let response = deserialize_json_response(raw_json.to_string()).unwrap();
@@ -238,19 +158,52 @@ mod tests {
     }
 
     #[test]
-    fn test_deserialize_success_response_output_text_default_usage() {
+    fn test_deserialize_success_response_invalid_stop_reason() {
         let raw_json = r#"{
-            "status": "completed",
-            "output": [{
-                "status": "completed",
-                "content": [{
-                    "text": "{\"code\": \"print('Hello, world!')\", \"description_of_what_was_done\": \"A simple hello world code\"}"
-                }]
-            }]
+            "content": [
+                { "type": "text", "text": "{\"code\": " }
+            ],
+            "stop_reason": "max_tokens",
+            "usage": { "input_tokens": 100, "output_tokens": 50 }
         }"#;
+        assert_error_message(raw_json, "query stopped prematurely: max_tokens");
+    }
 
-        let response = deserialize_json_response(raw_json.to_string()).unwrap();
-        assert_eq!(response.input_tokens, 0);
-        assert_eq!(response.output_tokens, 0);
+    #[test]
+    fn test_deserialize_success_response_empty_content() {
+        let raw_json = r#"{
+            "content": [],
+            "stop_reason": "end_turn",
+            "usage": { "input_tokens": 100, "output_tokens": 50 }
+        }"#;
+        assert_error_message(raw_json, "content array is empty");
+    }
+
+    #[test]
+    fn test_deserialize_success_response_completed_not_found() {
+        let raw_json = r#"{
+            "content": [
+                { "type": "tool_use", "name": "code_edit_tool" }
+            ],
+            "stop_reason": "end_turn",
+            "usage": { "input_tokens": 100, "output_tokens": 50 }
+        }"#;
+        assert_error_message(raw_json, "no TextBlock object found in response");
+    }
+
+    #[test]
+    fn test_deserialize_success_response_invalid_structured_output() {
+        let raw_json = r#"{
+            "content": [
+                { "type": "tool_use", "name": "code_edit_tool" },
+                {
+                    "type": "text",
+                    "text": "{\"code\": \"print('Hello, world!')\"}"
+                }
+            ],
+            "stop_reason": "end_turn",
+            "usage": { "input_tokens": 100, "output_tokens": 50 }
+        }"#;
+        assert_error_message(raw_json, "failed to deserialize structured output");
     }
 }
