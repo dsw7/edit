@@ -7,7 +7,4 @@ use clap::Parser;
 pub struct ConfigsFromCli {
     #[arg(value_name = "FILE-TO-EDIT")]
     pub file_to_edit: PathBuf,
-
-    #[arg(short, long, help = "Specify provider (anthropic, ...)")]
-    pub provider: Option<String>,
 }

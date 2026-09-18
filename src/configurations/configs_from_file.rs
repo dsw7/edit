@@ -15,9 +15,6 @@ where
 
 #[derive(Deserialize, Debug)]
 pub struct ConfigsFromFile {
-    #[serde(deserialize_with = "check_not_empty")]
-    pub provider: String,
-
     pub disable_prompt_validation: bool,
 
     pub ollama: Ollama,

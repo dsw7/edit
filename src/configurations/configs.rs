@@ -12,7 +12,6 @@ use crate::program_files;
 pub struct Configs {
     // CLI
     pub input_file: PathBuf,
-    pub provider: String,
 
     // code editing
     pub code_edit_model: String,
@@ -42,21 +41,10 @@ pub fn setup_configurations() -> anyhow::Result<Configs> {
     let cfgs_cli = ConfigsFromCli::parse();
     let cfgs_file = load_configs_from_file()?;
 
-    let provider = match cfgs_cli.provider {
-        Some(provider) => provider,
-        None => cfgs_file.provider,
-    };
-
-    let code_edit_model = match provider.as_str() {
-        "anthropic" => cfgs_file.anthropic.code_edit_model,
-        _ => anyhow::bail!(format!("invalid provider: `{provider}`")),
-    };
-
     let params = Configs {
+        code_edit_model: cfgs_file.anthropic.code_edit_model,
         disable_prompt_validation: cfgs_file.disable_prompt_validation,
         input_file: cfgs_cli.file_to_edit,
-        code_edit_model,
-        provider,
         ollama_host: cfgs_file.ollama.ollama_host,
         ollama_port: cfgs_file.ollama.ollama_port,
         ollama_validation_model: cfgs_file.ollama.ollama_validation_model,

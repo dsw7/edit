@@ -29,8 +29,8 @@ macro_rules! separator {
     }};
 }
 
-fn print_provider_info(params: &Configs) {
-    let editor = format!("{}:{}", &params.provider, &params.code_edit_model);
+fn print_misc_info(params: &Configs) {
+    let editor = format!("anthropic:{}", &params.code_edit_model);
     println!("● Using {} for code editing", editor.green());
 
     let validator = format!("ollama:{}", &params.ollama_validation_model);
@@ -142,7 +142,7 @@ fn print_query_info(results: AnthropicResults) {
 }
 
 pub fn run_process(params: Configs) -> anyhow::Result<()> {
-    print_provider_info(&params);
+    print_misc_info(&params);
 
     let term_width = get_term_width();
     separator!(term_width);
