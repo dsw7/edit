@@ -21,7 +21,7 @@ pub struct ConfigsFromFile {
     pub disable_prompt_validation: bool,
 
     pub ollama: Ollama,
-    pub openai: OpenAI,
+    pub anthropic: Anthropic,
 }
 
 #[derive(Deserialize, Debug)]
@@ -37,7 +37,7 @@ pub struct Ollama {
 }
 
 #[derive(Deserialize, Debug)]
-pub struct OpenAI {
+pub struct Anthropic {
     #[serde(deserialize_with = "check_not_empty")]
     pub code_edit_model: String,
 }

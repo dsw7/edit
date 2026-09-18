@@ -48,7 +48,7 @@ pub fn setup_configurations() -> anyhow::Result<Configs> {
     };
 
     let code_edit_model = match provider.as_str() {
-        "openai" => cfgs_file.openai.code_edit_model,
+        "anthropic" => cfgs_file.anthropic.code_edit_model,
         _ => anyhow::bail!(format!("invalid provider: `{provider}`")),
     };
 

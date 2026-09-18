@@ -1,5 +1,5 @@
 #[derive(Debug)]
-pub struct OpenAIResults {
+pub struct AnthropicResults {
     pub input_tokens: u32,
     pub output_tokens: u32,
     pub code: String,
