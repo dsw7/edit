@@ -15,6 +15,7 @@ pub struct Configs {
 
     // code editing
     pub code_edit_model: String,
+    pub max_tokens_edit_model: u16,
 
     // validation
     pub disable_prompt_validation: bool,
@@ -41,10 +42,13 @@ pub fn setup_configurations() -> anyhow::Result<Configs> {
     let cfgs_cli = ConfigsFromCli::parse();
     let cfgs_file = load_configs_from_file()?;
 
+    let max_tokens_edit_model = cfgs_file.anthropic.max_tokens_edit_model.clamp(1, 64000);
+
     let params = Configs {
         code_edit_model: cfgs_file.anthropic.code_edit_model,
         disable_prompt_validation: cfgs_file.disable_prompt_validation,
         input_file: cfgs_cli.file_to_edit,
+        max_tokens_edit_model,
         ollama_host: cfgs_file.ollama.ollama_host,
         ollama_port: cfgs_file.ollama.ollama_port,
         ollama_validation_model: cfgs_file.ollama.ollama_validation_model,
