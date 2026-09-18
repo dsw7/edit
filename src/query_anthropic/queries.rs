@@ -124,7 +124,7 @@ mod tests {
         let model = "foobar";
         let prompt = "What is 3 + 5?";
 
-        let result = write_new_code(model, prompt);
+        let result = write_new_code(4096, model, prompt);
         assert!(result.is_err());
 
         let error = result.unwrap_err();
@@ -135,7 +135,7 @@ mod tests {
     fn test_write_new_code_valid_query() {
         let model = "claude-haiku-4-5";
         let prompt = "Print 'hello world' in Python.";
-        let result = write_new_code(model, prompt).unwrap();
+        let result = write_new_code(4096, model, prompt).unwrap();
         assert!(result.input_tokens > 0);
         assert!(result.output_tokens > 0);
         assert!(!result.description_of_what_was_done.is_empty());
@@ -147,7 +147,7 @@ mod tests {
         let model = "claude-haiku-4-5";
         let prompt = "Fix the code such that it prints 'hello world'";
         let code_block = "print('hello world'";
-        let result = edit_code_block(model, prompt, code_block).unwrap();
+        let result = edit_code_block(code_block, 4096, model, prompt).unwrap();
         assert!(result.input_tokens > 0);
         assert!(result.output_tokens > 0);
         assert!(!result.description_of_what_was_done.is_empty());
