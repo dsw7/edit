@@ -5,7 +5,11 @@ use crate::utils;
 use crossterm::style::Stylize;
 
 pub fn create_new_file(params: Configs, user_prompt: &str) -> anyhow::Result<AnthropicResults> {
-    let results = write_new_code(&params.code_edit_model, user_prompt)?;
+    let results = write_new_code(
+        params.max_tokens_edit_model,
+        &params.code_edit_model,
+        user_prompt,
+    )?;
 
     utils::write_to_file(&params.input_file, &results.code)?;
 

@@ -37,4 +37,6 @@ pub struct Ollama {
 pub struct Anthropic {
     #[serde(deserialize_with = "check_not_empty")]
     pub code_edit_model: String,
+
+    pub max_tokens_edit_model: u16,
 }

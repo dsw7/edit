@@ -61,7 +61,12 @@ pub fn edit_existing_file(params: Configs, user_prompt: &str) -> anyhow::Result<
     let (start_idx, end_idx) = get_delim_indices(&file_content)?;
     let inner_content = get_delimited_block(&file_content, start_idx, end_idx)?;
 
-    let results = edit_code_block(&params.code_edit_model, user_prompt, inner_content)?;
+    let results = edit_code_block(
+        inner_content,
+        params.max_tokens_edit_model,
+        &params.code_edit_model,
+        user_prompt,
+    )?;
 
     let new_text = if results.code.ends_with('\n') {
         format!("{}{}{}", EDIT_START, results.code, EDIT_END)

@@ -67,9 +67,13 @@ fn query_messages_api(request_body: serde_json::Value) -> anyhow::Result<String>
     Ok(raw_json)
 }
 
-pub fn write_new_code(model: &str, prompt: &str) -> anyhow::Result<AnthropicResults> {
+pub fn write_new_code(
+    max_tokens: u16,
+    model: &str,
+    prompt: &str,
+) -> anyhow::Result<AnthropicResults> {
     let request_body = json!({
-        "max_tokens": 4096,
+        "max_tokens": max_tokens,
         "messages": vec![message_param(prompt)],
         "model": model,
         "output_config": schema_structured_output_code_generation(),
@@ -94,12 +98,13 @@ And apply them to the code:
 }
 
 pub fn edit_code_block(
+    code_block: &str,
+    max_tokens: u16,
     model: &str,
     prompt: &str,
-    code_block: &str,
 ) -> anyhow::Result<AnthropicResults> {
     let request_body = json!({
-        "max_tokens": 4096,
+        "max_tokens": max_tokens,
         "messages": vec![message_param(&user_prompt_code_edit(prompt, code_block))],
         "model": model,
         "output_config": schema_structured_output_code_generation(),
