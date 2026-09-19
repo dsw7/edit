@@ -29,18 +29,13 @@ Output:
 "
 }
 
-fn text_block_param(system_prompt: &str) -> serde_json::Value {
-    // see https://platform.claude.com/docs/en/api/http/messages#text_block_param
-    json!({"text": system_prompt, "type": "text"})
-}
-
 pub fn request_write_new_code(max_tokens: u16, model: &str, prompt: &str) -> Value {
     json!({
         "max_tokens": max_tokens,
         "messages": [{"content": prompt, "role": "user"}],
         "model": model,
         "output_config": schema_structured_output_code_generation(),
-        "system": [text_block_param(system_prompt_code_generation())],
+        "system": [{"text": system_prompt_code_generation(), "type": "text"}],
     })
 }
 
@@ -66,6 +61,6 @@ And apply them to the code:
         "messages": [{"content": prompt, "role": "user"}],
         "model": model,
         "output_config": schema_structured_output_code_generation(),
-        "system": [text_block_param(system_prompt_code_generation())],
+        "system": [{"text": system_prompt_code_generation(), "type": "text"}],
     })
 }
