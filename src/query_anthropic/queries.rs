@@ -1,49 +1,10 @@
 use anyhow::Context;
-use serde_json::json;
 
 use crate::utils::load_api_key;
 
 use super::connector::AnthropicConnector;
+use super::requests::{request_edit_code_block, request_write_new_code};
 use super::response::{AnthropicResults, deserialize_json_response};
-
-fn schema_structured_output_code_generation() -> serde_json::Value {
-    json!({
-        "format": {
-            "type": "json_schema",
-            "schema": {
-                "type": "object",
-                "properties": {
-                    "description_of_what_was_done": { "type": "string" },
-                    "code": { "type": "string" }
-                },
-                "required": ["description_of_what_was_done", "code"],
-                "additionalProperties": false
-            }
-        }
-    })
-}
-
-fn system_prompt_code_generation() -> &'static str {
-    "You are a helpful programming assistant.
-
-IMPORTANT: Do not wrap your response in backticks (```). Output the code
-directly without markdown code fences.
-
-Output:
-- description_of_what_was_done: brief summary of what you did
-- code: your updated code
-"
-}
-
-fn message_param(user_prompt: &str) -> serde_json::Value {
-    // see https://platform.claude.com/docs/en/api/http/messages#message_param
-    json!({"content": user_prompt, "role": "user"})
-}
-
-fn text_block_param(system_prompt: &str) -> serde_json::Value {
-    // see https://platform.claude.com/docs/en/api/http/messages#text_block_param
-    json!({"text": system_prompt, "type": "text"})
-}
 
 pub fn write_new_code(
     max_tokens: u16,
@@ -53,32 +14,12 @@ pub fn write_new_code(
     let api_key = load_api_key("ANTHROPIC_API_KEY")?;
     let connector = AnthropicConnector::try_new(api_key)?;
 
-    let request_body = json!({
-        "max_tokens": max_tokens,
-        "messages": vec![message_param(prompt)],
-        "model": model,
-        "output_config": schema_structured_output_code_generation(),
-        "system": vec![text_block_param(system_prompt_code_generation())],
-    });
-
+    let request_body = request_write_new_code(max_tokens, model, prompt);
     let raw_json = connector
         .query_messages_api(request_body)
         .context("failed to write code")?;
 
     deserialize_json_response(raw_json)
-}
-
-fn user_prompt_code_edit(prompt: &str, code_block: &str) -> String {
-    format!(
-        "Take the instructions:
-```plaintext
-{prompt}
-```
-And apply them to the code:
-```
-{code_block}
-```"
-    )
 }
 
 pub fn edit_code_block(
@@ -90,14 +31,7 @@ pub fn edit_code_block(
     let api_key = load_api_key("ANTHROPIC_API_KEY")?;
     let connector = AnthropicConnector::try_new(api_key)?;
 
-    let request_body = json!({
-        "max_tokens": max_tokens,
-        "messages": vec![message_param(&user_prompt_code_edit(prompt, code_block))],
-        "model": model,
-        "output_config": schema_structured_output_code_generation(),
-        "system": vec![text_block_param(system_prompt_code_generation())],
-    });
-
+    let request_body = request_edit_code_block(code_block, max_tokens, model, prompt);
     let raw_json = connector
         .query_messages_api(request_body)
         .context("failed to edit code")?;
