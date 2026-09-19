@@ -1,8 +1,6 @@
 use anyhow::Context;
 use serde::Deserialize;
 
-use super::structs::AnthropicResults;
-
 #[derive(Deserialize, Debug)]
 #[serde(untagged)]
 enum ApiResponse {
@@ -73,6 +71,14 @@ fn unpack_text_block(response: &Response) -> anyhow::Result<StructuredOutput> {
     }
 
     anyhow::bail!("no TextBlock object found in response")
+}
+
+#[derive(Debug)]
+pub struct AnthropicResults {
+    pub input_tokens: u32,
+    pub output_tokens: u32,
+    pub code: String,
+    pub description_of_what_was_done: String,
 }
 
 fn unpack_response(response: &Response) -> anyhow::Result<AnthropicResults> {

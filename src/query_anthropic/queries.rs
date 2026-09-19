@@ -6,8 +6,7 @@ use serde_json::json;
 
 use crate::utils::load_api_key;
 
-use super::response::deserialize_json_response;
-use super::structs::AnthropicResults;
+use super::response::{AnthropicResults, deserialize_json_response};
 
 fn schema_structured_output_code_generation() -> serde_json::Value {
     json!({

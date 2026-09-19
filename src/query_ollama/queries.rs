@@ -2,8 +2,7 @@ use anyhow::Context;
 
 use super::connector::OllamaConnector;
 use super::requests::request_body_validate_prompt;
-use super::response::deserialize_prompt_validation_response;
-use super::structs::ValidationResults;
+use super::response::{ValidationResults, deserialize_prompt_validation_response};
 
 use crate::configurations::Configs;
 

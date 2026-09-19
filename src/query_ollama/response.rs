@@ -1,8 +1,6 @@
 use anyhow::Context;
 use serde::Deserialize;
 
-use super::structs::ValidationResults;
-
 #[derive(Deserialize, Debug)]
 #[serde(untagged)]
 enum ApiResponse {
@@ -31,6 +29,15 @@ struct StructuredOutput {
 
 fn nanoseconds_to_seconds(ns: u64) -> f32 {
     ns as f32 / 1_000_000_000.0
+}
+
+#[derive(Debug)]
+pub struct ValidationResults {
+    pub input_tokens: u32,
+    pub output_tokens: u32,
+    pub reasoning: String,
+    pub total_duration: f32,
+    pub valid_instructions: bool,
 }
 
 fn unpack_response(response: &Response) -> anyhow::Result<ValidationResults> {
