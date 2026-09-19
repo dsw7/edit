@@ -54,12 +54,20 @@ fn query_generate_api(
     Ok(raw_json)
 }
 
+fn wrap_prompt_with_input_tags(prompt: &str) -> String {
+    format!(
+        "<input>
+    {prompt}
+</input>",
+    )
+}
+
 pub fn is_valid_prompt(params: &Configs, prompt: &str) -> anyhow::Result<ValidationResults> {
     let request_body = json!({
         "format": schema_structured_output_validate_prompt(),
         "keep_alive": "30m",
         "model": params.ollama_validation_model,
-        "prompt": prompt,
+        "prompt": wrap_prompt_with_input_tags(prompt),
         "stream": false,
         "system": system_prompt_validate_prompt(),
         "options": {
