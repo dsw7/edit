@@ -1,3 +1,4 @@
+mod connector;
 mod queries;
 mod response;
 
