@@ -29,11 +29,6 @@ Output:
 "
 }
 
-fn message_param(user_prompt: &str) -> serde_json::Value {
-    // see https://platform.claude.com/docs/en/api/http/messages#message_param
-    json!({"content": user_prompt, "role": "user"})
-}
-
 fn text_block_param(system_prompt: &str) -> serde_json::Value {
     // see https://platform.claude.com/docs/en/api/http/messages#text_block_param
     json!({"text": system_prompt, "type": "text"})
@@ -42,24 +37,11 @@ fn text_block_param(system_prompt: &str) -> serde_json::Value {
 pub fn request_write_new_code(max_tokens: u16, model: &str, prompt: &str) -> Value {
     json!({
         "max_tokens": max_tokens,
-        "messages": vec![message_param(prompt)],
+        "messages": [{"content": prompt, "role": "user"}],
         "model": model,
         "output_config": schema_structured_output_code_generation(),
-        "system": vec![text_block_param(system_prompt_code_generation())],
+        "system": [text_block_param(system_prompt_code_generation())],
     })
-}
-
-fn user_prompt_code_edit(prompt: &str, code_block: &str) -> String {
-    format!(
-        "Take the instructions:
-```plaintext
-{prompt}
-```
-And apply them to the code:
-```
-{code_block}
-```"
-    )
 }
 
 pub fn request_edit_code_block(
@@ -68,11 +50,22 @@ pub fn request_edit_code_block(
     model: &str,
     prompt: &str,
 ) -> Value {
+    let prompt = format!(
+        "Take the instructions:
+```plaintext
+{prompt}
+```
+And apply them to the code:
+```
+{code_block}
+```"
+    );
+
     json!({
         "max_tokens": max_tokens,
-        "messages": vec![message_param(&user_prompt_code_edit(prompt, code_block))],
+        "messages": [{"content": prompt, "role": "user"}],
         "model": model,
         "output_config": schema_structured_output_code_generation(),
-        "system": vec![text_block_param(system_prompt_code_generation())],
+        "system": [text_block_param(system_prompt_code_generation())],
     })
 }
