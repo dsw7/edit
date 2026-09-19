@@ -23,4 +23,21 @@ impl AnthropicConnector<'_> {
             api_key,
         })
     }
+
+    pub fn query_messages_api(&self, request_body: Value) -> anyhow::Result<String> {
+        let response = self
+            .client
+            .post(format!("{}/v1/messages", self.base_url))
+            .header("Content-Type", "application/json")
+            .header("anthropic-version", "2023-06-01")
+            .header("X-Api-Key", &self.api_key)
+            .json(&request_body)
+            .send()?;
+
+        let raw_json = response
+            .text()
+            .context("failed to decode response body to string")?;
+
+        Ok(raw_json)
+    }
 }
