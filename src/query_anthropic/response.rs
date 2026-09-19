@@ -90,7 +90,6 @@ fn unpack_response(response: &Response) -> anyhow::Result<AnthropicResults> {
     }
 
     let structured_output = unpack_text_block(response)?;
-    //.context("something went wrong when unpacking structured output")?;
 
     let results = AnthropicResults {
         input_tokens: response.usage.input_tokens,
