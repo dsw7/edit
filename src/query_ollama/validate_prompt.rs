@@ -82,6 +82,9 @@ fn wrap_prompt_with_input_tags(prompt: &str) -> String {
 }
 
 pub fn is_valid_prompt(params: &Configs, prompt: &str) -> anyhow::Result<ValidationResults> {
+    let connector = OllamaConnector::try_new(&params.ollama_host, params.ollama_port)?;
+    connector.try_handshake()?;
+
     let request_body = json!({
         "format": schema_structured_output_validate_prompt(),
         "keep_alive": "30m",
@@ -94,8 +97,6 @@ pub fn is_valid_prompt(params: &Configs, prompt: &str) -> anyhow::Result<Validat
             "num_ctx": params.validation_context_window,
         },
     });
-
-    let connector = OllamaConnector::try_new(&params.ollama_host, params.ollama_port)?;
     let raw_json = connector
         .query_generate_api(request_body)
         .context("failed to query Ollama")?;
