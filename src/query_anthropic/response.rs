@@ -123,7 +123,7 @@ mod tests {
         let raw_json = r#"{
             "error": {
         }"#;
-        assert_error_message(raw_json, "failed to deserialize raw json");
+        assert_error_message(raw_json, "failed to deserialize raw json from Anthropic");
     }
 
     #[test]
