@@ -1,11 +1,9 @@
-use std::time::Duration;
-
 use anyhow::Context;
-use reqwest::blocking::Client;
 use serde_json::json;
 
 use crate::utils::load_api_key;
 
+use super::connector::AnthropicConnector;
 use super::response::{AnthropicResults, deserialize_json_response};
 
 fn schema_structured_output_code_generation() -> serde_json::Value {
@@ -47,30 +45,14 @@ fn text_block_param(system_prompt: &str) -> serde_json::Value {
     json!({"text": system_prompt, "type": "text"})
 }
 
-fn query_messages_api(request_body: serde_json::Value) -> anyhow::Result<String> {
-    let api_key = load_api_key("ANTHROPIC_API_KEY")?;
-
-    let client = Client::builder().timeout(Duration::from_secs(10)).build()?;
-    let response = client
-        .post("https://api.anthropic.com/v1/messages")
-        .header("Content-Type", "application/json")
-        .header("anthropic-version", "2023-06-01")
-        .header("X-Api-Key", api_key)
-        .json(&request_body)
-        .send()?;
-
-    let raw_json = response
-        .text()
-        .context("failed to decode response body to string")?;
-
-    Ok(raw_json)
-}
-
 pub fn write_new_code(
     max_tokens: u16,
     model: &str,
     prompt: &str,
 ) -> anyhow::Result<AnthropicResults> {
+    let api_key = load_api_key("ANTHROPIC_API_KEY")?;
+    let connector = AnthropicConnector::try_new(api_key)?;
+
     let request_body = json!({
         "max_tokens": max_tokens,
         "messages": vec![message_param(prompt)],
@@ -79,7 +61,10 @@ pub fn write_new_code(
         "system": vec![text_block_param(system_prompt_code_generation())],
     });
 
-    let raw_json = query_messages_api(request_body).context("failed to write code")?;
+    let raw_json = connector
+        .query_messages_api(request_body)
+        .context("failed to write code")?;
+
     deserialize_json_response(raw_json)
 }
 
@@ -102,6 +87,9 @@ pub fn edit_code_block(
     model: &str,
     prompt: &str,
 ) -> anyhow::Result<AnthropicResults> {
+    let api_key = load_api_key("ANTHROPIC_API_KEY")?;
+    let connector = AnthropicConnector::try_new(api_key)?;
+
     let request_body = json!({
         "max_tokens": max_tokens,
         "messages": vec![message_param(&user_prompt_code_edit(prompt, code_block))],
@@ -110,7 +98,10 @@ pub fn edit_code_block(
         "system": vec![text_block_param(system_prompt_code_generation())],
     });
 
-    let raw_json = query_messages_api(request_body).context("failed to edit code")?;
+    let raw_json = connector
+        .query_messages_api(request_body)
+        .context("failed to edit code")?;
+
     deserialize_json_response(raw_json)
 }
 
