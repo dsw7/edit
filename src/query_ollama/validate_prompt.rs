@@ -9,8 +9,8 @@ use super::structs::ValidationResults;
 use crate::configurations::Configs;
 
 struct OllamaConnector {
-    client: Client,
     base_url: String,
+    client: Client,
 }
 
 impl OllamaConnector {
@@ -21,6 +21,15 @@ impl OllamaConnector {
         let base_url = format!("http://{host}:{port}");
 
         Ok(OllamaConnector { base_url, client })
+    }
+
+    fn try_handshake(&self) -> anyhow::Result<()> {
+        self.client
+            .get(&self.base_url)
+            .send()
+            .context("handshake with Ollama failed")?;
+
+        Ok(())
     }
 
     fn query_generate_api(&self, request_body: serde_json::Value) -> anyhow::Result<String> {
