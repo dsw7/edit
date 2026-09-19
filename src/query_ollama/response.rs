@@ -20,7 +20,7 @@ struct Response {
     eval_count: u32,
     prompt_eval_count: u32,
     response: String,
-    total_duration: u32,
+    total_duration: u64,
 }
 
 #[derive(Deserialize, Debug)]
@@ -29,7 +29,7 @@ struct StructuredOutput {
     valid_instructions: bool,
 }
 
-fn nanoseconds_to_seconds(ns: u32) -> f32 {
+fn nanoseconds_to_seconds(ns: u64) -> f32 {
     ns as f32 / 1_000_000_000.0
 }
 
