@@ -97,8 +97,8 @@ fn unpack_response(response: &Response) -> anyhow::Result<AnthropicResults> {
 }
 
 pub fn deserialize_json_response(raw_json: String) -> anyhow::Result<AnthropicResults> {
-    let response =
-        serde_json::from_str::<ApiResponse>(&raw_json).context("failed to deserialize raw json")?;
+    let response = serde_json::from_str::<ApiResponse>(&raw_json)
+        .context("failed to deserialize raw json from Anthropic")?;
 
     match response {
         ApiResponse::ErrorResponse(response) => anyhow::bail!(response.error.message),

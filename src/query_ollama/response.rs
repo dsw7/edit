@@ -49,8 +49,8 @@ fn unpack_response(response: &Response) -> anyhow::Result<ValidationResults> {
 }
 
 pub fn deserialize_json_response(raw_json: String) -> anyhow::Result<ValidationResults> {
-    let response =
-        serde_json::from_str::<ApiResponse>(&raw_json).context("failed to deserialize raw json")?;
+    let response = serde_json::from_str::<ApiResponse>(&raw_json)
+        .context("failed to deserialize raw json from Ollama")?;
 
     match response {
         ApiResponse::ErrorResponse(response) => anyhow::bail!(response.error),
