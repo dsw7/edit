@@ -1,7 +1,8 @@
+mod connector;
+mod queries;
 mod requests;
 mod response;
 mod structs;
-mod validate_prompt;
 
+pub use queries::is_valid_prompt;
 pub use structs::ValidationResults;
-pub use validate_prompt::is_valid_prompt;
