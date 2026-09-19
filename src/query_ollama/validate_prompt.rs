@@ -8,6 +8,43 @@ use super::response::deserialize_json_response;
 use super::structs::ValidationResults;
 use crate::configurations::Configs;
 
+struct OllamaConnector {
+    client: Client,
+    base_url: String,
+}
+
+impl OllamaConnector {
+    fn try_new(host: &str, port: u16) -> anyhow::Result<Self> {
+        let connection_timeout = Duration::from_secs(60);
+
+        let client = Client::builder().timeout(connection_timeout).build()?;
+        let base_url = format!("http://{host}:{port}");
+
+        Ok(OllamaConnector { base_url, client })
+    }
+}
+
+fn query_generate_api(
+    host: &str,
+    port: u16,
+    request_body: serde_json::Value,
+) -> anyhow::Result<String> {
+    let connection_timeout = Duration::from_secs(60);
+    let client = Client::builder().timeout(connection_timeout).build()?;
+
+    let response = client
+        .post(format!("http://{host}:{port}/api/generate"))
+        .header("Content-Type", "application/json")
+        .json(&request_body)
+        .send()?;
+
+    let raw_json = response
+        .text()
+        .context("failed to decode response body to string")?;
+
+    Ok(raw_json)
+}
+
 fn schema_structured_output_validate_prompt() -> serde_json::Value {
     json!({
         "type": "object",
@@ -31,27 +68,6 @@ Output:
 - reasoning: brief explanation of your classification
 - valid_instructions
 "
-}
-
-fn query_generate_api(
-    host: &str,
-    port: u16,
-    request_body: serde_json::Value,
-) -> anyhow::Result<String> {
-    let connection_timeout = Duration::from_secs(60);
-    let client = Client::builder().timeout(connection_timeout).build()?;
-
-    let response = client
-        .post(format!("http://{host}:{port}/api/generate"))
-        .header("Content-Type", "application/json")
-        .json(&request_body)
-        .send()?;
-
-    let raw_json = response
-        .text()
-        .context("failed to decode response body to string")?;
-
-    Ok(raw_json)
 }
 
 fn wrap_prompt_with_input_tags(prompt: &str) -> String {
