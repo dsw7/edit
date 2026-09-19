@@ -48,7 +48,9 @@ fn unpack_response(response: &Response) -> anyhow::Result<ValidationResults> {
     Ok(results)
 }
 
-pub fn deserialize_json_response(raw_json: String) -> anyhow::Result<ValidationResults> {
+pub fn deserialize_prompt_validation_response(
+    raw_json: String,
+) -> anyhow::Result<ValidationResults> {
     let response = serde_json::from_str::<ApiResponse>(&raw_json)
         .context("failed to deserialize raw json from Ollama")?;
 
