@@ -39,27 +39,6 @@ impl OllamaConnector {
     }
 }
 
-fn query_generate_api(
-    host: &str,
-    port: u16,
-    request_body: serde_json::Value,
-) -> anyhow::Result<String> {
-    let connection_timeout = Duration::from_secs(60);
-    let client = Client::builder().timeout(connection_timeout).build()?;
-
-    let response = client
-        .post(format!("http://{host}:{port}/api/generate"))
-        .header("Content-Type", "application/json")
-        .json(&request_body)
-        .send()?;
-
-    let raw_json = response
-        .text()
-        .context("failed to decode response body to string")?;
-
-    Ok(raw_json)
-}
-
 fn schema_structured_output_validate_prompt() -> serde_json::Value {
     json!({
         "type": "object",
@@ -107,7 +86,9 @@ pub fn is_valid_prompt(params: &Configs, prompt: &str) -> anyhow::Result<Validat
         },
     });
 
-    let raw_json = query_generate_api(&params.ollama_host, params.ollama_port, request_body)
+    let connector = OllamaConnector::try_new(&params.ollama_host, params.ollama_port)?;
+    let raw_json = connector
+        .query_generate_api(request_body)
         .context("failed to query Ollama")?;
 
     deserialize_json_response(raw_json)
