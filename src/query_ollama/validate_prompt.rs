@@ -22,6 +22,21 @@ impl OllamaConnector {
 
         Ok(OllamaConnector { base_url, client })
     }
+
+    fn query_generate_api(&self, request_body: serde_json::Value) -> anyhow::Result<String> {
+        let response = self
+            .client
+            .post(format!("{}/api/generate", self.base_url))
+            .header("Content-Type", "application/json")
+            .json(&request_body)
+            .send()?;
+
+        let raw_json = response
+            .text()
+            .context("failed to decode response body to string")?;
+
+        Ok(raw_json)
+    }
 }
 
 fn query_generate_api(
