@@ -1,6 +1,6 @@
 use serde_json::{Value, json};
 
-fn schema_structured_output_code_generation() -> serde_json::Value {
+fn schema_structured_output_code_generation() -> Value {
     json!({
         "format": {
             "type": "json_schema",

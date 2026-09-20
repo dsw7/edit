@@ -1,17 +1,27 @@
-use anyhow::Context;
+use std::env;
 
-use crate::utils::load_api_key;
+use anyhow::Context;
 
 use super::connector::AnthropicConnector;
 use super::requests::{request_edit_code_block, request_write_new_code};
 use super::response::{AnthropicResults, deserialize_json_response};
+
+fn load_anthropic_api_key() -> anyhow::Result<String> {
+    let env_var_key = "ANTHROPIC_API_KEY";
+
+    let env_var_value = env::var(env_var_key).context(format!(
+        "failed to load environment variable: {env_var_key}"
+    ))?;
+
+    Ok(env_var_value)
+}
 
 pub fn write_new_code(
     max_tokens: u16,
     model: &str,
     prompt: &str,
 ) -> anyhow::Result<AnthropicResults> {
-    let api_key = load_api_key("ANTHROPIC_API_KEY")?;
+    let api_key = load_anthropic_api_key()?;
     let connector = AnthropicConnector::try_new(api_key)?;
 
     let request_body = request_write_new_code(max_tokens, model, prompt);
@@ -28,7 +38,7 @@ pub fn edit_code_block(
     model: &str,
     prompt: &str,
 ) -> anyhow::Result<AnthropicResults> {
-    let api_key = load_api_key("ANTHROPIC_API_KEY")?;
+    let api_key = load_anthropic_api_key()?;
     let connector = AnthropicConnector::try_new(api_key)?;
 
     let request_body = request_edit_code_block(code_block, max_tokens, model, prompt);
