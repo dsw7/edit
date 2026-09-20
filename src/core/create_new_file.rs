@@ -1,8 +1,10 @@
+use std::fs;
+
+use anyhow::Context;
+use crossterm::style::Stylize;
+
 use crate::configurations::Configs;
 use crate::query_anthropic::{AnthropicResults, write_new_code};
-use crate::utils;
-
-use crossterm::style::Stylize;
 
 pub fn create_new_file(params: Configs, user_prompt: &str) -> anyhow::Result<AnthropicResults> {
     let results = write_new_code(
@@ -11,7 +13,10 @@ pub fn create_new_file(params: Configs, user_prompt: &str) -> anyhow::Result<Ant
         user_prompt,
     )?;
 
-    utils::write_to_file(&params.input_file, &results.code)?;
+    fs::write(&params.input_file, &results.code).context(format!(
+        "failed to write to file `{}`",
+        &params.input_file.display()
+    ))?;
 
     print!("Created new file ");
     let input_file = format!("{}", &params.input_file.display());

@@ -1,8 +1,8 @@
-use anyhow::Context;
-
 use std::fs::{OpenOptions, read_to_string};
 use std::io::Write;
 use std::path::PathBuf;
+
+use anyhow::Context;
 
 use crate::configurations::Configs;
 use crate::query_anthropic::{AnthropicResults, edit_code_block};
