@@ -1,5 +1,5 @@
+use std::fs;
 use std::io::{self, Write};
-use std::path::Path;
 
 use anyhow::Context;
 use crossterm::style::Stylize;
@@ -10,7 +10,6 @@ use super::edit_existing_file::edit_existing_file;
 use crate::configurations::Configs;
 use crate::query_anthropic::AnthropicResults;
 use crate::query_ollama::{ValidationResults, is_valid_prompt};
-use crate::utils;
 
 fn get_term_width() -> usize {
     match terminal::size() {
@@ -54,27 +53,16 @@ fn load_prompt_from_stdin() -> anyhow::Result<String> {
     Ok(prompt)
 }
 
-fn load_prompt_from_file(input_file: &Path) -> anyhow::Result<String> {
-    println!(">>> Found Inputfile in current directory. Reading instructions from this file");
-    utils::read_file(input_file)
-}
-
 fn load_prompt_from_file_or_stdin() -> anyhow::Result<String> {
-    let input_file = Path::new("Inputfile");
-
-    let user_prompt = if input_file.exists() {
-        load_prompt_from_file(input_file)?
-    } else {
-        load_prompt_from_stdin()?
+    let user_prompt = match fs::read_to_string("Inputfile").ok() {
+        Some(prompt) => {
+            println!(">>> Read instructions from Inputfile!");
+            prompt
+        }
+        None => load_prompt_from_stdin()?,
     };
 
-    let user_prompt = user_prompt.trim().to_string();
-
-    if user_prompt.is_empty() {
-        anyhow::bail!("the user prompt is empty")
-    }
-
-    Ok(user_prompt)
+    Ok(user_prompt.trim().to_string())
 }
 
 fn should_exit_program(user_prompt: &str) -> bool {
@@ -146,6 +134,11 @@ pub fn run_process(params: Configs) -> anyhow::Result<()> {
     separator!(term_width);
 
     let user_prompt = load_prompt_from_file_or_stdin()?;
+
+    if user_prompt.is_empty() {
+        anyhow::bail!("the user prompt is empty")
+    }
+
     separator!(term_width);
 
     if should_exit_program(&user_prompt) {
