@@ -1,12 +1,11 @@
 use anyhow::Context;
 
-use std::fs::OpenOptions;
+use std::fs::{OpenOptions, read_to_string};
 use std::io::Write;
 use std::path::PathBuf;
 
 use crate::configurations::Configs;
 use crate::query_anthropic::{AnthropicResults, edit_code_block};
-use crate::utils;
 
 const DELIM_EDIT_CODE: &str = "@@@\n";
 const EDIT_START: &str = ">>>>>>>\n";
@@ -56,7 +55,10 @@ fn overwrite_file(filename: &PathBuf, content: &str) -> anyhow::Result<()> {
 }
 
 pub fn edit_existing_file(params: Configs, user_prompt: &str) -> anyhow::Result<AnthropicResults> {
-    let mut file_content = utils::read_file(&params.input_file)?;
+    let mut file_content = read_to_string(&params.input_file).context(format!(
+        "failed to read file: `{}`",
+        &params.input_file.display()
+    ))?;
 
     let (start_idx, end_idx) = get_delim_indices(&file_content)?;
     let inner_content = get_delimited_block(&file_content, start_idx, end_idx)?;
