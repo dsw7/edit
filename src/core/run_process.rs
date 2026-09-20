@@ -56,9 +56,7 @@ fn load_prompt_from_stdin() -> anyhow::Result<String> {
 
 fn load_prompt_from_file(input_file: &Path) -> anyhow::Result<String> {
     println!(">>> Found Inputfile in current directory. Reading instructions from this file");
-
-    let prompt = utils::read_file(input_file)?;
-    Ok(prompt)
+    utils::read_file(input_file)
 }
 
 fn load_prompt_from_file_or_stdin() -> anyhow::Result<String> {
