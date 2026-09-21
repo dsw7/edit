@@ -70,12 +70,12 @@ fn should_exit_program(user_prompt: &str) -> bool {
 }
 
 fn print_validation_success(results: ValidationResults) {
-    let msg_usage = format!(
+    let usage = format!(
         "Validation took {} s | Input tokens: {} | Output tokens: {}",
         results.total_duration, results.input_tokens, results.output_tokens
     );
 
-    println!("● {}", msg_usage.dark_grey());
+    println!("● {}", usage.dark_grey());
 }
 
 fn print_validation_failure(results: ValidationResults) {
@@ -83,12 +83,12 @@ fn print_validation_failure(results: ValidationResults) {
     println!("! {}", errmsg.red());
     println!("! {}", results.reasoning.dark_grey());
 
-    let msg_usage = format!(
+    let usage = format!(
         "Validation took {} s | Input tokens: {} | Output tokens: {}",
         results.total_duration, results.input_tokens, results.output_tokens
     );
 
-    println!("! {}", msg_usage.dark_grey());
+    println!("! {}", usage.dark_grey());
 }
 
 fn prompt_is_invalid(params: &Configs, user_prompt: &str) -> anyhow::Result<bool> {
