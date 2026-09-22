@@ -7,4 +7,7 @@ use clap::Parser;
 pub struct ConfigsFromCli {
     #[arg(value_name = "FILE-TO-EDIT")]
     pub file_to_edit: PathBuf,
+
+    #[arg(short, long, help = "Force the edit by omitting prompt validation")]
+    pub force: bool,
 }

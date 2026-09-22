@@ -43,10 +43,11 @@ pub fn setup_configurations() -> anyhow::Result<Configs> {
     let cfgs_file = load_configs_from_file()?;
 
     let max_tokens_edit_model = cfgs_file.anthropic.max_tokens_edit_model.clamp(1, 64000);
+    let disable_prompt_validation = cfgs_cli.force || cfgs_file.disable_prompt_validation;
 
     let params = Configs {
         code_edit_model: cfgs_file.anthropic.code_edit_model,
-        disable_prompt_validation: cfgs_file.disable_prompt_validation,
+        disable_prompt_validation,
         input_file: cfgs_cli.file_to_edit,
         max_tokens_edit_model,
         ollama_host: cfgs_file.ollama.ollama_host,
