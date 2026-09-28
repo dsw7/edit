@@ -54,10 +54,10 @@ fn overwrite_file(filename: &PathBuf, content: &str) -> anyhow::Result<()> {
     Ok(())
 }
 
-pub fn edit_existing_file(params: Configs, user_prompt: &str) -> anyhow::Result<AnthropicResults> {
-    let mut file_content = read_to_string(&params.input_file).context(format!(
+pub fn edit_existing_file(configs: Configs, user_prompt: &str) -> anyhow::Result<AnthropicResults> {
+    let mut file_content = read_to_string(&configs.input_file).context(format!(
         "failed to read file: `{}`",
-        &params.input_file.display()
+        &configs.input_file.display()
     ))?;
 
     let (start_idx, end_idx) = get_delim_indices(&file_content)?;
@@ -65,8 +65,8 @@ pub fn edit_existing_file(params: Configs, user_prompt: &str) -> anyhow::Result<
 
     let results = edit_code_block(
         inner_content,
-        params.max_tokens_edit_model,
-        &params.code_edit_model,
+        configs.max_tokens_edit_model,
+        &configs.code_edit_model,
         user_prompt,
     )?;
 
@@ -78,7 +78,7 @@ pub fn edit_existing_file(params: Configs, user_prompt: &str) -> anyhow::Result<
 
     file_content.replace_range(start_idx..end_idx, &new_text);
 
-    overwrite_file(&params.input_file, &file_content)?;
+    overwrite_file(&configs.input_file, &file_content)?;
     Ok(results)
 }
 

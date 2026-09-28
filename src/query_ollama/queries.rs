@@ -6,11 +6,11 @@ use super::response::{ValidationResults, deserialize_prompt_validation_response}
 
 use crate::configurations::Configs;
 
-pub fn is_valid_prompt(params: &Configs, prompt: &str) -> anyhow::Result<ValidationResults> {
-    let connector = OllamaConnector::try_new(&params.ollama_host, params.ollama_port)?;
+pub fn is_valid_prompt(configs: &Configs, prompt: &str) -> anyhow::Result<ValidationResults> {
+    let connector = OllamaConnector::try_new(&configs.ollama_host, configs.ollama_port)?;
     connector.try_handshake()?;
 
-    let request_body = request_body_validate_prompt(params, prompt);
+    let request_body = request_body_validate_prompt(configs, prompt);
     let raw_json = connector
         .query_generate_api(request_body)
         .context("failed to query Ollama")?;

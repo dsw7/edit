@@ -45,7 +45,7 @@ pub fn setup_configurations() -> anyhow::Result<Configs> {
     let max_tokens_edit_model = cfgs_file.anthropic.max_tokens_edit_model.clamp(1, 64000);
     let disable_prompt_validation = cfgs_cli.force || cfgs_file.disable_prompt_validation;
 
-    let params = Configs {
+    let cfgs = Configs {
         code_edit_model: cfgs_file.anthropic.code_edit_model,
         disable_prompt_validation,
         input_file: cfgs_cli.file_to_edit,
@@ -56,5 +56,5 @@ pub fn setup_configurations() -> anyhow::Result<Configs> {
         validation_context_window: cfgs_file.ollama.validation_context_window,
     };
 
-    Ok(params)
+    Ok(cfgs)
 }

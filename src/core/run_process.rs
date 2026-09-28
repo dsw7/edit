@@ -28,11 +28,11 @@ macro_rules! separator {
     }};
 }
 
-fn print_misc_info(params: &Configs) {
-    let editor = format!("anthropic:{}", &params.code_edit_model);
+fn print_misc_info(configs: &Configs) {
+    let editor = format!("anthropic:{}", &configs.code_edit_model);
     println!("● Using {} for code editing", editor.green());
 
-    let validator = format!("ollama:{}", &params.ollama_validation_model);
+    let validator = format!("ollama:{}", &configs.ollama_validation_model);
     println!("● Using {} for prompt validation", validator.green());
 
     println!();
@@ -91,9 +91,9 @@ fn print_validation_failure(results: ValidationResults) {
     println!("! {}", usage.dark_grey());
 }
 
-fn prompt_is_invalid(params: &Configs, user_prompt: &str) -> anyhow::Result<bool> {
+fn prompt_is_invalid(configs: &Configs, user_prompt: &str) -> anyhow::Result<bool> {
     let results =
-        is_valid_prompt(params, user_prompt).context("prompt validation process failed")?;
+        is_valid_prompt(configs, user_prompt).context("prompt validation process failed")?;
 
     if results.valid_instructions {
         print_validation_success(results);
@@ -104,11 +104,11 @@ fn prompt_is_invalid(params: &Configs, user_prompt: &str) -> anyhow::Result<bool
     }
 }
 
-fn operate_on_file(params: Configs, user_prompt: &str) -> anyhow::Result<AnthropicResults> {
-    if params.input_file.exists() {
-        edit_existing_file(params, user_prompt)
+fn operate_on_file(configs: Configs, user_prompt: &str) -> anyhow::Result<AnthropicResults> {
+    if configs.input_file.exists() {
+        edit_existing_file(configs, user_prompt)
     } else {
-        create_new_file(params, user_prompt)
+        create_new_file(configs, user_prompt)
     }
 }
 
@@ -123,8 +123,8 @@ fn print_query_info(results: AnthropicResults) {
     println!("● Output tokens: {}", output_tokens.green());
 }
 
-pub fn run_process(params: Configs) -> anyhow::Result<()> {
-    print_misc_info(&params);
+pub fn run_process(configs: Configs) -> anyhow::Result<()> {
+    print_misc_info(&configs);
 
     let term_width = get_term_width();
     separator!(term_width);
@@ -141,11 +141,11 @@ pub fn run_process(params: Configs) -> anyhow::Result<()> {
         return Ok(());
     }
 
-    if !params.disable_prompt_validation && prompt_is_invalid(&params, &user_prompt)? {
+    if !configs.disable_prompt_validation && prompt_is_invalid(&configs, &user_prompt)? {
         return Ok(());
     }
 
-    let results = operate_on_file(params, &user_prompt).context("editing process failed")?;
+    let results = operate_on_file(configs, &user_prompt).context("editing process failed")?;
 
     print_query_info(results);
     separator!(term_width);

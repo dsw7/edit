@@ -2,7 +2,7 @@ use serde_json::{Value, json};
 
 use crate::configurations::Configs;
 
-pub fn request_body_validate_prompt(params: &Configs, user_prompt: &str) -> Value {
+pub fn request_body_validate_prompt(configs: &Configs, user_prompt: &str) -> Value {
     let system_prompt = "You are a classifier. Determine whether the
 user's text is a request related to editing code.
 
@@ -24,13 +24,13 @@ Output:
             "additionalProperties": false
         },
         "keep_alive": "30m",
-        "model": params.ollama_validation_model,
+        "model": configs.ollama_validation_model,
         "prompt": user_prompt,
         "stream": false,
         "system": system_prompt,
         "options": {
             "temperature": 0.1,
-            "num_ctx": params.validation_context_window,
+            "num_ctx": configs.validation_context_window,
         },
     })
 }
