@@ -29,10 +29,6 @@ fn possible_languages() -> HashMap<&'static str, &'static str> {
 }
 
 pub fn resolve_lang_from_extension(input_file: &Path) -> anyhow::Result<String> {
-    if !input_file.is_file() {
-        anyhow::bail!("provided path is not a file");
-    }
-
     let ext_os = input_file
         .extension()
         .ok_or_else(|| anyhow::anyhow!("could not get extension from file"))?;
