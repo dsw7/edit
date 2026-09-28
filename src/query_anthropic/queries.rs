@@ -31,14 +31,14 @@ pub fn write_new_code(prompt: &str, params: &AnthropicParams) -> anyhow::Result<
 
 pub fn edit_code_block(
     code_block: &str,
-    max_tokens: u16,
-    model: &str,
     prompt: &str,
+    params: &AnthropicParams,
 ) -> anyhow::Result<AnthropicResults> {
     let api_key = load_anthropic_api_key()?;
     let connector = AnthropicConnector::try_new(api_key)?;
 
-    let request_body = request_edit_code_block(code_block, max_tokens, model, prompt);
+    let request_body =
+        request_edit_code_block(code_block, params.max_tokens, &params.model, prompt);
     let raw_json = connector
         .query_messages_api(request_body)
         .context("failed to edit code")?;

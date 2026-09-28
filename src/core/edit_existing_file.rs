@@ -5,7 +5,7 @@ use std::path::PathBuf;
 use anyhow::Context;
 
 use crate::configurations::Configs;
-use crate::query_anthropic::{AnthropicResults, edit_code_block};
+use crate::query_anthropic::{AnthropicParams, AnthropicResults, edit_code_block};
 
 const DELIM_EDIT_CODE: &str = "@@@\n";
 const EDIT_START: &str = ">>>>>>>\n";
@@ -65,9 +65,11 @@ pub fn edit_existing_file(configs: Configs, user_prompt: &str) -> anyhow::Result
 
     let results = edit_code_block(
         inner_content,
-        configs.max_tokens_edit_model,
-        &configs.code_edit_model,
         user_prompt,
+        &AnthropicParams {
+            model: configs.code_edit_model,
+            max_tokens: configs.max_tokens_edit_model,
+        },
     )?;
 
     let new_text = if results.code.ends_with('\n') {
