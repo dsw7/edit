@@ -66,7 +66,7 @@ mod tests {
 
     #[test]
     fn test_write_new_code_valid_query() {
-        let prompt = "Print 'hello world' in Python.";
+        let prompt = "Print 'hello world'.";
         let params = AnthropicParams::default();
         let result = write_new_code(prompt, &params).unwrap();
         assert!(result.input_tokens > 0);

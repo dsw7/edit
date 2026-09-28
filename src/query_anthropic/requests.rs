@@ -19,8 +19,9 @@ fn schema_structured_output_code_generation() -> Value {
     })
 }
 
-fn system_prompt_code_generation() -> &'static str {
-    "You are a helpful programming assistant.
+fn system_prompt_code_generation(lang: &str) -> String {
+    format!(
+        "You are a helpful programming assistant that specializes in: {lang}
 
 IMPORTANT: Do not wrap your response in backticks (```). Output the code
 directly without markdown code fences.
@@ -29,6 +30,7 @@ Output:
 - description_of_what_was_done: brief summary of what you did
 - code: your updated code
 "
+    )
 }
 
 pub fn request_write_new_code(prompt: &str, params: &AnthropicParams) -> Value {
@@ -37,7 +39,7 @@ pub fn request_write_new_code(prompt: &str, params: &AnthropicParams) -> Value {
         "messages": [{"content": prompt, "role": "user"}],
         "model": params.model,
         "output_config": schema_structured_output_code_generation(),
-        "system": [{"text": system_prompt_code_generation(), "type": "text"}],
+        "system": [{"text": system_prompt_code_generation(&params.programming_language), "type": "text"}],
     })
 }
 
@@ -58,6 +60,6 @@ And apply them to the code:
         "messages": [{"content": prompt, "role": "user"}],
         "model": params.model,
         "output_config": schema_structured_output_code_generation(),
-        "system": [{"text": system_prompt_code_generation(), "type": "text"}],
+        "system": [{"text": system_prompt_code_generation(&params.programming_language), "type": "text"}],
     })
 }
