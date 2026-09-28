@@ -78,10 +78,10 @@ mod tests {
 
     #[test]
     fn test_edit_code_block_valid_query() {
-        let model = "claude-haiku-4-5";
-        let prompt = "Fix the code such that it prints 'hello world'";
         let code_block = "print('hello world'";
-        let result = edit_code_block(code_block, 4096, model, prompt).unwrap();
+        let prompt = "Fix the code such that it prints 'hello world'";
+        let params = AnthropicParams::default();
+        let result = edit_code_block(code_block, prompt, &params).unwrap();
         assert!(result.input_tokens > 0);
         assert!(result.output_tokens > 0);
         assert!(!result.description_of_what_was_done.is_empty());
