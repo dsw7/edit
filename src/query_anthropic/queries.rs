@@ -21,7 +21,7 @@ pub fn write_new_code(prompt: &str, params: &AnthropicParams) -> anyhow::Result<
     let api_key = load_anthropic_api_key()?;
     let connector = AnthropicConnector::try_new(api_key)?;
 
-    let request_body = request_write_new_code(params.max_tokens, &params.model, prompt);
+    let request_body = request_write_new_code(prompt, params);
     let raw_json = connector
         .query_messages_api(request_body)
         .context("failed to write code")?;
