@@ -1,5 +1,7 @@
 use serde_json::{Value, json};
 
+use super::params::AnthropicParams;
+
 fn schema_structured_output_code_generation() -> Value {
     json!({
         "format": {
@@ -29,22 +31,17 @@ Output:
 "
 }
 
-pub fn request_write_new_code(max_tokens: u16, model: &str, prompt: &str) -> Value {
+pub fn request_write_new_code(prompt: &str, params: &AnthropicParams) -> Value {
     json!({
-        "max_tokens": max_tokens,
+        "max_tokens": params.max_tokens,
         "messages": [{"content": prompt, "role": "user"}],
-        "model": model,
+        "model": params.model,
         "output_config": schema_structured_output_code_generation(),
         "system": [{"text": system_prompt_code_generation(), "type": "text"}],
     })
 }
 
-pub fn request_edit_code_block(
-    code_block: &str,
-    max_tokens: u16,
-    model: &str,
-    prompt: &str,
-) -> Value {
+pub fn request_edit_code_block(code_block: &str, prompt: &str, params: &AnthropicParams) -> Value {
     let prompt = format!(
         "Take the instructions:
 ```plaintext
@@ -57,9 +54,9 @@ And apply them to the code:
     );
 
     json!({
-        "max_tokens": max_tokens,
+        "max_tokens": params.max_tokens,
         "messages": [{"content": prompt, "role": "user"}],
-        "model": model,
+        "model": params.model,
         "output_config": schema_structured_output_code_generation(),
         "system": [{"text": system_prompt_code_generation(), "type": "text"}],
     })
