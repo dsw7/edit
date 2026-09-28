@@ -3,6 +3,7 @@ use std::env;
 use anyhow::Context;
 
 use super::connector::AnthropicConnector;
+use super::params::AnthropicParams;
 use super::requests::{request_edit_code_block, request_write_new_code};
 use super::response::{AnthropicResults, deserialize_json_response};
 
@@ -16,15 +17,11 @@ fn load_anthropic_api_key() -> anyhow::Result<String> {
     Ok(env_var_value)
 }
 
-pub fn write_new_code(
-    max_tokens: u16,
-    model: &str,
-    prompt: &str,
-) -> anyhow::Result<AnthropicResults> {
+pub fn write_new_code(prompt: &str, params: &AnthropicParams) -> anyhow::Result<AnthropicResults> {
     let api_key = load_anthropic_api_key()?;
     let connector = AnthropicConnector::try_new(api_key)?;
 
-    let request_body = request_write_new_code(max_tokens, model, prompt);
+    let request_body = request_write_new_code(params.max_tokens, &params.model, prompt);
     let raw_json = connector
         .query_messages_api(request_body)
         .context("failed to write code")?;
@@ -51,14 +48,17 @@ pub fn edit_code_block(
 
 #[cfg(test)]
 mod tests {
-    use super::{edit_code_block, write_new_code};
+    use super::{AnthropicParams, edit_code_block, write_new_code};
 
     #[test]
     fn test_write_new_code_invalid_model() {
-        let model = "foobar";
         let prompt = "What is 3 + 5?";
+        let params = AnthropicParams {
+            model: String::from("foobar"),
+            ..AnthropicParams::default()
+        };
 
-        let result = write_new_code(4096, model, prompt);
+        let result = write_new_code(prompt, &params);
         assert!(result.is_err());
 
         let error = result.unwrap_err();
@@ -67,9 +67,9 @@ mod tests {
 
     #[test]
     fn test_write_new_code_valid_query() {
-        let model = "claude-haiku-4-5";
         let prompt = "Print 'hello world' in Python.";
-        let result = write_new_code(4096, model, prompt).unwrap();
+        let params = AnthropicParams::default();
+        let result = write_new_code(prompt, &params).unwrap();
         assert!(result.input_tokens > 0);
         assert!(result.output_tokens > 0);
         assert!(!result.description_of_what_was_done.is_empty());

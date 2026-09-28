@@ -4,13 +4,15 @@ use anyhow::Context;
 use crossterm::style::Stylize;
 
 use crate::configurations::Configs;
-use crate::query_anthropic::{AnthropicResults, write_new_code};
+use crate::query_anthropic::{AnthropicParams, AnthropicResults, write_new_code};
 
 pub fn create_new_file(configs: Configs, user_prompt: &str) -> anyhow::Result<AnthropicResults> {
     let results = write_new_code(
-        configs.max_tokens_edit_model,
-        &configs.code_edit_model,
         user_prompt,
+        &AnthropicParams {
+            model: configs.code_edit_model,
+            max_tokens: configs.max_tokens_edit_model,
+        },
     )?;
 
     fs::write(&configs.input_file, &results.code).context(format!(
