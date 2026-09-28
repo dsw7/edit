@@ -7,6 +7,8 @@ use anyhow::Context;
 use crate::configurations::Configs;
 use crate::query_anthropic::{AnthropicParams, AnthropicResults, edit_code_block};
 
+use super::resolve_programming_language::resolve_lang_from_extension;
+
 const DELIM_EDIT_CODE: &str = "@@@\n";
 const EDIT_START: &str = ">>>>>>>\n";
 const EDIT_END: &str = "<<<<<<<\n";
@@ -63,12 +65,14 @@ pub fn edit_existing_file(configs: Configs, user_prompt: &str) -> anyhow::Result
     let (start_idx, end_idx) = get_delim_indices(&file_content)?;
     let inner_content = get_delimited_block(&file_content, start_idx, end_idx)?;
 
+    let lang = resolve_lang_from_extension(&configs.input_file)?;
     let results = edit_code_block(
         inner_content,
         user_prompt,
         &AnthropicParams {
-            model: configs.code_edit_model,
             max_tokens: configs.max_tokens_edit_model,
+            model: configs.code_edit_model,
+            programming_language: lang,
         },
     )?;
 
