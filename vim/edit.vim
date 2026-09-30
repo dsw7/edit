@@ -1,7 +1,4 @@
-function! s:print_separator()
-  let s:separator = repeat('=', 109)
-  call append('$', s:separator)
-endfunction
+let s:separator = repeat('=', 109)
 
 function! s:get_highlighted_block()
   let l:old_reg = getreg('x')
@@ -15,7 +12,7 @@ function! s:get_highlighted_block()
   return l:selection
 endfunction
 
-function! s:OpenEditCommandBuffer()
+function! s:open_edit_command_buf()
   let s:code_to_edit = s:get_highlighted_block()
   let l:code_to_edit = split(s:code_to_edit, "\n")
 
@@ -27,9 +24,9 @@ function! s:OpenEditCommandBuffer()
   let b:is_edit_cmd_buf = v:true
 
   call setline(1, l:code_to_edit)
-  s:print_separator()
+  call append('$', s:separator)
 
   normal! G
 endfunction
 
-xnoremap <silent> ed :<C-u>call <SID>OpenEditCommandBuffer()<CR>
+xnoremap <silent> ed :<C-u>call <SID>open_edit_command_buf()<CR>
