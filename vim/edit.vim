@@ -29,4 +29,43 @@ function! s:open_edit_command_buf()
   normal! G
 endfunction
 
+let s:was_prompt_consumed = v:false
+
+function! s:run_edit_command()
+  if ! exists('b:is_edit_cmd_buf') || ! b:is_edit_cmd_buf
+    echoerr 'Not a valid `edit` command buffer. Cannot proceed!'
+    return
+  endif
+
+  if s:was_prompt_consumed
+    call s:prompt_was_consumed()
+    return
+  endif
+
+  let s:was_prompt_consumed = v:true
+
+  let l:prompt = shellescape('Reverse the text: ' . s:code_to_edit)
+
+  if strlen(l:prompt) < 1
+    echoerr 'No prompt provided. Cannot proceed!'
+    return
+  endif
+
+  let l:command = 'gpt short ' . l:prompt
+  call append('$', '> Running command:')
+  call append('$', ['```console', l:command, '```'])
+  call append('$', s:separator)
+
+  let l:output = system(l:command)
+  if v:shell_error != 0
+    call append('$', 'An error occurred!')
+  endif
+
+  call append('$', split(l:output, '\n'))
+  call append('$', s:separator)
+
+  normal! G
+endfunction
+
 xnoremap <silent> ed :<C-u>call <SID>open_edit_command_buf()<CR>
+command A call <SID>run_edit_command()
