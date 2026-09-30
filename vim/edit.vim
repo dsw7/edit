@@ -1,5 +1,9 @@
 let s:separator = repeat('=', 109)
 
+let s:input_open = repeat('>', 5)
+let s:input_split = repeat('-', 5)
+let s:input_close = repeat('<', 5)
+
 function! s:get_highlighted_block()
   let l:old_reg = getreg('x')
   let l:old_regtype = getregtype('x')
@@ -10,6 +14,32 @@ function! s:get_highlighted_block()
   call setreg('x', l:old_reg, l:old_regtype)
 
   return l:selection
+endfunction
+
+function! s:get_code_to_edit()
+  let l:start_line = search(s:input_open)
+  let l:middle_line = search(s:input_split)
+
+  let l:code_to_edit = ''
+
+  if l:start_line > 0 && l:middle_line > l:start_line
+    let l:code_to_edit = join(getline(l:start_line + 1, l:middle_line - 1), "\n")
+  endif
+
+  return l:code_to_edit
+endfunction
+
+function! s:get_instructions()
+  let l:middle_line = search(s:input_split)
+  let l:end_line = search(s:input_close)
+
+  let l:instructions = ''
+
+  if l:middle_line > 0 && l:end_line > l:middle_line
+    let l:instructions = join(getline(l:middle_line + 1, l:end_line - 1), "\n")
+  endif
+
+  return l:instructions
 endfunction
 
 function! s:open_edit_command_buf()
@@ -23,27 +53,11 @@ function! s:open_edit_command_buf()
 
   let b:is_edit_cmd_buf = v:true
 
-  call setline(1, l:code_to_edit)
-  call append('$', s:separator)
+  call setline(1, s:input_open)
+  call setline(2, l:code_to_edit)
+  call append('$', s:input_split)
 
   normal! G
-endfunction
-
-function! s:get_instructions()
-  let l:line_number = search('^' . s:separator, 'n') + 1
-  let l:last_line = line('$')
-  if l:line_number <= l:last_line
-    let l:instructions = join(getline(l:line_number, l:last_line), "\n")
-  else
-    let l:instructions = ''
-  endif
-
-  if strlen(l:instructions) < 1
-    echoerr 'No instructions provided. Cannot proceed!'
-    return
-  endif
-
-  return l:instructions
 endfunction
 
 let s:was_prompt_consumed = v:false
@@ -60,6 +74,7 @@ function! s:run_edit_command()
   endif
 
   let s:was_prompt_consumed = v:true
+  call append('$', s:input_close)
 
   let l:instructions = s:get_instructions()
   let l:prompt = shellescape('Apply the instructions: '. l:instructions . '\n\nTo the code: ' . s:code_to_edit)
