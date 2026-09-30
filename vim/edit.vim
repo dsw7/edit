@@ -28,9 +28,10 @@ function! s:open_edit_command_buf()
   call setline(1, s:input_open)
   call setline(2, l:code_to_edit)
   call append('$', s:input_split)
-  call append('$', [''])
+  call append('$', s:input_close)
 
   normal! G
+  normal! O
   startinsert
 endfunction
 
@@ -90,7 +91,6 @@ function! s:consume_payload()
   endif
 
   let s:was_prompt_consumed = v:true
-  call append('$', s:input_close)
 
   let l:instructions = s:get_instructions()
   let l:code_to_edit = s:get_code_to_edit()
