@@ -44,12 +44,20 @@ function! s:run_edit_command()
 
   let s:was_prompt_consumed = v:true
 
-  let l:prompt = shellescape('Reverse the text: ' . s:code_to_edit)
+  let l:line_number = search('^' . s:separator, 'n') + 1
+  let l:last_line = line('$')
+  if l:line_number <= l:last_line
+    let l:instructions = join(getline(l:line_number, l:last_line), "\n")
+  else
+    let l:instructions = ''
+  endif
 
-  if strlen(l:prompt) < 1
-    echoerr 'No prompt provided. Cannot proceed!'
+  if strlen(l:instructions) < 1
+    echoerr 'No instructions provided. Cannot proceed!'
     return
   endif
+
+  let l:prompt = shellescape('Apply the instructions: '. l:instructions . '\n\nTo the code: ' . s:code_to_edit)
 
   let l:command = 'gpt short ' . l:prompt
   call append('$', '> Running command:')
