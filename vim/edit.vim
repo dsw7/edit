@@ -1,5 +1,3 @@
-let s:separator = repeat('=', 109)
-
 let s:input_open = repeat('>', 5)
 let s:input_split = repeat('-', 5)
 let s:input_close = repeat('<', 5)
@@ -60,16 +58,29 @@ function! s:get_instructions()
   return l:instructions
 endfunction
 
+function! s:run_edit_command(code_to_edit, instructions)
+  let l:command = [
+    '/tmp/foo.py', shellescape(a:code_to_edit), '--instructions=' . shellescape(a:instructions)
+  ]
+
+  let l:output = system(join(l:command, ' '))
+  if v:shell_error != 0
+    call append('$', 'An error occurred!')
+  endif
+
+  call append('$', split(l:output, '\n'))
+endfunction
+
 let s:was_prompt_consumed = v:false
 
-function! s:run_edit_command()
+function! s:consume_payload()
   if ! exists('b:is_edit_cmd_buf') || ! b:is_edit_cmd_buf
     echoerr 'Not a valid `edit` command buffer. Cannot proceed!'
     return
   endif
 
   if s:was_prompt_consumed
-    call s:prompt_was_consumed()
+    call append('$', 'Prompt was already consumed. Close buffer and try again.')
     return
   endif
 
@@ -78,23 +89,10 @@ function! s:run_edit_command()
 
   let l:instructions = s:get_instructions()
   let l:code_to_edit = s:get_code_to_edit()
-  let l:prompt = shellescape('Apply the instructions: '. l:instructions . '\n\nTo the code: ' . l:code_to_edit)
 
-  let l:command = 'gpt short ' . l:prompt
-  call append('$', '> Running command:')
-  call append('$', ['```console', l:command, '```'])
-  call append('$', s:separator)
-
-  let l:output = system(l:command)
-  if v:shell_error != 0
-    call append('$', 'An error occurred!')
-  endif
-
-  call append('$', split(l:output, '\n'))
-  call append('$', s:separator)
-
+  s:run_edit_command(l:code_to_edit, l:instructions)
   normal! G
 endfunction
 
 xnoremap <silent> ed :<C-u>call <SID>open_edit_command_buf()<CR>
-command A call <SID>run_edit_command()
+command A call <SID>consume_payload()
