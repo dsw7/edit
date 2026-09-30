@@ -61,20 +61,28 @@ function! s:get_instructions()
   return l:instructions
 endfunction
 
+function! s:print_results(output)
+  call append('$', ['', '', '> Results:'])
+  call append('$', split(a:output, '\n'))
+endfunction
+
+function! s:print_error(errmsg)
+  call append('$', ['', '', '> Error:'])
+  call append('$', split(a:errmsg, '\n'))
+endfunction
+
 function! s:run_edit_command(code_to_edit, instructions)
   let l:command = []
-
   call add(l:command, '/tmp/foo.py')
   call add(l:command, shellescape(a:code_to_edit))
   call add(l:command, '--instructions=' . shellescape(a:instructions))
-
   let l:output = system(join(l:command, ' '))
 
-  if v:shell_error != 0
-    call append('$', 'An error occurred!')
+  if v:shell_error == 0
+    call s:print_results(l:output)
+  else
+    call s:print_error(l:output)
   endif
-
-  call append('$', split(l:output, '\n'))
 endfunction
 
 let s:was_prompt_consumed = v:false
