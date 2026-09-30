@@ -28,8 +28,10 @@ function! s:open_edit_command_buf()
   call setline(1, s:input_open)
   call setline(2, l:code_to_edit)
   call append('$', s:input_split)
+  call append('$', [''])
 
   normal! G
+  startinsert
 endfunction
 
 function! s:get_code_to_edit()
