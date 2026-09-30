@@ -29,6 +29,23 @@ function! s:open_edit_command_buf()
   normal! G
 endfunction
 
+function! s:get_instructions()
+  let l:line_number = search('^' . s:separator, 'n') + 1
+  let l:last_line = line('$')
+  if l:line_number <= l:last_line
+    let l:instructions = join(getline(l:line_number, l:last_line), "\n")
+  else
+    let l:instructions = ''
+  endif
+
+  if strlen(l:instructions) < 1
+    echoerr 'No instructions provided. Cannot proceed!'
+    return
+  endif
+
+  return l:instructions
+endfunction
+
 let s:was_prompt_consumed = v:false
 
 function! s:run_edit_command()
@@ -44,19 +61,7 @@ function! s:run_edit_command()
 
   let s:was_prompt_consumed = v:true
 
-  let l:line_number = search('^' . s:separator, 'n') + 1
-  let l:last_line = line('$')
-  if l:line_number <= l:last_line
-    let l:instructions = join(getline(l:line_number, l:last_line), "\n")
-  else
-    let l:instructions = ''
-  endif
-
-  if strlen(l:instructions) < 1
-    echoerr 'No instructions provided. Cannot proceed!'
-    return
-  endif
-
+  let l:instructions = s:get_instructions()
   let l:prompt = shellescape('Apply the instructions: '. l:instructions . '\n\nTo the code: ' . s:code_to_edit)
 
   let l:command = 'gpt short ' . l:prompt
