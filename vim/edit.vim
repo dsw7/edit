@@ -58,6 +58,22 @@ function! s:get_instructions()
   return l:instructions
 endfunction
 
+function! s:run_edit_command(code_to_edit, instructions)
+  let l:command = []
+
+  call add(l:command, '/tmp/foo.py')
+  call add(l:command, shellescape(a:code_to_edit))
+  call add(l:command, '--instructions=' . shellescape(a:instructions))
+
+  let l:output = system(join(l:command, ' '))
+
+  if v:shell_error != 0
+    call append('$', 'An error occurred!')
+  endif
+
+  call append('$', split(l:output, '\n'))
+endfunction
+
 let s:was_prompt_consumed = v:false
 
 function! s:consume_payload()
@@ -77,15 +93,7 @@ function! s:consume_payload()
   let l:instructions = s:get_instructions()
   let l:code_to_edit = s:get_code_to_edit()
 
-  let l:command = ['/tmp/foo.py', shellescape(l:code_to_edit), '--instructions=' . shellescape(l:instructions)]
-
-  let l:output = system(join(l:command, ' '))
-  if v:shell_error != 0
-    call append('$', 'An error occurred!')
-  endif
-
-  call append('$', split(l:output, '\n'))
-
+  call s:run_edit_command(l:code_to_edit, l:instructions)
   normal! G
 endfunction
 
