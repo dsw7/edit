@@ -2,6 +2,17 @@ let s:input_open = repeat('>', 5)
 let s:input_split = repeat('-', 5)
 let s:input_close = repeat('<', 5)
 
+highlight ColorBlue ctermfg=blue guifg=blue
+highlight ColorRed ctermfg=red guifg=red
+
+function! s:color_lines_blue(lines)
+  call matchaddpos('ColorBlue', a:lines)
+endfunction
+
+function! s:color_lines_red(lines)
+  call matchaddpos('ColorRed', a:lines)
+endfunction
+
 function! s:set_valid_edit_cmd_buf()
   let b:is_edit_cmd_buf = v:true
 endfunction
@@ -79,27 +90,23 @@ function! s:get_instructions()
 endfunction
 
 function! s:print_results(results)
-  highlight ColorResults ctermfg=blue guifg=blue
-
   let l:start_line = line('$')
   call append('$', [''])
   call append('$', split(a:results, "\n"))
   let l:end_line = line('$')
 
   let l:lines_to_color = range(l:start_line + 1, l:end_line)
-  call matchaddpos('ColorResults', l:lines_to_color)
+  call s:color_lines_blue(l:lines_to_color)
 endfunction
 
 function! s:print_error(errmsg)
-  highlight ColorErrMsg ctermfg=red guifg=red
-
   let l:start_line = line('$')
   call append('$', [''])
   call append('$', split(a:errmsg, "\n"))
   let l:end_line = line('$')
 
   let l:lines_to_color = range(l:start_line + 1, l:end_line)
-  call matchaddpos('ColorErrMsg', l:lines_to_color)
+  call s:color_lines_red(l:lines_to_color)
 endfunction
 
 function! s:run_edit_command(code_to_edit, instructions)
