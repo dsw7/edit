@@ -2,6 +2,18 @@ let s:input_open = repeat('>', 5)
 let s:input_split = repeat('-', 5)
 let s:input_close = repeat('<', 5)
 
+function! s:set_valid_edit_cmd_buf()
+  let b:is_edit_cmd_buf = v:true
+endfunction
+
+function! s:is_valid_edit_cmd_buf()
+  if exists('b:is_edit_cmd_buf') && b:is_edit_cmd_buf
+    return v:true
+  endif
+
+  return v:false
+endfunction
+
 " -----------------------------------------------------------------------------------------------------------
 
 function! s:get_highlighted_block()
@@ -25,7 +37,7 @@ function! s:open_edit_command_buf()
   setlocal bufhidden=wipe
   setlocal noswapfile
 
-  let b:is_edit_cmd_buf = v:true
+  call s:set_valid_edit_cmd_buf()
 
   call setline(1, s:input_open)
   call setline(2, l:code_to_edit)
@@ -94,7 +106,7 @@ endfunction
 let s:was_prompt_consumed = v:false
 
 function! s:consume_payload()
-  if ! exists('b:is_edit_cmd_buf') || ! b:is_edit_cmd_buf
+  if ! s:is_valid_edit_cmd_buf()
     echoerr 'Not a valid `edit` command buffer. Cannot proceed!'
     return
   endif
