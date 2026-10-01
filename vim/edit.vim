@@ -2,15 +2,12 @@ let s:input_open = repeat('>', 5)
 let s:input_split = repeat('-', 5)
 let s:input_close = repeat('<', 5)
 
-highlight ColorBlue ctermfg=blue guifg=blue
-highlight ColorRed ctermfg=red guifg=red
-
 function! s:color_lines_blue(lines)
-  call matchaddpos('ColorBlue', a:lines)
+  call matchaddpos('MoreMsg', a:lines)
 endfunction
 
 function! s:color_lines_red(lines)
-  call matchaddpos('ColorRed', a:lines)
+  call matchaddpos('WarningMsg', a:lines)
 endfunction
 
 " -----------------------------------------------------------------------------------------------------------
