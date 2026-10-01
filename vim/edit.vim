@@ -14,7 +14,7 @@ function! s:color_lines_red(lines)
 endfunction
 
 " -----------------------------------------------------------------------------------------------------------
-" state management
+" State management
 
 function! s:enable_valid_buffer_state()
   let b:is_valid_edit_command_buffer = v:true
@@ -32,6 +32,7 @@ endfunction
 let s:is_buffer_consumed = v:false
 
 " -----------------------------------------------------------------------------------------------------------
+" Transfer highlighted code to new buffer on the right
 
 function! s:yank_code_to_edit()
   let l:old_reg = getreg('x')
@@ -68,6 +69,7 @@ endfunction
 xnoremap <silent> ed :<C-u>call <SID>open_edit_command_buf()<CR>
 
 " -----------------------------------------------------------------------------------------------------------
+" Operate on code in new buffer
 
 function! s:get_code_to_edit()
   let l:start_line = search(s:input_open)
@@ -149,3 +151,20 @@ function! s:consume_payload()
 endfunction
 
 command A call <SID>consume_payload()
+
+" -----------------------------------------------------------------------------------------------------------
+" Retry prompt while preserving buffer
+
+function! s:try_again()
+  let l:middle_line = search(s:input_split)
+  execute (l:middle_line + 1). ',$delete'
+
+  call append('$', s:input_close)
+  normal! G
+  normal! O
+  startinsert
+
+  let s:is_buffer_consumed = v:false
+endfunction
+
+command T call <SID>try_again()
