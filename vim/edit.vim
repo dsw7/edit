@@ -13,12 +13,15 @@ function! s:color_lines_red(lines)
   call matchaddpos('ColorRed', a:lines)
 endfunction
 
-function! s:set_valid_edit_cmd_buf()
-  let b:is_edit_cmd_buf = v:true
+" -----------------------------------------------------------------------------------------------------------
+" state management
+
+function! s:enable_valid_buffer_state()
+  let b:is_valid_edit_command_buffer = v:true
 endfunction
 
-function! s:is_valid_edit_cmd_buf()
-  if exists('b:is_edit_cmd_buf') && b:is_edit_cmd_buf
+function! s:is_valid_buffer_state()
+  if exists('b:is_valid_edit_command_buffer') && b:is_valid_edit_command_buffer
     return v:true
   endif
 
@@ -47,7 +50,7 @@ function! s:open_edit_command_buf()
   setlocal bufhidden=wipe
   setlocal noswapfile
 
-  call s:set_valid_edit_cmd_buf()
+  call s:enable_valid_buffer_state()
 
   call setline(1, s:input_open)
   call setline(2, l:code_to_edit)
@@ -126,7 +129,7 @@ endfunction
 let s:was_prompt_consumed = v:false
 
 function! s:consume_payload()
-  if ! s:is_valid_edit_cmd_buf()
+  if ! s:is_valid_buffer_state()
     echoerr 'Not a valid `edit` command buffer. Cannot proceed!'
     return
   endif
