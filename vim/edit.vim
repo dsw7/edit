@@ -78,13 +78,20 @@ function! s:get_instructions()
   return l:instructions
 endfunction
 
-function! s:print_results(output)
-  call append('$', ['', '', '> Results:'])
-  call append('$', split(a:output, "\n"))
+function! s:print_results(results)
+  highlight ColorResults ctermfg=blue guifg=blue
+
+  let l:start_line = line('$')
+  call append('$', [''])
+  call append('$', split(a:results, "\n"))
+  let l:end_line = line('$')
+
+  let l:lines_to_color = range(l:start_line + 1, l:end_line)
+  call matchaddpos('ColorResults', l:lines_to_color)
 endfunction
 
 function! s:print_error(errmsg)
-  highlight CustomRedText ctermfg=red guifg=red
+  highlight ColorErrMsg ctermfg=red guifg=red
 
   let l:start_line = line('$')
   call append('$', [''])
@@ -92,7 +99,7 @@ function! s:print_error(errmsg)
   let l:end_line = line('$')
 
   let l:lines_to_color = range(l:start_line + 1, l:end_line)
-  call matchaddpos('CustomRedText', l:lines_to_color)
+  call matchaddpos('ColorErrMsg', l:lines_to_color)
 endfunction
 
 function! s:run_edit_command(code_to_edit, instructions)
