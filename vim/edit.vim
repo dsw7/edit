@@ -2,6 +2,8 @@ let s:input_open = repeat('>', 5)
 let s:input_split = repeat('-', 5)
 let s:input_close = repeat('<', 5)
 
+" -----------------------------------------------------------------------------------------------------------
+
 function! s:get_highlighted_block()
   let l:old_reg = getreg('x')
   let l:old_regtype = getregtype('x')
@@ -34,6 +36,10 @@ function! s:open_edit_command_buf()
   normal! O
   startinsert
 endfunction
+
+xnoremap <silent> ed :<C-u>call <SID>open_edit_command_buf()<CR>
+
+" -----------------------------------------------------------------------------------------------------------
 
 function! s:get_code_to_edit()
   let l:start_line = search(s:input_open)
@@ -107,5 +113,4 @@ function! s:consume_payload()
   normal! G
 endfunction
 
-xnoremap <silent> ed :<C-u>call <SID>open_edit_command_buf()<CR>
 command A call <SID>consume_payload()
