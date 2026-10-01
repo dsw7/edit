@@ -124,10 +124,11 @@ function! s:print_error(errmsg)
   call s:color_lines_red(l:lines_to_color)
 endfunction
 
-function! s:run_edit_command(code_to_edit, instructions)
+function! s:run_edit_command(code_to_edit, instructions, filename)
   let l:command = []
   call add(l:command, '/tmp/foo.py')
   call add(l:command, shellescape(a:code_to_edit))
+  call add(l:command, '--filename=' . shellescape(a:filename))
   call add(l:command, '--instructions=' . shellescape(a:instructions))
   let l:output = system(join(l:command, ' '))
 
@@ -152,8 +153,9 @@ function! s:consume_payload()
 
   let l:instructions = s:get_instructions()
   let l:code_to_edit = s:get_code_to_edit()
+  let l:this_filename = bufname(1)
 
-  call s:run_edit_command(l:code_to_edit, l:instructions)
+  call s:run_edit_command(l:code_to_edit, l:instructions, l:this_filename)
   normal! G
 endfunction
 
