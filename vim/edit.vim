@@ -2,6 +2,10 @@ let s:input_open = repeat('>', 5)
 let s:input_split = repeat('-', 5)
 let s:input_close = repeat('<', 5)
 
+function! s:color_lines_comment(lines)
+  call matchaddpos('Comment', a:lines)
+endfunction
+
 function! s:color_lines_blue(lines)
   call matchaddpos('MoreMsg', a:lines)
 endfunction
@@ -53,8 +57,14 @@ function! s:open_edit_command_buf()
 
   call s:enable_valid_buffer_state()
 
-  call setline(1, s:input_open)
-  call setline(2, l:code_to_edit)
+  " TODO: change A:, T:
+  call setline(1, ':A to submit prompt')
+  call setline(2, ':T to clear prompt and try again')
+  call s:color_lines_comment(range(1, 2))
+  call append('$', [''])
+
+  call setline(4, s:input_open)
+  call setline(5, l:code_to_edit)
   call append('$', s:input_split)
   call append('$', s:input_close)
 
@@ -147,6 +157,7 @@ function! s:consume_payload()
   normal! G
 endfunction
 
+  " TODO: change A:
 command A call <SID>consume_payload()
 
 " -----------------------------------------------------------------------------------------------------------
@@ -164,4 +175,5 @@ function! s:try_again()
   let s:is_buffer_consumed = v:false
 endfunction
 
+  " TODO: change T:
 command T call <SID>try_again()
