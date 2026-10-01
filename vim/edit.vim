@@ -23,10 +23,13 @@ endfunction
 function! s:is_valid_buffer_state()
   if exists('b:is_valid_edit_command_buffer') && b:is_valid_edit_command_buffer
     return v:true
+  else
+    echoerr 'Not a valid `edit` command buffer. Cannot proceed!'
+    return v:false
   endif
-
-  return v:false
 endfunction
+
+let s:is_buffer_consumed = v:false
 
 " -----------------------------------------------------------------------------------------------------------
 
@@ -126,20 +129,17 @@ function! s:run_edit_command(code_to_edit, instructions)
   endif
 endfunction
 
-let s:was_prompt_consumed = v:false
-
 function! s:consume_payload()
   if ! s:is_valid_buffer_state()
-    echoerr 'Not a valid `edit` command buffer. Cannot proceed!'
     return
   endif
 
-  if s:was_prompt_consumed
-    call append('$', 'Prompt was already consumed. Close buffer and try again.')
+  if s:is_buffer_consumed
+    echoerr 'Buffer was already consumed. Close buffer and try again.'
     return
   endif
 
-  let s:was_prompt_consumed = v:true
+  let s:is_buffer_consumed = v:true
 
   let l:instructions = s:get_instructions()
   let l:code_to_edit = s:get_code_to_edit()
