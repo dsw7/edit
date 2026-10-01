@@ -57,9 +57,8 @@ function! s:open_edit_command_buf()
 
   call s:enable_valid_buffer_state()
 
-  " TODO: change A:, T:
-  call setline(1, ':A to submit prompt')
-  call setline(2, ':T to reset prompt')
+  call setline(1, ':Run to submit prompt')
+  call setline(2, ':Reset to reset prompt')
   call s:color_lines_comment(range(1, 2))
   call append('$', [''])
 
@@ -164,13 +163,12 @@ augroup reset_payload_consumed_state_on_buffer_close
   autocmd BufUnload * let s:is_payload_consumed = v:false
 augroup END
 
-" TODO: change A:
-command A call <SID>consume_payload()
+command Run call <SID>consume_payload()
 
 " -----------------------------------------------------------------------------------------------------------
-" Retry prompt while preserving buffer
+" Reset prompt while preserving buffer
 
-function! s:try_again()
+function! s:run_reset()
   let l:middle_line = search(s:input_split)
   execute (l:middle_line + 1). ',$delete'
 
@@ -182,5 +180,4 @@ function! s:try_again()
   let s:is_payload_consumed = v:false
 endfunction
 
-  " TODO: change T:
-command T call <SID>try_again()
+command Reset call <SID>run_reset()
