@@ -16,7 +16,7 @@ endfunction
 
 " -----------------------------------------------------------------------------------------------------------
 
-function! s:get_highlighted_block()
+function! s:yank_code_to_edit()
   let l:old_reg = getreg('x')
   let l:old_regtype = getregtype('x')
 
@@ -25,12 +25,11 @@ function! s:get_highlighted_block()
   let l:selection = getreg('x')
   call setreg('x', l:old_reg, l:old_regtype)
 
-  return l:selection
+  return split(l:selection, "\n")
 endfunction
 
 function! s:open_edit_command_buf()
-  let l:selected_text = s:get_highlighted_block()
-  let l:code_to_edit = split(l:selected_text, "\n")
+  let l:code_to_edit = s:yank_code_to_edit()
 
   vnew
   setlocal buftype=nofile
