@@ -30,7 +30,7 @@ function! s:is_valid_buffer_state()
   endif
 endfunction
 
-let s:is_buffer_consumed = v:false
+let s:is_payload_consumed = v:false
 
 " -----------------------------------------------------------------------------------------------------------
 " Transfer highlighted code to new buffer on the right
@@ -59,7 +59,7 @@ function! s:open_edit_command_buf()
 
   " TODO: change A:, T:
   call setline(1, ':A to submit prompt')
-  call setline(2, ':T to clear prompt and try again')
+  call setline(2, ':T to reset prompt')
   call s:color_lines_comment(range(1, 2))
   call append('$', [''])
 
@@ -144,12 +144,12 @@ function! s:consume_payload()
     return
   endif
 
-  if s:is_buffer_consumed
-    echoerr 'Buffer was already consumed. Close buffer and try again.'
+  if s:is_payload_consumed
+    echoerr 'Payload was already consumed. Reset buffer and try again.'
     return
   endif
 
-  let s:is_buffer_consumed = v:true
+  let s:is_payload_consumed = v:true
 
   let l:instructions = s:get_instructions()
   let l:code_to_edit = s:get_code_to_edit()
@@ -159,7 +159,12 @@ function! s:consume_payload()
   normal! G
 endfunction
 
-  " TODO: change A:
+augroup reset_payload_consumed_state_on_buffer_close
+  autocmd!
+  autocmd BufUnload * let s:is_payload_consumed = v:false
+augroup END
+
+" TODO: change A:
 command A call <SID>consume_payload()
 
 " -----------------------------------------------------------------------------------------------------------
@@ -174,7 +179,7 @@ function! s:try_again()
   normal! O
   startinsert
 
-  let s:is_buffer_consumed = v:false
+  let s:is_payload_consumed = v:false
 endfunction
 
   " TODO: change T:
