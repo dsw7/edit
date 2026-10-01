@@ -80,12 +80,19 @@ endfunction
 
 function! s:print_results(output)
   call append('$', ['', '', '> Results:'])
-  call append('$', split(a:output, '\n'))
+  call append('$', split(a:output, "\n"))
 endfunction
 
 function! s:print_error(errmsg)
-  call append('$', ['', '', '> Error:'])
-  call append('$', split(a:errmsg, '\n'))
+  highlight CustomRedText ctermfg=red guifg=red
+
+  let l:start_line = line('$')
+  call append('$', [''])
+  call append('$', split(a:errmsg, "\n"))
+  let l:end_line = line('$')
+
+  let l:lines_to_color = range(l:start_line + 1, l:end_line)
+  call matchaddpos('CustomRedText', l:lines_to_color)
 endfunction
 
 function! s:run_edit_command(code_to_edit, instructions)
