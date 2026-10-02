@@ -24,9 +24,6 @@ void printIntAddr()
 ```
 Will open:
 ```console
-:W to submit prompt
-:C to reset prompt
-
 >>>>>
 void printIntAddr()
 {
@@ -41,9 +38,6 @@ void printIntAddr()
 Place the prompt between the `-----` and `<<<<<` then invoke `:W` to submit the
 job. For example:
 ```console
-:W to submit prompt
-:C to reset prompt
-
 >>>>>
 void printIntAddr()
 {
@@ -55,6 +49,8 @@ void printIntAddr()
 What does the code do?
 <<<<<
 ```
-The results will print under the `<<<<<` delimiter. To retry, clear the payload
-by invoking `:C`, input the new prompt, and finally invoke `:W` to submit
-another job.
+The results will print under the `<<<<<` delimiter.
+
+### Retrying a prompt
+To retry, clear the payload by invoking `:C`, input the new prompt, and finally
+invoke `:W` to submit another job.
