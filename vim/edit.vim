@@ -28,6 +28,13 @@ function! s:get_range_instructions()
   return [l:start_line + 1, l:end_line - 1]
 endfunction
 
+function! s:get_range_results()
+  let l:start_line = search(s:input_close)
+  let l:end_line = line('$')
+
+  return [l:start_line + 1, l:end_line]
+endfunction
+
 " -----------------------------------------------------------------------------------------------------------
 " State management
 
@@ -105,10 +112,9 @@ function! s:print_results(results)
   call append('$', [''])
   call append('$', split(a:results, "\n"))
 
-  let l:start_line = search(s:input_close)
-  let l:end_line = line('$')
+  let [l:start, l:end] = s:get_range_results()
+  let l:lines_to_color = range(l:start, l:end)
 
-  let l:lines_to_color = range(l:start_line + 1, l:end_line)
   call s:color_lines_msg(l:lines_to_color)
 endfunction
 
@@ -116,10 +122,9 @@ function! s:print_error(errmsg)
   call append('$', [''])
   call append('$', split(a:errmsg, "\n"))
 
-  let l:start_line = search(s:input_close)
-  let l:end_line = line('$')
+  let [l:start, l:end] = s:get_range_results()
+  let l:lines_to_color = range(l:start, l:end)
 
-  let l:lines_to_color = range(l:start_line + 1, l:end_line)
   call s:color_lines_red(l:lines_to_color)
 endfunction
 
