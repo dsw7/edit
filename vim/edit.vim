@@ -6,7 +6,7 @@ function! s:color_lines_comment(lines)
   call matchaddpos('Comment', a:lines)
 endfunction
 
-function! s:color_lines_blue(lines)
+function! s:color_lines_msg(lines)
   call matchaddpos('MoreMsg', a:lines)
 endfunction
 
@@ -110,7 +110,7 @@ function! s:print_results(results)
   let l:end_line = line('$')
 
   let l:lines_to_color = range(l:start_line + 1, l:end_line)
-  call s:color_lines_blue(l:lines_to_color)
+  call s:color_lines_msg(l:lines_to_color)
 endfunction
 
 function! s:print_error(errmsg)
