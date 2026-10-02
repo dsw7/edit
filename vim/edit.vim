@@ -175,7 +175,7 @@ command Run call <SID>consume_payload()
 
 function! s:run_reset()
   let l:middle_line = search(s:input_split)
-  execute (l:middle_line + 1). ',$delete'
+  execute (l:middle_line + 1) . ',$delete'
 
   call append('$', s:input_close)
   normal! G
