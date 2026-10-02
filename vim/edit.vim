@@ -105,8 +105,8 @@ function! s:open_edit_command_buf()
 
   call s:enable_valid_buffer_state()
 
-  call setline(1, ':Run to submit prompt')
-  call setline(2, ':Reset to reset prompt')
+  call setline(1, ':W to submit prompt')
+  call setline(2, ':C to reset prompt')
   call s:color_lines_comment(range(1, 2))
   call append('$', [''])
 
@@ -176,7 +176,7 @@ function! s:consume_payload()
   endif
 
   if s:is_payload_consumed
-    echoerr 'Payload was already consumed. Reset buffer and try again.'
+    echom 'Payload was already consumed. Run :C to reset'
     return
   endif
 
@@ -195,7 +195,7 @@ augroup reset_payload_consumed_state_on_buffer_close
   autocmd BufUnload * let s:is_payload_consumed = v:false
 augroup END
 
-command Run call <SID>consume_payload()
+command! W call <SID>consume_payload()
 
 " -----------------------------------------------------------------------------------------------------------
 " Reset prompt while preserving buffer
@@ -219,4 +219,4 @@ function! s:run_reset()
   startinsert
 endfunction
 
-command Reset call <SID>run_reset()
+command! C call <SID>run_reset()
