@@ -38,7 +38,7 @@ void printIntAddr()
 
 <<<<<
 ```
-Place the prompt between the `-----` and `<<<<<` then press `:W` to submit the
+Place the prompt between the `-----` and `<<<<<` then invoke `:W` to submit the
 job. For example:
 ```console
 :W to submit prompt
@@ -55,4 +55,6 @@ void printIntAddr()
 What does the code do?
 <<<<<
 ```
-The results will print under the `<<<<<` delimiter.
+The results will print under the `<<<<<` delimiter. To retry, clear the payload
+by invoking `:C`, input the new prompt, and finally invoke `:W` to submit
+another job.
