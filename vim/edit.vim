@@ -3,6 +3,7 @@ let s:input_split = repeat('-', 5)
 let s:input_close = repeat('<', 5)
 
 let s:hl_ids_msg = []
+let s:hl_ids_err = []
 
 function! s:color_lines_comment(lines)
   call matchaddpos('Comment', a:lines)
@@ -14,7 +15,8 @@ function! s:color_lines_msg(lines)
 endfunction
 
 function! s:color_lines_red(lines)
-  call matchaddpos('WarningMsg', a:lines)
+  let l:hl_id = matchaddpos('WarningMsg', a:lines)
+  call add(s:hl_ids_err, l:hl_id)
 endfunction
 
 function! s:reset_lines_msg()
@@ -23,6 +25,14 @@ function! s:reset_lines_msg()
   endfor
 
   let s:hl_ids_msg = []
+endfunction
+
+function! s:reset_lines_err()
+  for id in s:hl_ids_err
+    call matchdelete(id)
+  endfor
+
+  let s:hl_ids_err = []
 endfunction
 
 function! s:get_range_code_to_edit()
@@ -189,7 +199,9 @@ function! s:run_reset()
   execute (l:middle_line + 1) . ',$delete'
 
   call append('$', s:input_close)
+
   call s:reset_lines_msg()
+  call s:reset_lines_err()
 
   normal! G
   normal! O
