@@ -14,6 +14,20 @@ function! s:color_lines_red(lines)
   call matchaddpos('WarningMsg', a:lines)
 endfunction
 
+function! s:get_range_code_to_edit()
+  let l:start_line = search(s:input_open)
+  let l:end_line = search(s:input_split)
+
+  return [l:start_line + 1, l:end_line - 1]
+endfunction
+
+function! s:get_range_instructions()
+  let l:start_line = search(s:input_split)
+  let l:end_line = search(s:input_close)
+
+  return [l:start_line + 1, l:end_line - 1]
+endfunction
+
 " -----------------------------------------------------------------------------------------------------------
 " State management
 
@@ -78,35 +92,20 @@ xnoremap <silent> ed :<C-u>call <SID>open_edit_command_buf()<CR>
 " Operate on code in new buffer
 
 function! s:get_code_to_edit()
-  let l:start_line = search(s:input_open)
-  let l:middle_line = search(s:input_split)
-
-  let l:code_to_edit = ''
-
-  if l:start_line > 0 && l:middle_line > l:start_line
-    let l:code_to_edit = join(getline(l:start_line + 1, l:middle_line - 1), "\n")
-  endif
-
-  return l:code_to_edit
+  let [l:start, l:end] = s:get_range_code_to_edit()
+  return join(getline(l:start, l:end), "\n")
 endfunction
 
 function! s:get_instructions()
-  let l:middle_line = search(s:input_split)
-  let l:end_line = search(s:input_close)
-
-  let l:instructions = ''
-
-  if l:middle_line > 0 && l:end_line > l:middle_line
-    let l:instructions = join(getline(l:middle_line + 1, l:end_line - 1), "\n")
-  endif
-
-  return l:instructions
+  let [l:start, l:end] = s:get_range_instructions()
+  return join(getline(l:start, l:end), "\n")
 endfunction
 
 function! s:print_results(results)
-  let l:start_line = line('$')
   call append('$', [''])
   call append('$', split(a:results, "\n"))
+
+  let l:start_line = search(s:input_close)
   let l:end_line = line('$')
 
   let l:lines_to_color = range(l:start_line + 1, l:end_line)
@@ -114,9 +113,10 @@ function! s:print_results(results)
 endfunction
 
 function! s:print_error(errmsg)
-  let l:start_line = line('$')
   call append('$', [''])
   call append('$', split(a:errmsg, "\n"))
+
+  let l:start_line = search(s:input_close)
   let l:end_line = line('$')
 
   let l:lines_to_color = range(l:start_line + 1, l:end_line)
