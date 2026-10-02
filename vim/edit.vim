@@ -200,11 +200,16 @@ command Run call <SID>consume_payload()
 " -----------------------------------------------------------------------------------------------------------
 " Reset prompt while preserving buffer
 
-function! s:run_reset()
+function! s:delete_existing_results()
   let l:middle_line = search(s:input_split)
   execute (l:middle_line + 1) . ',$delete'
+endfunction
 
+function! s:run_reset()
+  call s:delete_existing_results()
   call append('$', s:input_close)
+
+  let s:is_payload_consumed = v:false
 
   call s:reset_color_on_msg_lines()
   call s:reset_color_on_err_lines()
@@ -212,8 +217,6 @@ function! s:run_reset()
   normal! G
   normal! O
   startinsert
-
-  let s:is_payload_consumed = v:false
 endfunction
 
 command Reset call <SID>run_reset()
