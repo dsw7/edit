@@ -1,3 +1,9 @@
+" -----------------------------------------------------------------------------------------------------------
+" VimScript for `edit` command integration
+" Copyright © David Weber
+" See https://github.com/dsw7/edit for more information
+" -----------------------------------------------------------------------------------------------------------
+
 let s:input_open = repeat('>', 5)
 let s:input_split = repeat('-', 5)
 let s:input_close = repeat('<', 5)
