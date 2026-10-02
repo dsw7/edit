@@ -2,10 +2,57 @@
 
 ## Setting up VimScript
 Create a `vim` plugin directory:
-```bash
+```console
 mkdir -vp ~/.vim/plugin
 ```
 Then copy `edit.vim` to this directory:
-```bash
+```console
 cp -v edit.vim ~/.vim/plugin/
 ```
+
+## Usage
+Select a block of text in visual mode, and execute `ed`. This will open the
+selected text in a new vertical split window with a new scratch buffer. For
+example, selecting:
+```c
+void printIntAddr()
+{
+    const int i = 42;
+    printf("Value: %d\n", i);
+    printf("Address: %p\n", (void *)&i);
+}
+```
+Will open:
+```console
+:W to submit prompt
+:C to reset prompt
+
+>>>>>
+void printIntAddr()
+{
+    const int i = 42;
+    printf("Value: %d\n", i);
+    printf("Address: %p\n", (void *)&i);
+}
+-----
+
+<<<<<
+```
+Place the prompt between the `-----` and `<<<<<` then press `:W` to submit the
+job. For example:
+```console
+:W to submit prompt
+:C to reset prompt
+
+>>>>>
+void printIntAddr()
+{
+    const int i = 42;
+    printf("Value: %d\n", i);
+    printf("Address: %p\n", (void *)&i);
+}
+-----
+What does the code do?
+<<<<<
+```
+The results will print under the `<<<<<` delimiter.
