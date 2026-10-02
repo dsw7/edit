@@ -14,12 +14,12 @@ function! s:color_lines_msg(lines)
   call add(s:hl_ids_msg, l:hl_id)
 endfunction
 
-function! s:color_lines_red(lines)
+function! s:color_lines_err(lines)
   let l:hl_id = matchaddpos('WarningMsg', a:lines)
   call add(s:hl_ids_err, l:hl_id)
 endfunction
 
-function! s:reset_lines_msg()
+function! s:reset_color_on_msg_lines()
   for id in s:hl_ids_msg
     call matchdelete(id)
   endfor
@@ -27,7 +27,7 @@ function! s:reset_lines_msg()
   let s:hl_ids_msg = []
 endfunction
 
-function! s:reset_lines_err()
+function! s:reset_color_on_err_lines()
   for id in s:hl_ids_err
     call matchdelete(id)
   endfor
@@ -146,7 +146,7 @@ function! s:print_error(errmsg)
   let [l:start, l:end] = s:get_range_results()
   let l:lines_to_color = range(l:start, l:end)
 
-  call s:color_lines_red(l:lines_to_color)
+  call s:color_lines_err(l:lines_to_color)
 endfunction
 
 function! s:run_edit_command(code_to_edit, instructions, filename)
@@ -200,8 +200,8 @@ function! s:run_reset()
 
   call append('$', s:input_close)
 
-  call s:reset_lines_msg()
-  call s:reset_lines_err()
+  call s:reset_color_on_msg_lines()
+  call s:reset_color_on_err_lines()
 
   normal! G
   normal! O
