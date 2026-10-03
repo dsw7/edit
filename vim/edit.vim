@@ -39,14 +39,6 @@ function! s:reset_color_on_err_lines()
   let s:hl_ids_err = []
 endfunction
 
-
-function! s:get_range_results()
-  let l:start_line = search(s:input_close)
-  let l:end_line = line('$')
-
-  return [l:start_line + 1, l:end_line]
-endfunction
-
 " -----------------------------------------------------------------------------------------------------------
 " Buffer management
 
@@ -82,6 +74,17 @@ function! s:get_instructions()
 
   let l:lines = getline(l:start_line + 1, l:end_line - 1)
   return join(l:lines, "\n")
+endfunction
+
+function! s:set_results_and_return_range(results)
+  let l:start_line = search(s:input_close)
+  let l:lines = split(a:results, "\n")
+
+  call setline(l:start_line + 1, '')
+  call append('$', l:lines)
+
+  let l:end_line = line('$')
+  return [l:start_line + 2, l:end_line]
 endfunction
 
 function! s:is_valid_working_buffer()
@@ -140,38 +143,20 @@ xnoremap <silent> ed :<C-u>call <SID>open_edit_command_buf()<CR>
 " -----------------------------------------------------------------------------------------------------------
 " Operate on code in new buffer
 
-function! s:print_results(results)
-  call append('$', [''])
-  call append('$', split(a:results, "\n"))
-
-  let [l:start, l:end] = s:get_range_results()
-  let l:lines_to_color = range(l:start, l:end)
-
-  call s:color_lines_msg(l:lines_to_color)
-endfunction
-
-function! s:print_error(errmsg)
-  call append('$', [''])
-  call append('$', split(a:errmsg, "\n"))
-
-  let [l:start, l:end] = s:get_range_results()
-  let l:lines_to_color = range(l:start, l:end)
-
-  call s:color_lines_err(l:lines_to_color)
-endfunction
-
 function! s:run_edit_command(code_to_edit, instructions, filename)
   let l:command = []
   call add(l:command, '/tmp/foo.py')
   call add(l:command, shellescape(a:code_to_edit))
   call add(l:command, '--filename=' . shellescape(a:filename))
   call add(l:command, '--instructions=' . shellescape(a:instructions))
+
   let l:output = system(join(l:command, ' '))
+  let [l:start_line, l:end_line] = s:set_results_and_return_range(l:output)
 
   if v:shell_error == 0
-    call s:print_results(l:output)
+    call s:color_lines_msg(range(l:start_line, l:end_line))
   else
-    call s:print_error(l:output)
+    call s:color_lines_err(range(l:start_line, l:end_line))
   endif
 endfunction
 
