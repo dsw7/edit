@@ -62,6 +62,24 @@ function! s:get_range_results()
   return [l:start_line + 1, l:end_line]
 endfunction
 
+function! s:is_valid_delimiter_layout()
+  let l:open_line = search(s:input_open, 'n')
+  let l:split_line = search(s:input_split, 'n')
+  let l:close_line = search(s:input_close, 'n')
+
+  if l:open_line == 0 || l:split_line == 0 || l:close_line == 0
+    echoerr 'one or more delimiters not found'
+    return v:false
+  endif
+
+  if l:open_line >= l:split_line || l:split_line >= l:close_line
+    echoerr 'delimiters not in correct order'
+    return v:false
+  endif
+
+  return v:true
+endfunction
+
 " -----------------------------------------------------------------------------------------------------------
 " State management
 
