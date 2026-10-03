@@ -8,6 +8,8 @@ let s:input_open = repeat('>', 5)
 let s:input_split = repeat('-', 5)
 let s:input_close = repeat('<', 5)
 
+let s:is_payload_consumed = v:false
+
 let s:hl_ids_msg = []
 let s:hl_ids_err = []
 
@@ -81,24 +83,6 @@ function! s:is_valid_delimiter_layout()
 endfunction
 
 " -----------------------------------------------------------------------------------------------------------
-" State management
-
-function! s:enable_valid_buffer_state()
-  let b:is_valid_edit_command_buffer = v:true
-endfunction
-
-function! s:is_valid_buffer_state()
-  if exists('b:is_valid_edit_command_buffer') && b:is_valid_edit_command_buffer
-    return v:true
-  else
-    echom 'not a valid `edit` command buffer'
-    return v:false
-  endif
-endfunction
-
-let s:is_payload_consumed = v:false
-
-" -----------------------------------------------------------------------------------------------------------
 " Transfer highlighted code to new buffer on the right
 
 function! s:yank_code_to_edit()
@@ -123,7 +107,6 @@ function! s:open_edit_command_buf()
   setlocal noswapfile
 
   let b:original_filename = l:original_filename
-  call s:enable_valid_buffer_state()
 
   call setline(1, ':W to submit prompt')
   call setline(2, ':C to reset prompt')
@@ -191,10 +174,6 @@ function! s:run_edit_command(code_to_edit, instructions, filename)
 endfunction
 
 function! s:consume_payload()
-  if ! s:is_valid_buffer_state()
-    return
-  endif
-
   if ! s:is_valid_delimiter_layout()
     return
   endif
@@ -233,6 +212,10 @@ function! s:delete_existing_results()
 endfunction
 
 function! s:run_reset()
+  if ! s:is_valid_delimiter_layout()
+    quit
+  endif
+
   call s:delete_existing_results()
   call append('$', s:input_close)
 
