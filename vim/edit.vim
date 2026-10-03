@@ -129,10 +129,11 @@ function! s:open_edit_command_buf()
   setlocal bufhidden=wipe
   setlocal noswapfile
 
+  let b:code_to_edit = l:code_to_edit
   let b:original_filename = l:original_filename
 
   call s:set_buffer_template()
-  call s:set_code_to_edit(l:code_to_edit)
+  call s:set_code_to_edit(b:code_to_edit)
 
   normal! GO
   startinsert
