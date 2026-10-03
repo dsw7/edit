@@ -39,13 +39,6 @@ function! s:reset_color_on_err_lines()
   let s:hl_ids_err = []
 endfunction
 
-function! s:get_range_code_to_edit()
-  let l:start_line = search(s:input_open)
-  let l:end_line = search(s:input_split)
-
-  return [l:start_line + 1, l:end_line - 1]
-endfunction
-
 function! s:get_range_instructions()
   let l:start_line = search(s:input_split)
   let l:end_line = search(s:input_close)
@@ -79,6 +72,14 @@ endfunction
 function! s:insert_code_to_edit(code_to_edit)
   let l:open_line = search(s:input_open, 'n')
   call append(l:open_line, a:code_to_edit)
+endfunction
+
+function! s:get_code_to_edit()
+  let l:start_line = search(s:input_open)
+  let l:end_line = search(s:input_split)
+
+  let l:lines = getline(l:start_line + 1, l:end_line - 1)
+  return join(l:lines, "\n")
 endfunction
 
 function! s:is_valid_working_buffer()
@@ -136,11 +137,6 @@ xnoremap <silent> ed :<C-u>call <SID>open_edit_command_buf()<CR>
 
 " -----------------------------------------------------------------------------------------------------------
 " Operate on code in new buffer
-
-function! s:get_code_to_edit()
-  let [l:start, l:end] = s:get_range_code_to_edit()
-  return join(getline(l:start, l:end), "\n")
-endfunction
 
 function! s:get_instructions()
   let [l:start, l:end] = s:get_range_instructions()
