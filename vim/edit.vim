@@ -91,7 +91,7 @@ function! s:is_valid_buffer_state()
   if exists('b:is_valid_edit_command_buffer') && b:is_valid_edit_command_buffer
     return v:true
   else
-    echoerr 'Not a valid `edit` command buffer. Cannot proceed!'
+    echom 'not a valid `edit` command buffer'
     return v:false
   endif
 endfunction
@@ -194,7 +194,8 @@ function! s:consume_payload()
   endif
 
   if s:is_payload_consumed
-    echom 'Payload was already consumed. Run :C to reset'
+    echom 'payload was already consumed'
+    echom 'invoke :C to reset'
     return
   endif
 
