@@ -39,12 +39,6 @@ function! s:reset_color_on_err_lines()
   let s:hl_ids_err = []
 endfunction
 
-function! s:get_range_instructions()
-  let l:start_line = search(s:input_split)
-  let l:end_line = search(s:input_close)
-
-  return [l:start_line + 1, l:end_line - 1]
-endfunction
 
 function! s:get_range_results()
   let l:start_line = search(s:input_close)
@@ -69,7 +63,7 @@ function! s:set_buffer_template()
   call setline(6, s:input_close)
 endfunction
 
-function! s:insert_code_to_edit(code_to_edit)
+function! s:set_code_to_edit(code_to_edit)
   let l:open_line = search(s:input_open, 'n')
   call append(l:open_line, a:code_to_edit)
 endfunction
@@ -77,6 +71,14 @@ endfunction
 function! s:get_code_to_edit()
   let l:start_line = search(s:input_open)
   let l:end_line = search(s:input_split)
+
+  let l:lines = getline(l:start_line + 1, l:end_line - 1)
+  return join(l:lines, "\n")
+endfunction
+
+function! s:get_instructions()
+  let l:start_line = search(s:input_split)
+  let l:end_line = search(s:input_close)
 
   let l:lines = getline(l:start_line + 1, l:end_line - 1)
   return join(l:lines, "\n")
@@ -127,7 +129,7 @@ function! s:open_edit_command_buf()
   let b:original_filename = l:original_filename
 
   call s:set_buffer_template()
-  call s:insert_code_to_edit(l:code_to_edit)
+  call s:set_code_to_edit(l:code_to_edit)
 
   normal! GO
   startinsert
@@ -137,11 +139,6 @@ xnoremap <silent> ed :<C-u>call <SID>open_edit_command_buf()<CR>
 
 " -----------------------------------------------------------------------------------------------------------
 " Operate on code in new buffer
-
-function! s:get_instructions()
-  let [l:start, l:end] = s:get_range_instructions()
-  return join(getline(l:start, l:end), "\n")
-endfunction
 
 function! s:print_results(results)
   call append('$', [''])
@@ -192,8 +189,8 @@ function! s:consume_payload()
 
   let s:is_payload_consumed = v:true
 
-  let l:instructions = s:get_instructions()
   let l:code_to_edit = s:get_code_to_edit()
+  let l:instructions = s:get_instructions()
   let l:this_filename = b:original_filename
 
   call s:run_edit_command(l:code_to_edit, l:instructions, l:this_filename)
