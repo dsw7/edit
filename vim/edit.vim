@@ -64,7 +64,7 @@ function! s:get_range_results()
   return [l:start_line + 1, l:end_line]
 endfunction
 
-function! s:is_valid_delimiter_layout()
+function! s:is_valid_working_buffer()
   let l:open_line = search(s:input_open, 'n')
   let l:split_line = search(s:input_split, 'n')
   let l:close_line = search(s:input_close, 'n')
@@ -174,7 +174,8 @@ function! s:run_edit_command(code_to_edit, instructions, filename)
 endfunction
 
 function! s:consume_payload()
-  if ! s:is_valid_delimiter_layout()
+  if ! s:is_valid_working_buffer()
+    quit
     return
   endif
 
@@ -194,17 +195,10 @@ function! s:consume_payload()
   normal! G
 endfunction
 
-augroup reset_payload_consumed_state_on_buffer_close
-  autocmd!
-  autocmd BufUnload * let s:is_payload_consumed = v:false
-  autocmd BufUnload * call s:reset_color_on_msg_lines()
-  autocmd BufUnload * call s:reset_color_on_err_lines()
-augroup END
-
 command! W call <SID>consume_payload()
 
 " -----------------------------------------------------------------------------------------------------------
-" Reset prompt while preserving buffer
+" Retry logic
 
 function! s:delete_existing_results()
   let l:middle_line = search(s:input_split)
@@ -212,8 +206,9 @@ function! s:delete_existing_results()
 endfunction
 
 function! s:run_reset()
-  if ! s:is_valid_delimiter_layout()
+  if ! s:is_valid_working_buffer()
     quit
+    return
   endif
 
   call s:delete_existing_results()
@@ -230,3 +225,13 @@ function! s:run_reset()
 endfunction
 
 command! C call <SID>run_reset()
+
+" -----------------------------------------------------------------------------------------------------------
+" Miscellaneous cleanup logic
+
+augroup reset_payload_consumed_state_on_buffer_close
+  autocmd!
+  autocmd BufUnload * let s:is_payload_consumed = v:false
+  autocmd BufUnload * call s:reset_color_on_msg_lines()
+  autocmd BufUnload * call s:reset_color_on_err_lines()
+augroup END
