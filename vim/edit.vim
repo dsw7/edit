@@ -167,8 +167,9 @@ function! s:consume_payload()
 
   let s:is_payload_consumed = v:true
 
+  let l:code_to_edit = join(b:code_to_edit, "\n")
   let l:instructions = s:get_instructions()
-  call s:run_edit_command(b:original_filename, b:code_to_edit, l:instructions)
+  call s:run_edit_command(b:original_filename, l:code_to_edit, l:instructions)
 
   normal! G
 endfunction
