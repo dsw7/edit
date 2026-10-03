@@ -60,14 +60,6 @@ function! s:set_code_to_edit(code_to_edit)
   call append(l:open_line, a:code_to_edit)
 endfunction
 
-function! s:get_code_to_edit()
-  let l:start_line = search(s:input_open)
-  let l:end_line = search(s:input_split)
-
-  let l:lines = getline(l:start_line + 1, l:end_line - 1)
-  return join(l:lines, "\n")
-endfunction
-
 function! s:get_instructions()
   let l:start_line = search(s:input_split)
   let l:end_line = search(s:input_close)
@@ -144,7 +136,7 @@ xnoremap <silent> ed :<C-u>call <SID>open_edit_command_buf()<CR>
 " -----------------------------------------------------------------------------------------------------------
 " Operate on code in new buffer
 
-function! s:run_edit_command(code_to_edit, instructions, filename)
+function! s:run_edit_command(filename, code_to_edit, instructions)
   let l:command = []
   call add(l:command, '/tmp/foo.py')
   call add(l:command, shellescape(a:code_to_edit))
@@ -175,11 +167,9 @@ function! s:consume_payload()
 
   let s:is_payload_consumed = v:true
 
-  let l:code_to_edit = s:get_code_to_edit()
   let l:instructions = s:get_instructions()
-  let l:this_filename = b:original_filename
+  call s:run_edit_command(b:original_filename, b:code_to_edit, l:instructions)
 
-  call s:run_edit_command(l:code_to_edit, l:instructions, l:this_filename)
   normal! G
 endfunction
 
