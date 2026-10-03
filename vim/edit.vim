@@ -13,10 +13,6 @@ let s:is_payload_consumed = v:false
 let s:hl_ids_msg = []
 let s:hl_ids_err = []
 
-function! s:color_lines_comment(lines)
-  call matchaddpos('Comment', a:lines)
-endfunction
-
 function! s:color_lines_msg(lines)
   let l:hl_id = matchaddpos('MoreMsg', a:lines)
   call add(s:hl_ids_msg, l:hl_id)
@@ -64,6 +60,27 @@ function! s:get_range_results()
   return [l:start_line + 1, l:end_line]
 endfunction
 
+" -----------------------------------------------------------------------------------------------------------
+" Buffer management
+
+function! s:set_buffer_template()
+  normal! ggdG
+
+  call setline(1, ':W to submit prompt')
+  call setline(2, ':C to reset prompt')
+  call matchaddpos('Comment', [1, 2])
+
+  call setline(3, '')
+  call setline(4, s:input_open)
+  call setline(5, s:input_split)
+  call setline(6, s:input_close)
+endfunction
+
+function! s:insert_code_to_edit(code_to_edit)
+  let l:open_line = search(s:input_open, 'n')
+  call append(l:open_line, a:code_to_edit)
+endfunction
+
 function! s:is_valid_working_buffer()
   let l:open_line = search(s:input_open, 'n')
   let l:split_line = search(s:input_split, 'n')
@@ -108,18 +125,10 @@ function! s:open_edit_command_buf()
 
   let b:original_filename = l:original_filename
 
-  call setline(1, ':W to submit prompt')
-  call setline(2, ':C to reset prompt')
-  call s:color_lines_comment(range(1, 2))
-  call append('$', [''])
+  call s:set_buffer_template()
+  call s:insert_code_to_edit(l:code_to_edit)
 
-  call setline(4, s:input_open)
-  call setline(5, l:code_to_edit)
-  call append('$', s:input_split)
-  call append('$', s:input_close)
-
-  normal! G
-  normal! O
+  normal! GO
   startinsert
 endfunction
 
