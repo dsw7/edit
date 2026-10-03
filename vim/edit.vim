@@ -188,27 +188,21 @@ command! W call <SID>consume_payload()
 " -----------------------------------------------------------------------------------------------------------
 " Retry logic
 
-function! s:delete_existing_results()
-  let l:middle_line = search(s:input_split)
-  execute (l:middle_line + 1) . ',$delete'
-endfunction
-
 function! s:run_reset()
   if ! s:is_valid_working_buffer()
     quit
     return
   endif
 
-  call s:delete_existing_results()
-  call append('$', s:input_close)
-
-  let s:is_payload_consumed = v:false
-
   call s:reset_color_on_msg_lines()
   call s:reset_color_on_err_lines()
 
-  normal! G
-  normal! O
+  call s:set_buffer_template()
+  call s:set_code_to_edit(b:code_to_edit)
+
+  let s:is_payload_consumed = v:false
+
+  normal! GO
   startinsert
 endfunction
 
