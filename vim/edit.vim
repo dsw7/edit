@@ -115,12 +115,14 @@ endfunction
 
 function! s:open_edit_command_buf()
   let l:code_to_edit = s:yank_code_to_edit()
+  let l:original_filename = bufname('%')
 
   vnew
   setlocal buftype=nofile
   setlocal bufhidden=wipe
   setlocal noswapfile
 
+  let b:original_filename = l:original_filename
   call s:enable_valid_buffer_state()
 
   call setline(1, ':W to submit prompt')
@@ -193,6 +195,10 @@ function! s:consume_payload()
     return
   endif
 
+  if ! s:is_valid_delimiter_layout()
+    return
+  endif
+
   if s:is_payload_consumed
     echom 'payload was already consumed'
     echom 'invoke :C to reset'
@@ -203,7 +209,7 @@ function! s:consume_payload()
 
   let l:instructions = s:get_instructions()
   let l:code_to_edit = s:get_code_to_edit()
-  let l:this_filename = bufname(1)
+  let l:this_filename = b:original_filename
 
   call s:run_edit_command(l:code_to_edit, l:instructions, l:this_filename)
   normal! G
@@ -212,6 +218,8 @@ endfunction
 augroup reset_payload_consumed_state_on_buffer_close
   autocmd!
   autocmd BufUnload * let s:is_payload_consumed = v:false
+  autocmd BufUnload * call s:reset_color_on_msg_lines()
+  autocmd BufUnload * call s:reset_color_on_err_lines()
 augroup END
 
 command! W call <SID>consume_payload()
