@@ -7,6 +7,10 @@
 let s:hl_ids_msg = []
 let s:hl_ids_err = []
 
+let s:input_open = repeat('>', 5)
+let s:input_split = repeat('-', 5)
+let s:input_close = repeat('<', 5)
+
 function! s:color_lines_msg(lines) abort
   let l:hl_id = matchaddpos('MoreMsg', a:lines)
   call add(s:hl_ids_msg, l:hl_id)
@@ -36,10 +40,6 @@ endfunction
 " -----------------------------------------------------------------------------------------------------------
 " Buffer management
 
-let s:input_open = repeat('>', 5)
-let s:input_split = repeat('-', 5)
-let s:input_close = repeat('<', 5)
-
 function! s:set_buffer_template() abort
   normal! ggdG
 
@@ -52,6 +52,34 @@ function! s:set_buffer_template() abort
   call setline(5, s:input_split)
   call setline(6, s:input_close)
 endfunction
+
+function! s:open_new_buffer() abort
+  vnew
+  setlocal buftype=nofile
+  setlocal bufhidden=wipe
+  setlocal noswapfile
+
+  call s:set_buffer_template()
+  let b:valid_buffer = v:true
+endfunction
+
+function! s:is_valid_buffer() abort
+  if exists('b:valid_buffer')
+    return v:true
+  endif
+
+  echom 'not a valid `edit` command buffer'
+  return v:false
+endfunction
+
+augroup reset_payload_consumed_state_on_buffer_close
+  autocmd!
+  autocmd BufUnload * call s:reset_color_on_msg_lines()
+  autocmd BufUnload * call s:reset_color_on_err_lines()
+augroup END
+
+" -----------------------------------------------------------------------------------------------------------
+" Getters and setters
 
 function! s:set_code_to_edit(code_to_edit) abort
   let l:start_line = search('^' . s:input_open . '$', 'n')
@@ -113,18 +141,12 @@ function! s:open_edit_command_buf() abort
   let l:code_to_edit = s:yank_code_to_edit()
   let l:original_filename = bufname('%')
 
-  vnew
-  setlocal buftype=nofile
-  setlocal bufhidden=wipe
-  setlocal noswapfile
+  call s:open_new_buffer()
 
   let b:code_to_edit = l:code_to_edit
   let b:original_filename = l:original_filename
 
-  call s:set_buffer_template()
   call s:set_code_to_edit(b:code_to_edit)
-
-  let b:valid_buffer = v:true
   let b:is_payload_consumed = v:false
 
   normal! GO
@@ -162,8 +184,7 @@ function! s:exit_window() abort
 endfunction
 
 function! s:consume_payload() abort
-  if ! exists('b:valid_buffer')
-    echom 'not a valid `edit` command buffer'
+  if ! s:is_valid_buffer()
     return
   endif
 
@@ -194,8 +215,7 @@ command! W call <SID>consume_payload()
 " Retry logic
 
 function! s:run_reset() abort
-  if ! exists('b:valid_buffer')
-    echom 'not a valid `edit` command buffer'
+  if ! s:is_valid_buffer()
     return
   endif
 
@@ -212,12 +232,3 @@ function! s:run_reset() abort
 endfunction
 
 command! C call <SID>run_reset()
-
-" -----------------------------------------------------------------------------------------------------------
-" Miscellaneous cleanup logic
-
-augroup reset_payload_consumed_state_on_buffer_close
-  autocmd!
-  autocmd BufUnload * call s:reset_color_on_msg_lines()
-  autocmd BufUnload * call s:reset_color_on_err_lines()
-augroup END
