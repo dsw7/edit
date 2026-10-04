@@ -4,10 +4,6 @@
 " See https://github.com/dsw7/edit for more information
 " -----------------------------------------------------------------------------------------------------------
 
-let s:input_open = repeat('>', 5)
-let s:input_split = repeat('-', 5)
-let s:input_close = repeat('<', 5)
-
 let s:is_payload_consumed = v:false
 
 let s:hl_ids_msg = []
@@ -42,6 +38,10 @@ endfunction
 " -----------------------------------------------------------------------------------------------------------
 " Buffer management
 
+let s:input_open = repeat('>', 5)
+let s:input_split = repeat('-', 5)
+let s:input_close = repeat('<', 5)
+
 function! s:set_buffer_template()
   normal! ggdG
 
@@ -55,21 +55,51 @@ function! s:set_buffer_template()
   call setline(6, s:input_close)
 endfunction
 
-function! s:set_code_to_edit(code_to_edit)
-  let l:open_line = search(s:input_open, 'n')
+function! s:get_input_open_line() abort
+  let l:line = search(s:input_open, 'n')
+
+  if l:line == 0
+    throw 'DelimNotFound: ' . s:input_open
+  endif
+
+  return l:line
+endfunction
+
+function! s:get_input_split_line() abort
+  let l:line = search(s:input_split, 'n')
+
+  if l:line == 0
+    throw 'DelimNotFound: ' . s:input_split
+  endif
+
+  return l:line
+endfunction
+
+function! s:get_input_close_line() abort
+  let l:line = search(s:input_close, 'n')
+
+  if l:line == 0
+    throw 'DelimNotFound: ' . s:input_close
+  endif
+
+  return l:line
+endfunction
+
+function! s:set_code_to_edit(code_to_edit) abort
+  let l:open_line = s:get_input_open_line()
   call append(l:open_line, a:code_to_edit)
 endfunction
 
-function! s:get_instructions()
-  let l:start_line = search(s:input_split)
-  let l:end_line = search(s:input_close)
+function! s:get_instructions() abort
+  let l:start_line = s:get_input_split_line()
+  let l:end_line = s:get_input_close_line()
 
   let l:lines = getline(l:start_line + 1, l:end_line - 1)
   return join(l:lines, "\n")
 endfunction
 
-function! s:set_results_and_return_range(results)
-  let l:start_line = search(s:input_close)
+function! s:set_results_and_return_range(results) abort
+  let l:start_line = s:get_input_close_line()
   let l:lines = split(a:results, "\n")
 
   call setline(l:start_line + 1, '')
@@ -154,11 +184,6 @@ function! s:run_edit_command(filename, code_to_edit, instructions)
 endfunction
 
 function! s:consume_payload()
-  if ! s:is_valid_working_buffer()
-    quit
-    return
-  endif
-
   if s:is_payload_consumed
     echom 'payload was already consumed'
     echom 'invoke :C to reset'
@@ -167,9 +192,19 @@ function! s:consume_payload()
 
   let s:is_payload_consumed = v:true
 
-  let l:code_to_edit = join(b:code_to_edit, "\n")
-  let l:instructions = s:get_instructions()
-  call s:run_edit_command(b:original_filename, l:code_to_edit, l:instructions)
+  try
+    let l:code_to_edit = join(b:code_to_edit, "\n")
+    let l:instructions = s:get_instructions()
+    call s:run_edit_command(b:original_filename, l:code_to_edit, l:instructions)
+  catch /DelimNotFound/
+    echohl ErrorMsg
+    echo v:exception
+    echohl None
+
+    call input("Press ENTER to close this window...")
+    quit
+    return
+  endtry
 
   normal! G
 endfunction
