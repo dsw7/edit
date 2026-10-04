@@ -9,17 +9,17 @@ let s:is_payload_consumed = v:false
 let s:hl_ids_msg = []
 let s:hl_ids_err = []
 
-function! s:color_lines_msg(lines)
+function! s:color_lines_msg(lines) abort
   let l:hl_id = matchaddpos('MoreMsg', a:lines)
   call add(s:hl_ids_msg, l:hl_id)
 endfunction
 
-function! s:color_lines_err(lines)
+function! s:color_lines_err(lines) abort
   let l:hl_id = matchaddpos('WarningMsg', a:lines)
   call add(s:hl_ids_err, l:hl_id)
 endfunction
 
-function! s:reset_color_on_msg_lines()
+function! s:reset_color_on_msg_lines() abort
   for id in s:hl_ids_msg
     call matchdelete(id)
   endfor
@@ -27,7 +27,7 @@ function! s:reset_color_on_msg_lines()
   let s:hl_ids_msg = []
 endfunction
 
-function! s:reset_color_on_err_lines()
+function! s:reset_color_on_err_lines() abort
   for id in s:hl_ids_err
     call matchdelete(id)
   endfor
@@ -42,7 +42,7 @@ let s:input_open = repeat('>', 5)
 let s:input_split = repeat('-', 5)
 let s:input_close = repeat('<', 5)
 
-function! s:set_buffer_template()
+function! s:set_buffer_template() abort
   normal! ggdG
 
   call setline(1, ':W to submit prompt')
@@ -109,7 +109,7 @@ function! s:set_results_and_return_range(results) abort
   return [l:start_line + 2, l:end_line]
 endfunction
 
-function! s:is_valid_working_buffer()
+function! s:is_valid_working_buffer() abort
   let l:open_line = search(s:input_open, 'n')
   let l:split_line = search(s:input_split, 'n')
   let l:close_line = search(s:input_close, 'n')
@@ -130,7 +130,7 @@ endfunction
 " -----------------------------------------------------------------------------------------------------------
 " Transfer highlighted code to new buffer on the right
 
-function! s:yank_code_to_edit()
+function! s:yank_code_to_edit() abort
   let l:old_reg = getreg('x')
   let l:old_regtype = getregtype('x')
 
@@ -142,7 +142,7 @@ function! s:yank_code_to_edit()
   return split(l:selection, "\n")
 endfunction
 
-function! s:open_edit_command_buf()
+function! s:open_edit_command_buf() abort
   let l:code_to_edit = s:yank_code_to_edit()
   let l:original_filename = bufname('%')
 
@@ -166,7 +166,7 @@ xnoremap <silent> ed :<C-u>call <SID>open_edit_command_buf()<CR>
 " -----------------------------------------------------------------------------------------------------------
 " Operate on code in new buffer
 
-function! s:run_edit_command(filename, code_to_edit, instructions)
+function! s:run_edit_command(filename, code_to_edit, instructions) abort
   let l:command = []
   call add(l:command, '/tmp/foo.py')
   call add(l:command, shellescape(a:code_to_edit))
@@ -183,7 +183,7 @@ function! s:run_edit_command(filename, code_to_edit, instructions)
   endif
 endfunction
 
-function! s:consume_payload()
+function! s:consume_payload() abort
   if s:is_payload_consumed
     echom 'payload was already consumed'
     echom 'invoke :C to reset'
@@ -214,7 +214,7 @@ command! W call <SID>consume_payload()
 " -----------------------------------------------------------------------------------------------------------
 " Retry logic
 
-function! s:run_reset()
+function! s:run_reset() abort
   if ! s:is_valid_working_buffer()
     quit
     return
