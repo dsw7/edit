@@ -72,6 +72,12 @@ function! s:is_valid_buffer() abort
   return v:false
 endfunction
 
+function! s:close_buffer() abort
+  if exists('b:valid_buffer')
+    quit
+  endif
+endfunction
+
 augroup reset_payload_consumed_state_on_buffer_close
   autocmd!
   autocmd BufUnload * call s:reset_color_on_msg_lines()
@@ -142,11 +148,10 @@ function! s:open_edit_command_buf() abort
   let l:original_filename = bufname('%')
 
   call s:open_new_buffer()
+  call s:set_code_to_edit(l:code_to_edit)
 
   let b:code_to_edit = l:code_to_edit
   let b:original_filename = l:original_filename
-
-  call s:set_code_to_edit(b:code_to_edit)
   let b:is_payload_consumed = v:false
 
   normal! GO
@@ -175,14 +180,6 @@ function! s:run_edit_command(filename, code_to_edit, instructions) abort
   endif
 endfunction
 
-function! s:exit_window() abort
-  echohl ErrorMsg
-  echo v:exception
-  echohl None
-  call input("Press ENTER to close this window...")
-  quit
-endfunction
-
 function! s:consume_payload() abort
   if ! s:is_valid_buffer()
     return
@@ -202,7 +199,11 @@ function! s:consume_payload() abort
     let l:instructions = s:get_instructions()
     call s:run_edit_command(b:original_filename, l:code_to_edit, l:instructions)
   catch /DelimNotFound/
-    call s:exit_window()
+    echohl ErrorMsg
+    echo v:exception
+    echohl None
+    call input("Press ENTER to close this window...")
+    call s:close_buffer()
     return
   endtry
 
