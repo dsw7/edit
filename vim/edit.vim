@@ -231,7 +231,6 @@ command! C call <SID>run_reset()
 
 augroup reset_payload_consumed_state_on_buffer_close
   autocmd!
-  autocmd BufUnload * let b:is_payload_consumed = v:false
   autocmd BufUnload * call s:reset_color_on_msg_lines()
   autocmd BufUnload * call s:reset_color_on_err_lines()
 augroup END
