@@ -35,6 +35,14 @@ function! s:reset_color_on_err_lines() abort
   let s:hl_ids_err = []
 endfunction
 
+function! s:exit_window() abort
+  echohl ErrorMsg
+  echo v:exception
+  echohl None
+  call input("Press ENTER to close this window...")
+  quit
+endfunction
+
 " -----------------------------------------------------------------------------------------------------------
 " Buffer management
 
@@ -197,12 +205,7 @@ function! s:consume_payload() abort
     let l:instructions = s:get_instructions()
     call s:run_edit_command(b:original_filename, l:code_to_edit, l:instructions)
   catch /DelimNotFound/
-    echohl ErrorMsg
-    echo v:exception
-    echohl None
-
-    call input("Press ENTER to close this window...")
-    quit
+    call s:exit_window()
     return
   endtry
 
