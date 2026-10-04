@@ -4,8 +4,6 @@
 " See https://github.com/dsw7/edit for more information
 " -----------------------------------------------------------------------------------------------------------
 
-let s:is_payload_consumed = v:false
-
 let s:hl_ids_msg = []
 let s:hl_ids_err = []
 
@@ -148,6 +146,7 @@ function! s:open_edit_command_buf() abort
   call s:set_code_to_edit(b:code_to_edit)
 
   let b:valid_buffer = v:true
+  let b:is_payload_consumed = v:false
 
   normal! GO
   startinsert
@@ -181,13 +180,14 @@ function! s:consume_payload() abort
     return
   endif
 
-  if s:is_payload_consumed
+  if b:is_payload_consumed
     echom 'payload was already consumed'
     echom 'invoke :C to reset'
     return
+  else
+    let b:is_payload_consumed = v:true
   endif
 
-  let s:is_payload_consumed = v:true
   let l:code_to_edit = join(b:code_to_edit, "\n")
 
   try
@@ -218,7 +218,7 @@ function! s:run_reset() abort
   call s:set_buffer_template()
   call s:set_code_to_edit(b:code_to_edit)
 
-  let s:is_payload_consumed = v:false
+  let b:is_payload_consumed = v:false
 
   normal! GO
   startinsert
@@ -231,7 +231,7 @@ command! C call <SID>run_reset()
 
 augroup reset_payload_consumed_state_on_buffer_close
   autocmd!
-  autocmd BufUnload * let s:is_payload_consumed = v:false
+  autocmd BufUnload * let b:is_payload_consumed = v:false
   autocmd BufUnload * call s:reset_color_on_msg_lines()
   autocmd BufUnload * call s:reset_color_on_err_lines()
 augroup END
