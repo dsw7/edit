@@ -147,6 +147,8 @@ function! s:open_edit_command_buf() abort
   call s:set_buffer_template()
   call s:set_code_to_edit(b:code_to_edit)
 
+  let b:valid_buffer = v:true
+
   normal! GO
   startinsert
 endfunction
@@ -174,6 +176,11 @@ function! s:run_edit_command(filename, code_to_edit, instructions) abort
 endfunction
 
 function! s:consume_payload() abort
+  if ! exists('b:valid_buffer')
+    echom 'not a valid `edit` command buffer'
+    return
+  endif
+
   if s:is_payload_consumed
     echom 'payload was already consumed'
     echom 'invoke :C to reset'
@@ -200,6 +207,11 @@ command! W call <SID>consume_payload()
 " Retry logic
 
 function! s:run_reset() abort
+  if ! exists('b:valid_buffer')
+    echom 'not a valid `edit` command buffer'
+    return
+  endif
+
   call s:reset_color_on_msg_lines()
   call s:reset_color_on_err_lines()
 
