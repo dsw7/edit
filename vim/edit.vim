@@ -64,7 +64,7 @@ function! s:set_buffer_template() abort
 endfunction
 
 function! s:get_input_open_line() abort
-  let l:line = search(s:input_open, 'n')
+  let l:line = search('^' . s:input_open . '$', 'n')
 
   if l:line == 0
     throw 'DelimNotFound: ' . s:input_open
@@ -74,7 +74,7 @@ function! s:get_input_open_line() abort
 endfunction
 
 function! s:get_input_split_line() abort
-  let l:line = search(s:input_split, 'n')
+  let l:line = search('^' . s:input_split . '$', 'n')
 
   if l:line == 0
     throw 'DelimNotFound: ' . s:input_split
@@ -84,7 +84,7 @@ function! s:get_input_split_line() abort
 endfunction
 
 function! s:get_input_close_line() abort
-  let l:line = search(s:input_close, 'n')
+  let l:line = search('^' . s:input_close . '$', 'n')
 
   if l:line == 0
     throw 'DelimNotFound: ' . s:input_close
