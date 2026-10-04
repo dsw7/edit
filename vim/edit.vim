@@ -117,24 +117,6 @@ function! s:set_results_and_return_range(results) abort
   return [l:start_line + 2, l:end_line]
 endfunction
 
-function! s:is_valid_working_buffer() abort
-  let l:open_line = search(s:input_open, 'n')
-  let l:split_line = search(s:input_split, 'n')
-  let l:close_line = search(s:input_close, 'n')
-
-  if l:open_line == 0 || l:split_line == 0 || l:close_line == 0
-    echoerr 'one or more delimiters not found'
-    return v:false
-  endif
-
-  if l:open_line >= l:split_line || l:split_line >= l:close_line
-    echoerr 'delimiters not in correct order'
-    return v:false
-  endif
-
-  return v:true
-endfunction
-
 " -----------------------------------------------------------------------------------------------------------
 " Transfer highlighted code to new buffer on the right
 
@@ -218,11 +200,6 @@ command! W call <SID>consume_payload()
 " Retry logic
 
 function! s:run_reset() abort
-  if ! s:is_valid_working_buffer()
-    quit
-    return
-  endif
-
   call s:reset_color_on_msg_lines()
   call s:reset_color_on_err_lines()
 
