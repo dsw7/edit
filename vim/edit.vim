@@ -37,6 +37,12 @@ function! s:reset_color_on_err_lines() abort
   let s:hl_ids_err = []
 endfunction
 
+function! s:print_exception()
+  echohl ErrorMsg
+  echo v:exception
+  echohl None
+endfunction
+
 " -----------------------------------------------------------------------------------------------------------
 " Buffer management
 
@@ -218,9 +224,7 @@ function! s:consume_payload() abort
     let l:instructions = s:get_instructions()
     call s:run_edit_command(b:original_filename, l:code_to_edit, l:instructions)
   catch /.*/
-    echohl ErrorMsg
-    echo v:exception
-    echohl None
+    call s:print_exception()
     call input('Press ENTER to close this window...')
     call s:close_buffer()
     return
