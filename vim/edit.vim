@@ -87,15 +87,15 @@ augroup END
 " -----------------------------------------------------------------------------------------------------------
 " State management
 
-function! s:set_ready_to_consume()
+function! s:set_payload_is_ready_to_consume_state()
   let b:is_payload_consumed = v:false
 endfunction
 
-function! s:set_is_consumed()
+function! s:set_payload_is_consumed_state()
   let b:is_payload_consumed = v:true
 endfunction
 
-function! s:is_consumed()
+function! s:payload_is_consumed_state()
   if b:is_payload_consumed
     echom 'payload was already consumed'
     echom 'invoke :C to reset'
@@ -173,7 +173,7 @@ function! s:open_edit_command_buf() abort
 
   let b:code_to_edit = l:code_to_edit
   let b:original_filename = l:original_filename
-  call s:set_ready_to_consume()
+  call s:set_payload_is_ready_to_consume_state()
 
   normal! GO
   startinsert
@@ -206,11 +206,11 @@ function! s:consume_payload() abort
     return
   endif
 
-  if s:is_consumed()
+  if s:payload_is_consumed_state()
     return
   endif
 
-  call s:set_is_consumed()
+  call s:set_payload_is_consumed_state()
 
   let l:code_to_edit = join(b:code_to_edit, "\n")
 
@@ -245,7 +245,7 @@ function! s:run_reset() abort
   call s:set_buffer_template()
   call s:set_code_to_edit(b:code_to_edit)
 
-  call s:set_ready_to_consume()
+  call s:set_payload_is_ready_to_consume_state()
   normal! GO
   startinsert
 endfunction
