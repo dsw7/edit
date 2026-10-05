@@ -91,27 +91,6 @@ augroup reset_payload_consumed_state_on_buffer_close
 augroup END
 
 " -----------------------------------------------------------------------------------------------------------
-" State management
-
-function! s:set_payload_is_ready_to_consume_state()
-  let b:is_payload_consumed = v:false
-endfunction
-
-function! s:set_payload_is_consumed_state()
-  let b:is_payload_consumed = v:true
-endfunction
-
-function! s:payload_is_consumed_state()
-  if b:is_payload_consumed
-    echom 'payload was already consumed'
-    echom 'invoke :C to reset'
-    return v:true
-  endif
-
-  return v:false
-endfunction
-
-" -----------------------------------------------------------------------------------------------------------
 " Getters and setters
 
 function! s:set_code_to_edit(code_to_edit) abort
@@ -179,7 +158,6 @@ function! s:open_edit_command_buf() abort
 
   let b:code_to_edit = l:code_to_edit
   let b:original_filename = l:original_filename
-  call s:set_payload_is_ready_to_consume_state()
 
   normal! GO
   startinsert
@@ -191,12 +169,6 @@ xnoremap <silent> ed :<C-u>call <SID>open_edit_command_buf()<CR>
 " Operate on code in new buffer
 
 function! s:consume_payload() abort
-  if s:payload_is_consumed_state()
-    return
-  endif
-
-  call s:set_payload_is_consumed_state()
-
   let l:code_to_edit = join(b:code_to_edit, "\n")
   let l:instructions = s:get_instructions()
 
@@ -242,7 +214,6 @@ function! s:reset_edit_buffer() abort
   call s:set_buffer_template()
   call s:set_code_to_edit(b:code_to_edit)
 
-  call s:set_payload_is_ready_to_consume_state()
   normal! GO
   startinsert
 endfunction
