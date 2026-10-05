@@ -191,10 +191,6 @@ xnoremap <silent> ed :<C-u>call <SID>open_edit_command_buf()<CR>
 " Operate on code in new buffer
 
 function! s:consume_payload() abort
-  if ! s:is_valid_buffer()
-    return
-  endif
-
   if s:payload_is_consumed_state()
     return
   endif
@@ -223,13 +219,15 @@ function! s:consume_payload() abort
 endfunction
 
 function! s:run_edit_command() abort
-  try
-    call s:consume_payload()
-  catch /.*/
-    call s:print_exception()
-    call input('Press ENTER to close this window...')
-    call s:close_buffer()
-  endtry
+  if s:is_valid_buffer()
+    try
+      call s:consume_payload()
+    catch /.*/
+      call s:print_exception()
+      call input('Press ENTER to close this window...')
+      call s:close_buffer()
+    endtry
+  endif
 endfunction
 
 command! W call <SID>run_edit_command()
@@ -237,11 +235,7 @@ command! W call <SID>run_edit_command()
 " -----------------------------------------------------------------------------------------------------------
 " Retry logic
 
-function! s:run_reset() abort
-  if ! s:is_valid_buffer()
-    return
-  endif
-
+function! s:reset_edit_buffer() abort
   call s:reset_color_on_msg_lines()
   call s:reset_color_on_err_lines()
 
@@ -251,6 +245,12 @@ function! s:run_reset() abort
   call s:set_payload_is_ready_to_consume_state()
   normal! GO
   startinsert
+endfunction
+
+function s:run_reset_command() abort
+  if s:is_valid_buffer()
+    call s:reset_edit_buffer()
+  endif
 endfunction
 
 command! C call <SID>run_reset()
