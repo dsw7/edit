@@ -112,7 +112,7 @@ function! s:set_code_to_edit(code_to_edit) abort
   let l:start_line = search('^' . s:input_open . '$', 'n')
 
   if l:start_line == 0
-    throw 'DelimNotFound: ' . s:input_open
+    throw 'delimiter not found: ' . s:input_open
   else
     call append(l:start_line, a:code_to_edit)
   endif
@@ -121,12 +121,12 @@ endfunction
 function! s:get_instructions() abort
   let l:start_line = search('^' . s:input_split . '$', 'n')
   if l:start_line == 0
-    throw 'DelimNotFound: ' . s:input_split
+    throw 'delimiter not found: ' . s:input_split
   endif
 
   let l:end_line = search('^' . s:input_close . '$', 'n')
   if l:end_line == 0
-    throw 'DelimNotFound: ' . s:input_close
+    throw 'delimiter not found: ' . s:input_close
   endif
 
   let l:lines = getline(l:start_line + 1, l:end_line - 1)
@@ -137,7 +137,7 @@ function! s:set_results_and_return_range(results) abort
   let l:start_line = search('^' . s:input_close . '$', 'n')
 
   if l:start_line == 0
-    throw 'DelimNotFound: ' . s:input_close
+    throw 'delimiter not found: ' . s:input_close
   endif
 
   let l:lines = split(a:results, "\n")
@@ -217,11 +217,11 @@ function! s:consume_payload() abort
   try
     let l:instructions = s:get_instructions()
     call s:run_edit_command(b:original_filename, l:code_to_edit, l:instructions)
-  catch /DelimNotFound/
+  catch /.*/
     echohl ErrorMsg
     echo v:exception
     echohl None
-    call input("Press ENTER to close this window...")
+    call input('Press ENTER to close this window...')
     call s:close_buffer()
     return
   endtry
