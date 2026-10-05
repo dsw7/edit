@@ -37,7 +37,7 @@ function! s:reset_color_on_err_lines() abort
   let s:hl_ids_err = []
 endfunction
 
-function! s:print_exception()
+function! s:print_exception() abort
   echohl ErrorMsg
   echo v:exception
   echohl None
@@ -190,23 +190,6 @@ xnoremap <silent> ed :<C-u>call <SID>open_edit_command_buf()<CR>
 " -----------------------------------------------------------------------------------------------------------
 " Operate on code in new buffer
 
-function! s:run_edit_command(filename, code_to_edit, instructions) abort
-  let l:command = []
-  call add(l:command, '/tmp/foo.py')
-  call add(l:command, shellescape(a:code_to_edit))
-  call add(l:command, '--filename=' . shellescape(a:filename))
-  call add(l:command, '--instructions=' . shellescape(a:instructions))
-
-  let l:output = system(join(l:command, ' '))
-  let [l:start_line, l:end_line] = s:set_results_and_return_range(l:output)
-
-  if v:shell_error == 0
-    call s:color_lines_msg(range(l:start_line, l:end_line))
-  else
-    call s:color_lines_err(range(l:start_line, l:end_line))
-  endif
-endfunction
-
 function! s:consume_payload() abort
   if ! s:is_valid_buffer()
     return
@@ -219,21 +202,37 @@ function! s:consume_payload() abort
   call s:set_payload_is_consumed_state()
 
   let l:code_to_edit = join(b:code_to_edit, "\n")
+  let l:instructions = s:get_instructions()
 
-  try
-    let l:instructions = s:get_instructions()
-    call s:run_edit_command(b:original_filename, l:code_to_edit, l:instructions)
-  catch /.*/
-    call s:print_exception()
-    call input('Press ENTER to close this window...')
-    call s:close_buffer()
-    return
-  endtry
+  let l:command = []
+  call add(l:command, '/tmp/foo.py')
+  call add(l:command, shellescape(l:code_to_edit))
+  call add(l:command, '--filename=' . shellescape(b:original_filename))
+  call add(l:command, '--instructions=' . shellescape(l:instructions))
+  let l:output = system(join(l:command, ' '))
+
+  let [l:start_line, l:end_line] = s:set_results_and_return_range(l:output)
+
+  if v:shell_error == 0
+    call s:color_lines_msg(range(l:start_line, l:end_line))
+  else
+    call s:color_lines_err(range(l:start_line, l:end_line))
+  endif
 
   normal! G
 endfunction
 
-command! W call <SID>consume_payload()
+function! s:run_edit_command() abort
+  try
+    call s:consume_payload()
+  catch /.*/
+    call s:print_exception()
+    call input('Press ENTER to close this window...')
+    call s:close_buffer()
+  endtry
+endfunction
+
+command! W call <SID>run_edit_command()
 
 " -----------------------------------------------------------------------------------------------------------
 " Retry logic
