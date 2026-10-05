@@ -253,4 +253,4 @@ function s:run_reset_command() abort
   endif
 endfunction
 
-command! C call <SID>run_reset()
+command! C call <SID>run_reset_command()
