@@ -118,22 +118,6 @@ function! s:get_instructions() abort
   return join(l:lines, "\n")
 endfunction
 
-function! s:set_results_and_return_range(results) abort
-  let l:start_line = search('^' . s:input_close . '$', 'n')
-
-  if l:start_line == 0
-    throw 'delimiter not found: ' . s:input_close
-  endif
-
-  let l:lines = split(a:results, "\n")
-
-  call setline(l:start_line + 1, '')
-  call append('$', l:lines)
-
-  let l:end_line = line('$')
-  return [l:start_line + 2, l:end_line]
-endfunction
-
 " -----------------------------------------------------------------------------------------------------------
 " Transfer highlighted code to new buffer on the right
 
@@ -168,6 +152,31 @@ xnoremap <silent> ed :<C-u>call <SID>open_edit_command_buf()<CR>
 " -----------------------------------------------------------------------------------------------------------
 " Operate on code in new buffer
 
+function! s:print_output(output) abort
+  let l:start_line = search('^' . s:input_close . '$', 'n')
+
+  if l:start_line == 0
+    throw 'delimiter not found: ' . s:input_close
+  endif
+
+  " TODO: delete hl ids on reset
+  execute (l:start_line + 1) . ',$delete'
+
+  call setline(l:start_line + 1, '')
+
+  let l:lines = split(a:output, "\n")
+  call append('$', l:lines)
+  let l:end_line = line('$')
+
+  let l:range_to_color = range(l:start_line + 2, l:end_line)
+
+  if v:shell_error == 0
+    call s:color_lines_msg(l:range_to_color)
+  else
+    call s:color_lines_err(l:range_to_color)
+  endif
+endfunction
+
 function! s:consume_payload() abort
   let l:code_to_edit = join(b:code_to_edit, "\n")
   let l:instructions = s:get_instructions()
@@ -179,14 +188,7 @@ function! s:consume_payload() abort
   call add(l:command, '--instructions=' . shellescape(l:instructions))
   let l:output = system(join(l:command, ' '))
 
-  let [l:start_line, l:end_line] = s:set_results_and_return_range(l:output)
-
-  if v:shell_error == 0
-    call s:color_lines_msg(range(l:start_line, l:end_line))
-  else
-    call s:color_lines_err(range(l:start_line, l:end_line))
-  endif
-
+  call s:print_output(l:output)
   normal! G
 endfunction
 
