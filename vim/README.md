@@ -12,8 +12,8 @@ cp -v edit.vim ~/.vim/plugin/
 
 ## Usage
 Select a block of text in visual mode, and execute `ed`. This will open the
-selected text in a new vertical split window with a new scratch buffer. For
-example, selecting:
+selected text in a new vertical split window (named **Prompt**) with a new
+scratch buffer. For example, selecting:
 ```c
 void printIntAddr()
 {
@@ -24,33 +24,26 @@ void printIntAddr()
 ```
 Will open:
 ```console
->>>>>
 void printIntAddr()
 {
     const int i = 42;
     printf("Value: %d\n", i);
     printf("Address: %p\n", (void *)&i);
 }
------
+─────────────────────────────────────────────────────────────────────────────────────────────────────────────
 
-<<<<<
 ```
-Place the prompt between the `-----` and `<<<<<` then invoke `:W` to submit the
-job. For example:
+Place the instructions below the vertical separator and invoke `:W` to submit
+the job. For example:
 ```console
->>>>>
 void printIntAddr()
 {
     const int i = 42;
     printf("Value: %d\n", i);
     printf("Address: %p\n", (void *)&i);
 }
------
+─────────────────────────────────────────────────────────────────────────────────────────────────────────────
 What does the code do?
-<<<<<
 ```
-The results will print under the `<<<<<` delimiter.
-
-### Retrying a prompt
-To retry, clear the payload by invoking `:C`, input the new prompt, and finally
-invoke `:W` to submit another job.
+The results will be loaded into another window named **Completion** which will
+be positioned beneath **Prompt**.
