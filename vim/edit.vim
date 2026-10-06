@@ -84,20 +84,6 @@ augroup reset_payload_consumed_state_on_buffer_close
 augroup END
 
 " -----------------------------------------------------------------------------------------------------------
-" Getters and setters
-
-function! s:get_instructions() abort
-  let l:start_line = search('^' . s:input_split . '$', 'n')
-  if l:start_line == 0
-    throw 'delimiter not found: ' . s:input_split
-  endif
-
-  let l:end_line = line('$')
-  let l:lines = getline(l:start_line + 1, l:end_line)
-  return join(l:lines, "\n")
-endfunction
-
-" -----------------------------------------------------------------------------------------------------------
 " Transfer highlighted code to new buffer on the right
 
 function! s:yank_code_to_edit() abort
@@ -130,6 +116,15 @@ xnoremap <silent> ed :<C-u>call <SID>open_edit_command_buf()<CR>
 " -----------------------------------------------------------------------------------------------------------
 " Operate on code in new buffer
 
+function! s:get_instructions() abort
+  let l:start_line = search('^' . s:input_split . '$', 'n')
+  if l:start_line == 0
+    throw 'delimiter not found: ' . s:input_split
+  endif
+
+  return getline(l:start_line + 1, line('$'))
+endfunction
+
 function! s:open_completion_window(output) abort
   new Completion
   setlocal buftype=nofile
@@ -142,7 +137,7 @@ endfunction
 
 function! s:consume_payload() abort
   let l:code_to_edit = join(b:code_to_edit, "\n")
-  let l:instructions = s:get_instructions()
+  let l:instructions = join(s:get_instructions(), "\n")
 
   let l:command = []
   call add(l:command, '/tmp/foo.py')
