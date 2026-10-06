@@ -59,20 +59,11 @@ function! s:open_prompt_window(code_to_edit) abort
   call append('$', a:code_to_edit)
   call append('$', s:input_split)
 
-  let b:valid_buffer = v:true
+  let b:prompt_window_is_open = v:true
 endfunction
 
-function! s:is_valid_buffer() abort
-  if exists('b:valid_buffer')
-    return v:true
-  endif
-
-  echom 'not a valid `edit` command buffer'
-  return v:false
-endfunction
-
-function! s:close_buffer() abort
-  if exists('b:valid_buffer')
+function! s:close_prompt_window() abort
+  if exists('b:prompt_window_is_open')
     quit
   endif
 endfunction
@@ -84,7 +75,7 @@ augroup reset_payload_consumed_state_on_buffer_close
 augroup END
 
 " -----------------------------------------------------------------------------------------------------------
-" Transfer highlighted code to new buffer on the right
+" Transfer highlighted code to new window on the right
 
 function! s:yank_code_to_edit() abort
   let l:old_reg = getreg('x')
@@ -114,7 +105,7 @@ endfunction
 xnoremap <silent> ed :<C-u>call <SID>open_edit_command_buf()<CR>
 
 " -----------------------------------------------------------------------------------------------------------
-" Operate on code in new buffer
+" Operate on code in new window
 
 function! s:get_instructions() abort
   let l:start_line = search('^' . s:input_split . '$', 'n')
@@ -151,14 +142,16 @@ function! s:consume_payload() abort
 endfunction
 
 function! s:run_edit_command() abort
-  if s:is_valid_buffer()
+  if exists('b:prompt_window_is_open')
     try
       call s:consume_payload()
     catch /.*/
       call s:print_exception()
       call input('Press ENTER to close this window...')
-      call s:close_buffer()
+      call s:close_prompt_window()
     endtry
+  else
+    echom 'command must follow `ed` invocation'
   endif
 endfunction
 
