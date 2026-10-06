@@ -9,7 +9,6 @@ let s:hl_ids_err = []
 
 let s:input_open = repeat('>', 5)
 let s:input_split = repeat('-', 5)
-let s:input_close = repeat('<', 5)
 
 function! s:color_lines_msg(lines) abort
   let l:hl_id = matchaddpos('MoreMsg', a:lines)
@@ -56,7 +55,6 @@ function! s:set_buffer_template() abort
   call setline(3, '')
   call setline(4, s:input_open)
   call setline(5, s:input_split)
-  call setline(6, s:input_close)
 endfunction
 
 function! s:open_new_buffer() abort
@@ -109,12 +107,8 @@ function! s:get_instructions() abort
     throw 'delimiter not found: ' . s:input_split
   endif
 
-  let l:end_line = search('^' . s:input_close . '$', 'n')
-  if l:end_line == 0
-    throw 'delimiter not found: ' . s:input_close
-  endif
-
-  let l:lines = getline(l:start_line + 1, l:end_line - 1)
+  let l:end_line = line('$')
+  let l:lines = getline(l:start_line + 1, l:end_line)
   return join(l:lines, "\n")
 endfunction
 
@@ -143,7 +137,7 @@ function! s:open_edit_command_buf() abort
   let b:code_to_edit = l:code_to_edit
   let b:original_filename = l:original_filename
 
-  normal! GO
+  normal! Go
   startinsert
 endfunction
 
