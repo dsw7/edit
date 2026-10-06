@@ -12,13 +12,14 @@ function! s:print_exception() abort
   echohl None
 endfunction
 
+" -----------------------------------------------------------------------------------------------------------
+" Windows
+
 function! s:open_prompt_window(code_to_edit) abort
   vnew Prompt
   setlocal buftype=nofile
   setlocal bufhidden=wipe
   setlocal noswapfile
-
-  normal! ggdG
 
   call setline(1, ':W to submit prompt')
   call matchaddpos('Comment', [1])
@@ -26,6 +27,7 @@ function! s:open_prompt_window(code_to_edit) abort
   call setline(2, '')
   call append('$', a:code_to_edit)
   call append('$', s:separator)
+  call matchaddpos('Title', [line('$')])
 
   let b:prompt_window_is_open = v:true
 endfunction
@@ -34,6 +36,15 @@ function! s:close_prompt_window() abort
   if exists('b:prompt_window_is_open')
     quit
   endif
+endfunction
+
+function! s:open_completion_window(completion) abort
+  new Completion
+  setlocal buftype=nofile
+  setlocal bufhidden=wipe
+  setlocal noswapfile
+
+  call setline(1, split(a:completion, "\n"))
 endfunction
 
 " -----------------------------------------------------------------------------------------------------------
@@ -77,16 +88,6 @@ function! s:get_instructions_after_delimiter() abort
   endif
 
   throw 'delimiter not found'
-endfunction
-
-function! s:open_completion_window(output) abort
-  new Completion
-  setlocal buftype=nofile
-  setlocal bufhidden=wipe
-  setlocal noswapfile
-
-  let l:lines = split(a:output, "\n")
-  call setline(1, l:lines)
 endfunction
 
 function! s:consume_payload() abort
