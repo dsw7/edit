@@ -4,36 +4,7 @@
 " See https://github.com/dsw7/edit for more information
 " -----------------------------------------------------------------------------------------------------------
 
-let s:hl_ids_msg = []
-let s:hl_ids_err = []
-
 let s:input_split = repeat('─', winwidth(0))
-
-function! s:color_lines_msg(lines) abort
-  let l:hl_id = matchaddpos('MoreMsg', a:lines)
-  call add(s:hl_ids_msg, l:hl_id)
-endfunction
-
-function! s:color_lines_err(lines) abort
-  let l:hl_id = matchaddpos('WarningMsg', a:lines)
-  call add(s:hl_ids_err, l:hl_id)
-endfunction
-
-function! s:reset_color_on_msg_lines() abort
-  for id in s:hl_ids_msg
-    call matchdelete(id)
-  endfor
-
-  let s:hl_ids_msg = []
-endfunction
-
-function! s:reset_color_on_err_lines() abort
-  for id in s:hl_ids_err
-    call matchdelete(id)
-  endfor
-
-  let s:hl_ids_err = []
-endfunction
 
 function! s:print_exception() abort
   echohl ErrorMsg
@@ -67,12 +38,6 @@ function! s:close_prompt_window() abort
     quit
   endif
 endfunction
-
-augroup reset_payload_consumed_state_on_buffer_close
-  autocmd!
-  autocmd BufUnload * call s:reset_color_on_msg_lines()
-  autocmd BufUnload * call s:reset_color_on_err_lines()
-augroup END
 
 " -----------------------------------------------------------------------------------------------------------
 " Transfer highlighted code to new window on the right
