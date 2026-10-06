@@ -40,7 +40,7 @@ function! s:close_prompt_window() abort
 endfunction
 
 " -----------------------------------------------------------------------------------------------------------
-" Transfer highlighted code to new window on the right
+" Transfer selected code to new window on the right
 
 function! s:yank_code_to_edit() abort
   let l:old_reg = getreg('x')
@@ -54,7 +54,7 @@ function! s:yank_code_to_edit() abort
   return split(l:selection, "\n")
 endfunction
 
-function! s:open_edit_command_buf() abort
+function! s:copy_selected_code_to_new_window() abort
   let l:code_to_edit = s:yank_code_to_edit()
   let l:original_filename = bufname('%')
 
@@ -67,7 +67,7 @@ function! s:open_edit_command_buf() abort
   startinsert
 endfunction
 
-xnoremap <silent> ed :<C-u>call <SID>open_edit_command_buf()<CR>
+xnoremap <silent> ed :<C-u>call <SID>copy_selected_code_to_new_window()<CR>
 
 " -----------------------------------------------------------------------------------------------------------
 " Operate on code in new window
