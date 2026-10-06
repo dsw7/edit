@@ -7,7 +7,6 @@
 let s:hl_ids_msg = []
 let s:hl_ids_err = []
 
-let s:input_open = repeat('>', 5)
 let s:input_split = repeat('─', winwidth(0))
 
 function! s:color_lines_msg(lines) abort
@@ -45,7 +44,7 @@ endfunction
 " -----------------------------------------------------------------------------------------------------------
 " Buffer management
 
-function! s:open_prompt_window() abort
+function! s:open_prompt_window(code_to_edit) abort
   vnew Prompt
   setlocal buftype=nofile
   setlocal bufhidden=wipe
@@ -54,12 +53,11 @@ function! s:open_prompt_window() abort
   normal! ggdG
 
   call setline(1, ':W to submit prompt')
-  call setline(2, ':C to reset prompt')
-  call matchaddpos('Comment', [1, 2])
+  call matchaddpos('Comment', [1])
 
-  call setline(3, '')
-  call setline(4, s:input_open)
-  call setline(5, s:input_split)
+  call setline(2, '')
+  call append('$', a:code_to_edit)
+  call append('$', s:input_split)
 
   let b:valid_buffer = v:true
 endfunction
@@ -87,16 +85,6 @@ augroup END
 
 " -----------------------------------------------------------------------------------------------------------
 " Getters and setters
-
-function! s:set_code_to_edit(code_to_edit) abort
-  let l:start_line = search('^' . s:input_open . '$', 'n')
-
-  if l:start_line == 0
-    throw 'delimiter not found: ' . s:input_open
-  else
-    call append(l:start_line, a:code_to_edit)
-  endif
-endfunction
 
 function! s:get_instructions() abort
   let l:start_line = search('^' . s:input_split . '$', 'n')
@@ -128,8 +116,7 @@ function! s:open_edit_command_buf() abort
   let l:code_to_edit = s:yank_code_to_edit()
   let l:original_filename = bufname('%')
 
-  call s:open_prompt_window()
-  call s:set_code_to_edit(l:code_to_edit)
+  call s:open_prompt_window(l:code_to_edit)
 
   let b:code_to_edit = l:code_to_edit
   let b:original_filename = l:original_filename
