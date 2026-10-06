@@ -25,9 +25,9 @@ function! s:open_prompt_window(code_to_edit) abort
   call matchaddpos('Comment', [1])
 
   call setline(2, '')
-  call append('$', a:code_to_edit)
+  call append('$', split(a:code_to_edit, "\n"))
   call append('$', s:separator)
-  call matchaddpos('Title', [line('$')])
+  call matchaddpos('Comment', [line('$')])
 
   let b:prompt_window_is_open = v:true
 endfunction
@@ -48,7 +48,7 @@ function! s:open_completion_window(completion) abort
 endfunction
 
 " -----------------------------------------------------------------------------------------------------------
-" Transfer selected code to new window on the right
+" Step 1: execute `ed` in normal mode to transfer code to new window
 
 function! s:yank_code_to_edit() abort
   let l:old_reg = getreg('x')
@@ -59,7 +59,7 @@ function! s:yank_code_to_edit() abort
   let l:selection = getreg('x')
   call setreg('x', l:old_reg, l:old_regtype)
 
-  return split(l:selection, "\n")
+  return l:selection
 endfunction
 
 function! s:copy_selected_code_to_new_window() abort
@@ -78,7 +78,7 @@ endfunction
 xnoremap <silent> ed :<C-u>call <SID>copy_selected_code_to_new_window()<CR>
 
 " -----------------------------------------------------------------------------------------------------------
-" Operate on code in new window
+" Step 2: execute `:W` after instructions have been provided
 
 function! s:get_instructions_after_delimiter() abort
   let l:start_line = search('^' . s:separator . '$', 'n')
@@ -91,12 +91,11 @@ function! s:get_instructions_after_delimiter() abort
 endfunction
 
 function! s:consume_payload() abort
-  let l:code_to_edit = join(b:code_to_edit, "\n")
   let l:instructions = join(s:get_instructions_after_delimiter(), "\n")
 
   let l:command = []
   call add(l:command, '/tmp/foo.py')
-  call add(l:command, shellescape(l:code_to_edit))
+  call add(l:command, shellescape(b:code_to_edit))
   call add(l:command, '--filename=' . shellescape(b:original_filename))
   call add(l:command, '--instructions=' . shellescape(l:instructions))
   let l:output = system(join(l:command, ' '))
