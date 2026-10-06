@@ -72,13 +72,14 @@ xnoremap <silent> ed :<C-u>call <SID>copy_selected_code_to_new_window()<CR>
 " -----------------------------------------------------------------------------------------------------------
 " Operate on code in new window
 
-function! s:get_instructions() abort
+function! s:get_instructions_after_delimiter() abort
   let l:start_line = search('^' . s:input_split . '$', 'n')
-  if l:start_line == 0
-    throw 'delimiter not found: ' . s:input_split
+
+  if l:start_line > 0
+    return getline(l:start_line + 1, line('$'))
   endif
 
-  return getline(l:start_line + 1, line('$'))
+  throw 'delimiter not found'
 endfunction
 
 function! s:open_completion_window(output) abort
@@ -93,7 +94,7 @@ endfunction
 
 function! s:consume_payload() abort
   let l:code_to_edit = join(b:code_to_edit, "\n")
-  let l:instructions = join(s:get_instructions(), "\n")
+  let l:instructions = join(s:get_instructions_after_delimiter(), "\n")
 
   let l:command = []
   call add(l:command, '/tmp/foo.py')
