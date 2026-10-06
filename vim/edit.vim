@@ -60,7 +60,7 @@ function! s:set_buffer_template() abort
 endfunction
 
 function! s:open_new_buffer() abort
-  vnew
+  vnew Prompt
   setlocal buftype=nofile
   setlocal bufhidden=wipe
   setlocal noswapfile
@@ -152,34 +152,14 @@ xnoremap <silent> ed :<C-u>call <SID>open_edit_command_buf()<CR>
 " -----------------------------------------------------------------------------------------------------------
 " Operate on code in new buffer
 
-function! s:delete_to_end_of_file(start_line) abort
-  if a:start_line < line('$')
-    execute a:start_line . ',$delete'
-  endif
-endfunction
-
-function! s:print_output(output) abort
-  let l:start_line = search('^' . s:input_close . '$', 'n')
-
-  if l:start_line == 0
-    throw 'delimiter not found: ' . s:input_close
-  endif
-
-  " TODO: delete hl ids on reset
-  call s:delete_to_end_of_file(l:start_line + 1)
+function! s:print_new_in_new_buffer(output) abort
+  new Completion
+  setlocal buftype=nofile
+  setlocal bufhidden=wipe
+  setlocal noswapfile
 
   let l:lines = split(a:output, "\n")
-  call append('$', [''])
-  call append('$', l:lines)
-  let l:end_line = line('$')
-
-  let l:range_to_color = range(l:start_line + 2, l:end_line)
-
-  if v:shell_error == 0
-    call s:color_lines_msg(l:range_to_color)
-  else
-    call s:color_lines_err(l:range_to_color)
-  endif
+  call setline(1, l:lines)
 endfunction
 
 function! s:consume_payload() abort
@@ -193,7 +173,7 @@ function! s:consume_payload() abort
   call add(l:command, '--instructions=' . shellescape(l:instructions))
   let l:output = system(join(l:command, ' '))
 
-  call s:print_output(l:output)
+  call s:print_new_in_new_buffer(l:output)
   normal! G
 endfunction
 
