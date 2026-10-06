@@ -8,7 +8,7 @@ let s:hl_ids_msg = []
 let s:hl_ids_err = []
 
 let s:input_open = repeat('>', 5)
-let s:input_split = repeat('-', 5)
+let s:input_split = repeat('─', winwidth(0))
 
 function! s:color_lines_msg(lines) abort
   let l:hl_id = matchaddpos('MoreMsg', a:lines)
