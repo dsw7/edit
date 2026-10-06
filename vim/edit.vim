@@ -4,16 +4,13 @@
 " See https://github.com/dsw7/edit for more information
 " -----------------------------------------------------------------------------------------------------------
 
-let s:input_split = repeat('─', winwidth(0))
+let s:separator = repeat('─', (&colorcolumn > 0 ? &colorcolumn : 81) - 1)
 
 function! s:print_exception() abort
   echohl ErrorMsg
   echo v:exception
   echohl None
 endfunction
-
-" -----------------------------------------------------------------------------------------------------------
-" Buffer management
 
 function! s:open_prompt_window(code_to_edit) abort
   vnew Prompt
@@ -28,7 +25,7 @@ function! s:open_prompt_window(code_to_edit) abort
 
   call setline(2, '')
   call append('$', a:code_to_edit)
-  call append('$', s:input_split)
+  call append('$', s:separator)
 
   let b:prompt_window_is_open = v:true
 endfunction
@@ -73,7 +70,7 @@ xnoremap <silent> ed :<C-u>call <SID>copy_selected_code_to_new_window()<CR>
 " Operate on code in new window
 
 function! s:get_instructions_after_delimiter() abort
-  let l:start_line = search('^' . s:input_split . '$', 'n')
+  let l:start_line = search('^' . s:separator . '$', 'n')
 
   if l:start_line > 0
     return getline(l:start_line + 1, line('$'))
