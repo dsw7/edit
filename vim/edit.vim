@@ -152,6 +152,12 @@ xnoremap <silent> ed :<C-u>call <SID>open_edit_command_buf()<CR>
 " -----------------------------------------------------------------------------------------------------------
 " Operate on code in new buffer
 
+function! s:delete_to_end_of_file(start_line) abort
+  if a:start_line < line('$')
+    execute a:start_line . ',$delete'
+  endif
+endfunction
+
 function! s:print_output(output) abort
   let l:start_line = search('^' . s:input_close . '$', 'n')
 
@@ -160,11 +166,10 @@ function! s:print_output(output) abort
   endif
 
   " TODO: delete hl ids on reset
-  execute (l:start_line + 1) . ',$delete'
-
-  call setline(l:start_line + 1, '')
+  call s:delete_to_end_of_file(l:start_line + 1)
 
   let l:lines = split(a:output, "\n")
+  call append('$', [''])
   call append('$', l:lines)
   let l:end_line = line('$')
 
