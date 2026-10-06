@@ -45,6 +45,7 @@ function! s:open_completion_window(completion) abort
   setlocal noswapfile
 
   call setline(1, split(a:completion, "\n"))
+  setlocal nomodifiable
 endfunction
 
 " -----------------------------------------------------------------------------------------------------------
