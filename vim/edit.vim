@@ -184,25 +184,3 @@ function! s:run_edit_command() abort
 endfunction
 
 command! W call <SID>run_edit_command()
-
-" -----------------------------------------------------------------------------------------------------------
-" Retry logic
-
-function! s:reset_edit_buffer() abort
-  call s:reset_color_on_msg_lines()
-  call s:reset_color_on_err_lines()
-
-  call s:set_buffer_template()
-  call s:set_code_to_edit(b:code_to_edit)
-
-  normal! GO
-  startinsert
-endfunction
-
-function s:run_reset_command() abort
-  if s:is_valid_buffer()
-    call s:reset_edit_buffer()
-  endif
-endfunction
-
-command! C call <SID>run_reset_command()
