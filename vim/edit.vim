@@ -45,7 +45,12 @@ endfunction
 " -----------------------------------------------------------------------------------------------------------
 " Buffer management
 
-function! s:set_buffer_template() abort
+function! s:open_prompt_window() abort
+  vnew Prompt
+  setlocal buftype=nofile
+  setlocal bufhidden=wipe
+  setlocal noswapfile
+
   normal! ggdG
 
   call setline(1, ':W to submit prompt')
@@ -55,15 +60,7 @@ function! s:set_buffer_template() abort
   call setline(3, '')
   call setline(4, s:input_open)
   call setline(5, s:input_split)
-endfunction
 
-function! s:open_new_buffer() abort
-  vnew Prompt
-  setlocal buftype=nofile
-  setlocal bufhidden=wipe
-  setlocal noswapfile
-
-  call s:set_buffer_template()
   let b:valid_buffer = v:true
 endfunction
 
@@ -131,7 +128,7 @@ function! s:open_edit_command_buf() abort
   let l:code_to_edit = s:yank_code_to_edit()
   let l:original_filename = bufname('%')
 
-  call s:open_new_buffer()
+  call s:open_prompt_window()
   call s:set_code_to_edit(l:code_to_edit)
 
   let b:code_to_edit = l:code_to_edit
@@ -146,7 +143,7 @@ xnoremap <silent> ed :<C-u>call <SID>open_edit_command_buf()<CR>
 " -----------------------------------------------------------------------------------------------------------
 " Operate on code in new buffer
 
-function! s:print_new_in_new_buffer(output) abort
+function! s:open_completion_window(output) abort
   new Completion
   setlocal buftype=nofile
   setlocal bufhidden=wipe
@@ -167,7 +164,7 @@ function! s:consume_payload() abort
   call add(l:command, '--instructions=' . shellescape(l:instructions))
   let l:output = system(join(l:command, ' '))
 
-  call s:print_new_in_new_buffer(l:output)
+  call s:open_completion_window(l:output)
   normal! G
 endfunction
 
