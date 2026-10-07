@@ -4,11 +4,7 @@
 " See https://github.com/dsw7/edit for more information
 " -----------------------------------------------------------------------------------------------------------
 
-function! s:get_col_width() abort
-  return (&colorcolumn > 0 ? &colorcolumn : 81) - 1
-endfunction
-
-let s:separator = repeat('─', s:get_col_width())
+let s:separator = repeat('─', ((&colorcolumn > 0 ? &colorcolumn : 81) - 1))
 
 function! s:print_exception() abort
   echohl ErrorMsg
@@ -42,13 +38,15 @@ function! s:close_prompt_window() abort
   endif
 endfunction
 
-function! s:open_completion_window(completion) abort
+function! s:open_completion_window(results) abort
   new Completion
   setlocal buftype=nofile
   setlocal bufhidden=wipe
   setlocal noswapfile
 
-  call setline(1, split(a:completion, "\n"))
+  execute 'setlocal syntax=' . a:results.language
+  call setline(1, split(a:results.edited_code, "\n"))
+
   setlocal nomodifiable
 endfunction
 
@@ -106,6 +104,12 @@ function! s:get_instructions_after_delimiter() abort
   throw 'delimiter not found'
 endfunction
 
+function! s:unpack_output(completion) abort
+  let l:json = json_decode(a:completion)
+
+  return {'edited_code': l:json.content, 'language': l:json.lang}
+endfunction
+
 function! s:consume_payload() abort
   let l:instructions = join(s:get_instructions_after_delimiter(), "\n")
 
@@ -114,11 +118,10 @@ function! s:consume_payload() abort
   call add(l:command, shellescape(b:code_to_edit))
   call add(l:command, shellescape(l:instructions))
   call add(l:command, '--filename=' . shellescape(b:original_filename))
-  call add(l:command, '--width=' . s:get_col_width())
   let l:output = system(join(l:command, ' '))
 
   if v:shell_error == 0
-    call s:open_completion_window(l:output)
+    call s:open_completion_window(s:unpack_output(l:output))
   else
     call s:open_error_window(l:output)
   endif
