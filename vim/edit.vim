@@ -43,12 +43,16 @@ function! s:close_prompt_window() abort
 endfunction
 
 function! s:open_completion_window(completion) abort
+  let l:json_result = json_decode(a:completion)
+
   new Completion
   setlocal buftype=nofile
   setlocal bufhidden=wipe
   setlocal noswapfile
 
-  call setline(1, split(a:completion, "\n"))
+  execute 'setlocal syntax=' . l:json_result.lang
+  call setline(1, split(l:json_result.content, "\n"))
+
   setlocal nomodifiable
 endfunction
 
