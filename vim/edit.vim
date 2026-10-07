@@ -4,7 +4,11 @@
 " See https://github.com/dsw7/edit for more information
 " -----------------------------------------------------------------------------------------------------------
 
-let s:separator = repeat('─', (&colorcolumn > 0 ? &colorcolumn : 81) - 1)
+function! s:get_col_width() abort
+  return (&colorcolumn > 0 ? &colorcolumn : 81) - 1
+endfunction
+
+let s:separator = repeat('─', s:get_col_width())
 
 function! s:print_exception() abort
   echohl ErrorMsg
@@ -99,6 +103,7 @@ function! s:consume_payload() abort
   call add(l:command, shellescape(b:code_to_edit))
   call add(l:command, shellescape(l:instructions))
   call add(l:command, '--filename=' . shellescape(b:original_filename))
+  call add(l:command, '--width=' . s:get_col_width())
   let l:output = system(join(l:command, ' '))
 
   call s:open_completion_window(l:output)
