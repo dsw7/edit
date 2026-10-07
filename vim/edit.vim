@@ -42,16 +42,14 @@ function! s:close_prompt_window() abort
   endif
 endfunction
 
-function! s:open_completion_window(completion) abort
-  let l:json_result = json_decode(a:completion)
-
+function! s:open_completion_window(results) abort
   new Completion
   setlocal buftype=nofile
   setlocal bufhidden=wipe
   setlocal noswapfile
 
-  execute 'setlocal syntax=' . l:json_result.lang
-  call setline(1, split(l:json_result.content, "\n"))
+  execute 'setlocal syntax=' . a:results.language
+  call setline(1, split(a:results.edited_code, "\n"))
 
   setlocal nomodifiable
 endfunction
@@ -110,6 +108,12 @@ function! s:get_instructions_after_delimiter() abort
   throw 'delimiter not found'
 endfunction
 
+function! s:unpack_output(completion) abort
+  let l:json = json_decode(a:completion)
+
+  return {'edited_code': l:json.content, 'language': l:json.lang}
+endfunction
+
 function! s:consume_payload() abort
   let l:instructions = join(s:get_instructions_after_delimiter(), "\n")
 
@@ -122,7 +126,7 @@ function! s:consume_payload() abort
   let l:output = system(join(l:command, ' '))
 
   if v:shell_error == 0
-    call s:open_completion_window(l:output)
+    call s:open_completion_window(s:unpack_output(l:output))
   else
     call s:open_error_window(l:output)
   endif
