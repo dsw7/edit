@@ -97,8 +97,8 @@ function! s:consume_payload() abort
   let l:command = []
   call add(l:command, '/tmp/foo.py')
   call add(l:command, shellescape(b:code_to_edit))
+  call add(l:command, shellescape(l:instructions))
   call add(l:command, '--filename=' . shellescape(b:original_filename))
-  call add(l:command, '--instructions=' . shellescape(l:instructions))
   let l:output = system(join(l:command, ' '))
 
   call s:open_completion_window(l:output)
