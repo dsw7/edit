@@ -55,9 +55,9 @@ function! s:open_error_window(error) abort
   setlocal buftype=nofile
   setlocal bufhidden=wipe
   setlocal noswapfile
-  setlocal statusline=%#ErrorMsg#\%f
 
   call setline(1, split(a:error, "\n"))
+  call matchaddpos('WarningMsg', range(1, line('$')))
   setlocal nomodifiable
 endfunction
 
