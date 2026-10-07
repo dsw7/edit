@@ -52,6 +52,17 @@ function! s:open_completion_window(completion) abort
   setlocal nomodifiable
 endfunction
 
+function! s:open_error_window(error) abort
+  new Error
+  setlocal buftype=nofile
+  setlocal bufhidden=wipe
+  setlocal noswapfile
+  setlocal statusline=%#ErrorMsg#\%f
+
+  call setline(1, split(a:error, "\n"))
+  setlocal nomodifiable
+endfunction
+
 " -----------------------------------------------------------------------------------------------------------
 " Step 1: execute `ed` in normal mode to transfer code to new window
 
@@ -106,7 +117,12 @@ function! s:consume_payload() abort
   call add(l:command, '--width=' . s:get_col_width())
   let l:output = system(join(l:command, ' '))
 
-  call s:open_completion_window(l:output)
+  if v:shell_error == 0
+    call s:open_completion_window(l:output)
+  else
+    call s:open_error_window(l:output)
+  endif
+
   normal! G
 endfunction
 
