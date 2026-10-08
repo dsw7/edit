@@ -104,35 +104,41 @@ function! s:get_instructions_after_delimiter() abort
   throw 'delimiter not found'
 endfunction
 
+function! s:build_command() abort
+  let l:command = []
+  call add(l:command, 'edit')
+  call add(l:command, '--filename=' . shellescape(b:original_filename))
+  call add(l:command, shellescape(b:code_to_edit))
+
+  let l:instructions = join(s:get_instructions_after_delimiter(), "\n")
+  call add(l:command, shellescape(l:instructions))
+  return join(l:command, ' ')
+endfunction
+
 function! s:unpack_output(completion) abort
   let l:json = json_decode(a:completion)
 
   return {'edited_code': l:json.content, 'language': l:json.lang}
 endfunction
 
-function! s:consume_payload() abort
-  let l:instructions = join(s:get_instructions_after_delimiter(), "\n")
+function! s:consume_code_and_instructions() abort
+  if executable('edit')
+    let l:output = system(s:build_command())
 
-  let l:command = []
-  call add(l:command, '/tmp/foo.py')
-  call add(l:command, shellescape(b:code_to_edit))
-  call add(l:command, shellescape(l:instructions))
-  call add(l:command, '--filename=' . shellescape(b:original_filename))
-  let l:output = system(join(l:command, ' '))
-
-  if v:shell_error == 0
-    call s:open_completion_window(s:unpack_output(l:output))
+    if v:shell_error == 0
+      call s:open_completion_window(s:unpack_output(l:output))
+    else
+      call s:open_error_window(l:output)
+    endif
   else
-    call s:open_error_window(l:output)
+    throw 'could not find `edit` binary in $PATH'
   endif
-
-  normal! G
 endfunction
 
 function! s:run_edit_command() abort
   if exists('b:prompt_window_is_open')
     try
-      call s:consume_payload()
+      call s:consume_code_and_instructions()
     catch /.*/
       call s:print_exception()
       call input('Press ENTER to close this window...')
