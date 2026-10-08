@@ -104,12 +104,6 @@ function! s:get_instructions_after_delimiter() abort
   throw 'delimiter not found'
 endfunction
 
-function! s:unpack_output(completion) abort
-  let l:json = json_decode(a:completion)
-
-  return {'edited_code': l:json.content, 'language': l:json.lang}
-endfunction
-
 function! s:build_command() abort
   let l:command = []
   call add(l:command, 'edit')
@@ -121,7 +115,13 @@ function! s:build_command() abort
   return join(l:command, ' ')
 endfunction
 
-function! s:consume_payload() abort
+function! s:unpack_output(completion) abort
+  let l:json = json_decode(a:completion)
+
+  return {'edited_code': l:json.content, 'language': l:json.lang}
+endfunction
+
+function! s:consume_code_and_instructions() abort
   if executable('edit')
     let l:output = system(s:build_command())
 
@@ -138,7 +138,7 @@ endfunction
 function! s:run_edit_command() abort
   if exists('b:prompt_window_is_open')
     try
-      call s:consume_payload()
+      call s:consume_code_and_instructions()
     catch /.*/
       call s:print_exception()
       call input('Press ENTER to close this window...')
