@@ -111,22 +111,26 @@ function! s:unpack_output(completion) abort
 endfunction
 
 function! s:consume_payload() abort
-  let l:instructions = join(s:get_instructions_after_delimiter(), "\n")
+  if executable('edit')
+    let l:instructions = join(s:get_instructions_after_delimiter(), "\n")
 
-  let l:command = []
-  call add(l:command, '/tmp/foo.py')
-  call add(l:command, shellescape(b:code_to_edit))
-  call add(l:command, shellescape(l:instructions))
-  call add(l:command, '--filename=' . shellescape(b:original_filename))
-  let l:output = system(join(l:command, ' '))
+    let l:command = []
+    call add(l:command, 'edit')
+    call add(l:command, shellescape(b:code_to_edit))
+    call add(l:command, shellescape(l:instructions))
+    call add(l:command, '--filename=' . shellescape(b:original_filename))
+    let l:output = system(join(l:command, ' '))
 
-  if v:shell_error == 0
-    call s:open_completion_window(s:unpack_output(l:output))
+    if v:shell_error == 0
+      call s:open_completion_window(s:unpack_output(l:output))
+    else
+      call s:open_error_window(l:output)
+    endif
+
+    normal! G
   else
-    call s:open_error_window(l:output)
+    throw 'could not find `edit` binary in $PATH'
   endif
-
-  normal! G
 endfunction
 
 function! s:run_edit_command() abort
