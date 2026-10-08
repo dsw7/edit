@@ -110,16 +110,20 @@ function! s:unpack_output(completion) abort
   return {'edited_code': l:json.content, 'language': l:json.lang}
 endfunction
 
+function! s:build_command() abort
+  let l:command = []
+  call add(l:command, 'edit')
+  call add(l:command, '--filename=' . shellescape(b:original_filename))
+  call add(l:command, shellescape(b:code_to_edit))
+
+  let l:instructions = join(s:get_instructions_after_delimiter(), "\n")
+  call add(l:command, shellescape(l:instructions))
+  return join(l:command, ' ')
+endfunction
+
 function! s:consume_payload() abort
   if executable('edit')
-    let l:instructions = join(s:get_instructions_after_delimiter(), "\n")
-
-    let l:command = []
-    call add(l:command, 'edit')
-    call add(l:command, shellescape(b:code_to_edit))
-    call add(l:command, shellescape(l:instructions))
-    call add(l:command, '--filename=' . shellescape(b:original_filename))
-    let l:output = system(join(l:command, ' '))
+    let l:output = system(s:build_command())
 
     if v:shell_error == 0
       call s:open_completion_window(s:unpack_output(l:output))
