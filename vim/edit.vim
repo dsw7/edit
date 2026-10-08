@@ -126,8 +126,6 @@ function! s:consume_payload() abort
     else
       call s:open_error_window(l:output)
     endif
-
-    normal! G
   else
     throw 'could not find `edit` binary in $PATH'
   endif
