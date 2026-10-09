@@ -33,10 +33,21 @@ function! s:close_prompt_window() abort
   endif
 endfunction
 
-function! s:unpack_output(completion) abort
-  let l:json = json_decode(a:completion)
+function! s:print_result_lines(results) abort
+  let l:json = json_decode(a:results)
 
-  return {'edited_code': l:json.content, 'language': l:json.lang}
+  silent %delete _
+  execute 'setlocal syntax=' . l:json.lang
+
+  call setline(1, split(l:json.content, "\n"))
+endfunction
+
+function! s:print_error_lines(error) abort
+  silent %delete _
+  setlocal syntax=off
+
+  call setline(1, split(a:error, "\n"))
+  call matchaddpos('WarningMsg', range(1, line('$')))
 endfunction
 
 function! s:write_to_completion_window(results) abort
@@ -56,18 +67,11 @@ function! s:write_to_completion_window(results) abort
     call win_gotoid(l:win_id)
   endif
 
-  silent %delete _
-
   if v:shell_error == 0
-    let l:results = s:unpack_output(a:results)
-    execute 'setlocal syntax=' . l:results.language
-    call setline(1, split(l:results.edited_code, "\n"))
+    call s:print_result_lines(a:results)
   else
-    setlocal syntax=off
-    call setline(1, split(a:results, "\n"))
-    call matchaddpos('WarningMsg', range(1, line('$')))
+    call s:print_error_lines(a:results)
   endif
-
 endfunction
 
 " -----------------------------------------------------------------------------------------------------------
