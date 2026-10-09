@@ -1,13 +1,9 @@
 # `vim` integration
 
 ## Setting up VimScript
-Create a `vim` plugin directory:
+Run the setup script:
 ```console
-mkdir -vp ~/.vim/plugin
-```
-Then copy `edit.vim` to this directory:
-```console
-cp -v edit.vim ~/.vim/plugin/
+./setup.py
 ```
 
 ## Usage
