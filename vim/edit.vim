@@ -49,14 +49,28 @@ function! s:open_completion_window(results) abort
 endfunction
 
 function! s:open_error_window(error) abort
-  new Error
-  setlocal buftype=nofile
-  setlocal bufhidden=wipe
-  setlocal noswapfile
+  let l:bufname = 'Error'
+  let l:win_id = bufwinid(l:bufname)
+
+  if l:win_id == -1
+    let l:bufnr = bufnr(l:bufname)
+
+    if l:bufnr == -1
+      execute 'new ' . l:bufname
+      setlocal buftype=nofile
+      setlocal bufhidden=wipe
+      setlocal noswapfile
+    else
+      execute 'split | buffer ' . l:bufnr
+    endif
+  else
+    call win_gotoid(l:win_id)
+  endif
+
+  silent %delete _
 
   call setline(1, split(a:error, "\n"))
   call matchaddpos('WarningMsg', range(1, line('$')))
-  setlocal nomodifiable
 endfunction
 
 " -----------------------------------------------------------------------------------------------------------
