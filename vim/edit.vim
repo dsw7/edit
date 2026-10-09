@@ -12,9 +12,6 @@ function! s:print_exception() abort
   echohl None
 endfunction
 
-" -----------------------------------------------------------------------------------------------------------
-" Windows
-
 function! s:open_prompt_window(code_to_edit) abort
   vnew Prompt
   setlocal buftype=nofile
@@ -28,37 +25,56 @@ function! s:open_prompt_window(code_to_edit) abort
   call append('$', split(a:code_to_edit, "\n"))
   call append('$', s:separator)
   call matchaddpos('Comment', [line('$')])
-
-  let b:prompt_window_is_open = v:true
 endfunction
 
 function! s:close_prompt_window() abort
-  if exists('b:prompt_window_is_open')
+  if expand('%:t') ==# 'Prompt'
     quit
   endif
 endfunction
 
-function! s:open_completion_window(results) abort
-  new Completion
-  setlocal buftype=nofile
-  setlocal bufhidden=wipe
-  setlocal noswapfile
+function! s:write_to_completion_window(results) abort
+  let l:win_id = bufwinid('Completion')
 
-  execute 'setlocal syntax=' . a:results.language
+  if l:win_id == -1
+    let l:bufnr = bufnr('Completion')
+
+    if l:bufnr == -1
+      new Completion
+      setlocal buftype=nofile bufhidden=wipe noswapfile
+      execute 'setlocal syntax=' . a:results.language
+    else
+      split
+      buffer l:bufnr
+    endif
+  else
+    call win_gotoid(l:win_id)
+  endif
+
+  silent %delete _
   call setline(1, split(a:results.edited_code, "\n"))
-
-  setlocal nomodifiable
 endfunction
 
-function! s:open_error_window(error) abort
-  new Error
-  setlocal buftype=nofile
-  setlocal bufhidden=wipe
-  setlocal noswapfile
+function! s:write_to_error_window(error) abort
+  let l:win_id = bufwinid('Error')
 
+  if l:win_id == -1
+    let l:bufnr = bufnr('Error')
+
+    if l:bufnr == -1
+      new Error
+      setlocal buftype=nofile bufhidden=wipe noswapfile
+    else
+      split
+      buffer l:bufnr
+    endif
+  else
+    call win_gotoid(l:win_id)
+  endif
+
+  silent %delete _
   call setline(1, split(a:error, "\n"))
   call matchaddpos('WarningMsg', range(1, line('$')))
-  setlocal nomodifiable
 endfunction
 
 " -----------------------------------------------------------------------------------------------------------
@@ -126,9 +142,9 @@ function! s:consume_code_and_instructions() abort
     let l:output = system(s:build_command())
 
     if v:shell_error == 0
-      call s:open_completion_window(s:unpack_output(l:output))
+      call s:write_to_completion_window(s:unpack_output(l:output))
     else
-      call s:open_error_window(l:output)
+      call s:write_to_error_window(l:output)
     endif
   else
     throw 'could not find `edit` binary in $PATH'
@@ -136,7 +152,7 @@ function! s:consume_code_and_instructions() abort
 endfunction
 
 function! s:run_edit_command() abort
-  if exists('b:prompt_window_is_open')
+  if expand('%:t') ==# 'Prompt'
     try
       call s:consume_code_and_instructions()
     catch /.*/
