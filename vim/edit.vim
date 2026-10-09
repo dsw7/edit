@@ -28,12 +28,10 @@ function! s:open_prompt_window(code_to_edit) abort
   call append('$', split(a:code_to_edit, "\n"))
   call append('$', s:separator)
   call matchaddpos('Comment', [line('$')])
-
-  let b:prompt_window_is_open = v:true
 endfunction
 
 function! s:close_prompt_window() abort
-  if exists('b:prompt_window_is_open')
+  if expand('%:t') ==# 'Prompt'
     quit
   endif
 endfunction
@@ -136,7 +134,7 @@ function! s:consume_code_and_instructions() abort
 endfunction
 
 function! s:run_edit_command() abort
-  if exists('b:prompt_window_is_open')
+  if expand('%:t') ==# 'Prompt'
     try
       call s:consume_code_and_instructions()
     catch /.*/
