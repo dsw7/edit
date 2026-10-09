@@ -12,9 +12,6 @@ function! s:print_exception() abort
   echohl None
 endfunction
 
-" -----------------------------------------------------------------------------------------------------------
-" Windows
-
 function! s:open_prompt_window(code_to_edit) abort
   vnew Prompt
   setlocal buftype=nofile
@@ -49,19 +46,17 @@ function! s:open_completion_window(results) abort
 endfunction
 
 function! s:open_error_window(error) abort
-  let l:bufname = 'Error'
-  let l:win_id = bufwinid(l:bufname)
+  let l:win_id = bufwinid('Error')
 
   if l:win_id == -1
-    let l:bufnr = bufnr(l:bufname)
+    let l:bufnr = bufnr('Error')
 
     if l:bufnr == -1
-      execute 'new ' . l:bufname
-      setlocal buftype=nofile
-      setlocal bufhidden=wipe
-      setlocal noswapfile
+      new Error
+      setlocal buftype=nofile bufhidden=wipe noswapfile
     else
-      execute 'split | buffer ' . l:bufnr
+      split
+      buffer l:bufnr
     endif
   else
     call win_gotoid(l:win_id)
