@@ -33,47 +33,6 @@ function! s:close_prompt_window() abort
   endif
 endfunction
 
-function! s:print_result_lines(results) abort
-  let l:json = json_decode(a:results)
-
-  silent %delete _
-  execute 'setlocal syntax=' . l:json.lang
-
-  call setline(1, split(l:json.content, "\n"))
-endfunction
-
-function! s:print_error_lines(error) abort
-  silent %delete _
-  setlocal syntax=off
-
-  call setline(1, split(a:error, "\n"))
-  call matchaddpos('WarningMsg', range(1, line('$')))
-endfunction
-
-function! s:write_to_completion_window(results) abort
-  let l:win_id = bufwinid('Completion')
-
-  if l:win_id == -1
-    let l:bufnr = bufnr('Completion')
-
-    if l:bufnr == -1
-      new Completion
-      setlocal buftype=nofile bufhidden=wipe noswapfile
-    else
-      split
-      buffer l:bufnr
-    endif
-  else
-    call win_gotoid(l:win_id)
-  endif
-
-  if v:shell_error == 0
-    call s:print_result_lines(a:results)
-  else
-    call s:print_error_lines(a:results)
-  endif
-endfunction
-
 " -----------------------------------------------------------------------------------------------------------
 " Step 1: execute `ed` in normal mode to transfer code to new window
 
@@ -126,6 +85,47 @@ function! s:build_command() abort
   let l:instructions = join(s:get_instructions_after_delimiter(), "\n")
   call add(l:command, shellescape(l:instructions))
   return join(l:command, ' ')
+endfunction
+
+function! s:write_results(results) abort
+  let l:json = json_decode(a:results)
+
+  silent %delete _
+  execute 'setlocal syntax=' . l:json.lang
+
+  call setline(1, split(l:json.content, "\n"))
+endfunction
+
+function! s:write_error(error) abort
+  silent %delete _
+  setlocal syntax=off
+
+  call setline(1, split(a:error, "\n"))
+  call matchaddpos('WarningMsg', range(1, line('$')))
+endfunction
+
+function! s:write_to_completion_window(results) abort
+  let l:win_id = bufwinid('Completion')
+
+  if l:win_id == -1
+    let l:bufnr = bufnr('Completion')
+
+    if l:bufnr == -1
+      new Completion
+      setlocal buftype=nofile bufhidden=wipe noswapfile
+    else
+      split
+      buffer l:bufnr
+    endif
+  else
+    call win_gotoid(l:win_id)
+  endif
+
+  if v:shell_error == 0
+    call s:write_results(a:results)
+  else
+    call s:write_error(a:results)
+  endif
 endfunction
 
 function! s:consume_code_and_instructions() abort
