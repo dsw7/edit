@@ -34,15 +34,25 @@ function! s:close_prompt_window() abort
 endfunction
 
 function! s:open_completion_window(results) abort
-  new Completion
-  setlocal buftype=nofile
-  setlocal bufhidden=wipe
-  setlocal noswapfile
+  let l:win_id = bufwinid('Completion')
 
-  execute 'setlocal syntax=' . a:results.language
+  if l:win_id == -1
+    let l:bufnr = bufnr('Completion')
+
+    if l:bufnr == -1
+      new Completion
+      setlocal buftype=nofile bufhidden=wipe noswapfile
+      execute 'setlocal syntax=' . a:results.language
+    else
+      split
+      buffer l:bufnr
+    endif
+  else
+    call win_gotoid(l:win_id)
+  endif
+
+  silent %delete _
   call setline(1, split(a:results.edited_code, "\n"))
-
-  setlocal nomodifiable
 endfunction
 
 function! s:open_error_window(error) abort
@@ -63,7 +73,6 @@ function! s:open_error_window(error) abort
   endif
 
   silent %delete _
-
   call setline(1, split(a:error, "\n"))
   call matchaddpos('WarningMsg', range(1, line('$')))
 endfunction
