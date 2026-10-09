@@ -33,7 +33,7 @@ function! s:close_prompt_window() abort
   endif
 endfunction
 
-function! s:open_completion_window(results) abort
+function! s:write_to_completion_window(results) abort
   let l:win_id = bufwinid('Completion')
 
   if l:win_id == -1
@@ -55,7 +55,7 @@ function! s:open_completion_window(results) abort
   call setline(1, split(a:results.edited_code, "\n"))
 endfunction
 
-function! s:open_error_window(error) abort
+function! s:write_to_error_window(error) abort
   let l:win_id = bufwinid('Error')
 
   if l:win_id == -1
@@ -142,9 +142,9 @@ function! s:consume_code_and_instructions() abort
     let l:output = system(s:build_command())
 
     if v:shell_error == 0
-      call s:open_completion_window(s:unpack_output(l:output))
+      call s:write_to_completion_window(s:unpack_output(l:output))
     else
-      call s:open_error_window(l:output)
+      call s:write_to_error_window(l:output)
     endif
   else
     throw 'could not find `edit` binary in $PATH'
