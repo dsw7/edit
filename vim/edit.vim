@@ -33,6 +33,12 @@ function! s:close_prompt_window() abort
   endif
 endfunction
 
+function! s:unpack_output(completion) abort
+  let l:json = json_decode(a:completion)
+
+  return {'edited_code': l:json.content, 'language': l:json.lang}
+endfunction
+
 function! s:write_to_completion_window(results) abort
   let l:win_id = bufwinid('Completion')
 
@@ -42,7 +48,6 @@ function! s:write_to_completion_window(results) abort
     if l:bufnr == -1
       new Completion
       setlocal buftype=nofile bufhidden=wipe noswapfile
-      execute 'setlocal syntax=' . a:results.language
     else
       split
       buffer l:bufnr
@@ -52,29 +57,17 @@ function! s:write_to_completion_window(results) abort
   endif
 
   silent %delete _
-  call setline(1, split(a:results.edited_code, "\n"))
-endfunction
 
-function! s:write_to_error_window(error) abort
-  let l:win_id = bufwinid('Error')
-
-  if l:win_id == -1
-    let l:bufnr = bufnr('Error')
-
-    if l:bufnr == -1
-      new Error
-      setlocal buftype=nofile bufhidden=wipe noswapfile
-    else
-      split
-      buffer l:bufnr
-    endif
+  if v:shell_error == 0
+    let l:results = s:unpack_output(a:results)
+    execute 'setlocal syntax=' . l:results.language
+    call setline(1, split(l:results.edited_code, "\n"))
   else
-    call win_gotoid(l:win_id)
+    setlocal syntax=off
+    call setline(1, split(a:results, "\n"))
+    call matchaddpos('WarningMsg', range(1, line('$')))
   endif
 
-  silent %delete _
-  call setline(1, split(a:error, "\n"))
-  call matchaddpos('WarningMsg', range(1, line('$')))
 endfunction
 
 " -----------------------------------------------------------------------------------------------------------
@@ -131,21 +124,9 @@ function! s:build_command() abort
   return join(l:command, ' ')
 endfunction
 
-function! s:unpack_output(completion) abort
-  let l:json = json_decode(a:completion)
-
-  return {'edited_code': l:json.content, 'language': l:json.lang}
-endfunction
-
 function! s:consume_code_and_instructions() abort
   if executable('edit')
-    let l:output = system(s:build_command())
-
-    if v:shell_error == 0
-      call s:write_to_completion_window(s:unpack_output(l:output))
-    else
-      call s:write_to_error_window(l:output)
-    endif
+    call s:write_to_completion_window(system(s:build_command()))
   else
     throw 'could not find `edit` binary in $PATH'
   endif
