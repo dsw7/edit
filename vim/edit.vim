@@ -4,37 +4,35 @@
 " See https://github.com/dsw7/edit for more information
 " -----------------------------------------------------------------------------------------------------------
 
-let s:separator = repeat('─', ((&colorcolumn > 0 ? &colorcolumn : 81) - 1))
+function! s:handle_submission(user_input)
+  if a:user_input ==# 'quit'
+      execute 'q!'
+      return
+  endif
 
-function! s:print_exception() abort
-  echohl ErrorMsg
-  echo v:exception
-  echohl None
+  call prompt_setprompt(bufnr('%'), '> ')
 endfunction
 
-function! s:open_prompt_window(code_to_edit) abort
+function! s:start_repl_loop(code_to_edit) abort
   vnew Prompt
-  setlocal buftype=nofile
+  setlocal buftype=prompt
   setlocal bufhidden=wipe
   setlocal noswapfile
 
-  call setline(1, ':W to submit prompt')
+  call prompt_setprompt(bufnr('%'), '> ')
+  call prompt_setcallback(bufnr('%'), 's:handle_submission')
+
+  let l:separator = repeat('─', ((&colorcolumn > 0 ? &colorcolumn : 81) - 1))
+
+  call setline(1, "Type 'quit' to exit")
   call matchaddpos('Comment', [1])
-
   call setline(2, '')
-  call append('$', split(a:code_to_edit, "\n"))
-  call append('$', s:separator)
+  call setline(3, split(a:code_to_edit, "\n"))
+  call append('$', l:separator)
   call matchaddpos('Comment', [line('$')])
-endfunction
 
-function! s:close_prompt_window() abort
-  if expand('%:t') ==# 'Prompt'
-    quit
-  endif
+  startinsert
 endfunction
-
-" -----------------------------------------------------------------------------------------------------------
-" Step 1: execute `ed` in normal mode to transfer code to new window
 
 function! s:yank_code_to_edit() abort
   let l:old_reg = getreg('x')
@@ -52,7 +50,7 @@ function! s:copy_selected_code_to_new_window() abort
   let l:code_to_edit = s:yank_code_to_edit()
   let l:original_filename = bufname('%')
 
-  call s:open_prompt_window(l:code_to_edit)
+  call s:start_repl_loop(l:code_to_edit)
 
   let b:code_to_edit = l:code_to_edit
   let b:original_filename = l:original_filename
@@ -62,92 +60,3 @@ function! s:copy_selected_code_to_new_window() abort
 endfunction
 
 xnoremap <silent> ed :<C-u>call <SID>copy_selected_code_to_new_window()<CR>
-
-" -----------------------------------------------------------------------------------------------------------
-" Step 2: execute `:W` after instructions have been provided
-
-function! s:get_instructions_after_delimiter() abort
-  let l:start_line = search('^' . s:separator . '$', 'n')
-
-  if l:start_line > 0
-    return getline(l:start_line + 1, line('$'))
-  endif
-
-  throw 'delimiter not found'
-endfunction
-
-function! s:build_command() abort
-  let l:command = []
-  call add(l:command, 'edit')
-  call add(l:command, '--filename=' . shellescape(b:original_filename))
-  call add(l:command, shellescape(b:code_to_edit))
-
-  let l:instructions = join(s:get_instructions_after_delimiter(), "\n")
-  call add(l:command, shellescape(l:instructions))
-  return join(l:command, ' ')
-endfunction
-
-function! s:write_results(results) abort
-  let l:json = json_decode(a:results)
-
-  silent %delete _
-  execute 'setlocal syntax=' . l:json.lang
-
-  call setline(1, split(l:json.content, "\n"))
-endfunction
-
-function! s:write_error(error) abort
-  silent %delete _
-  setlocal syntax=off
-
-  call setline(1, split(a:error, "\n"))
-  call matchaddpos('WarningMsg', range(1, line('$')))
-endfunction
-
-function! s:write_to_completion_window(results) abort
-  let l:win_id = bufwinid('Completion')
-
-  if l:win_id == -1
-    let l:bufnr = bufnr('Completion')
-
-    if l:bufnr == -1
-      new Completion
-      setlocal buftype=nofile bufhidden=wipe noswapfile
-    else
-      split
-      buffer l:bufnr
-    endif
-  else
-    call win_gotoid(l:win_id)
-  endif
-
-  if v:shell_error == 0
-    call s:write_results(a:results)
-  else
-    call s:write_error(a:results)
-  endif
-endfunction
-
-function! s:consume_code_and_instructions() abort
-  if executable('edit')
-    call s:write_to_completion_window(system(s:build_command()))
-  else
-    throw 'could not find `edit` binary in $PATH'
-  endif
-endfunction
-
-function! s:run_edit_command() abort
-  if expand('%:t') ==# 'Prompt'
-    try
-      call s:consume_code_and_instructions()
-    catch /.*/
-      call s:print_exception()
-      call input('Press ENTER to close this window...')
-      call s:close_prompt_window()
-    endtry
-  else
-    echom 'command must follow `ed` invocation'
-  endif
-endfunction
-
-command! W call <SID>run_edit_command()
