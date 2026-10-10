@@ -2,7 +2,6 @@ mod configurations;
 mod core;
 mod program_files;
 mod query_anthropic;
-mod query_ollama;
 
 use std::process::ExitCode;
 

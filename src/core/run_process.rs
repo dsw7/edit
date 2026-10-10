@@ -9,7 +9,6 @@ use super::create_new_file::create_new_file;
 use super::edit_existing_file::edit_existing_file;
 use crate::configurations::Configs;
 use crate::query_anthropic::AnthropicResults;
-use crate::query_ollama::{ValidationResults, is_valid_prompt};
 
 fn get_term_width() -> usize {
     match terminal::size() {
@@ -31,9 +30,6 @@ macro_rules! separator {
 fn print_misc_info(configs: &Configs) {
     let editor = format!("anthropic:{}", &configs.code_edit_model);
     println!("● Using {} for code editing", editor.green());
-
-    let validator = format!("ollama:{}", &configs.ollama_validation_model);
-    println!("● Using {} for prompt validation", validator.green());
 
     println!();
     let q = "q";
@@ -67,41 +63,6 @@ fn load_prompt_from_file_or_stdin() -> anyhow::Result<String> {
 
 fn should_exit_program(user_prompt: &str) -> bool {
     matches!(user_prompt, "quit" | "q")
-}
-
-fn print_validation_success(results: ValidationResults) {
-    let usage = format!(
-        "Validation took {} s | Input tokens: {} | Output tokens: {}",
-        results.total_duration, results.input_tokens, results.output_tokens
-    );
-
-    println!("● {}", usage.dark_grey());
-}
-
-fn print_validation_failure(results: ValidationResults) {
-    let errmsg = "Instructions failed validation";
-    println!("! {}", errmsg.red());
-    println!("! {}", results.reasoning.dark_grey());
-
-    let usage = format!(
-        "Validation took {} s | Input tokens: {} | Output tokens: {}",
-        results.total_duration, results.input_tokens, results.output_tokens
-    );
-
-    println!("! {}", usage.dark_grey());
-}
-
-fn prompt_is_invalid(configs: &Configs, user_prompt: &str) -> anyhow::Result<bool> {
-    let results =
-        is_valid_prompt(configs, user_prompt).context("prompt validation process failed")?;
-
-    if results.valid_instructions {
-        print_validation_success(results);
-        Ok(false)
-    } else {
-        print_validation_failure(results);
-        Ok(true)
-    }
 }
 
 fn operate_on_file(configs: Configs, user_prompt: &str) -> anyhow::Result<AnthropicResults> {
@@ -138,10 +99,6 @@ pub fn run_process(configs: Configs) -> anyhow::Result<()> {
     separator!(term_width);
 
     if should_exit_program(&user_prompt) {
-        return Ok(());
-    }
-
-    if !configs.disable_prompt_validation && prompt_is_invalid(&configs, &user_prompt)? {
         return Ok(());
     }
 
