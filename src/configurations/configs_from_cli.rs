@@ -11,7 +11,7 @@ pub struct ConfigsFromCli {
     #[arg(value_name = "INSTRUCTIONS")]
     pub instructions: String,
 
-    /// specify filename (used to infer programming language)
+    /// Specify filename (used to infer programming language)
     #[arg(short, long)]
     pub filename: PathBuf,
 }

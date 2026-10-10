@@ -1,5 +1,5 @@
 use anyhow::Context;
-use serde::{Deserialize};
+use serde::Deserialize;
 
 #[derive(Deserialize, Debug)]
 #[serde(untagged)]
