@@ -1,69 +1,9 @@
-use std::fs;
-use std::io::{self, Write};
-
 use anyhow::Context;
-use crossterm::style::Stylize;
-use crossterm::terminal;
 
 use super::create_new_file::create_new_file;
 use super::edit_existing_file::edit_existing_file;
 use crate::configurations::Configs;
 use crate::query_anthropic::AnthropicResults;
-
-fn get_term_width() -> usize {
-    match terminal::size() {
-        Ok(dimensions) => {
-            let (width, _) = dimensions;
-            usize::from(width)
-        }
-        Err(_) => 25,
-    }
-}
-
-macro_rules! separator {
-    ($width:expr) => {{
-        let separator = "─".repeat($width);
-        println!("{}", separator);
-    }};
-}
-
-fn print_misc_info(configs: &Configs) {
-    let editor = format!("anthropic:{}", &configs.code_edit_model);
-    println!("● Using {} for code editing", editor.green());
-
-    println!();
-    let q = "q";
-    let quit = "quit";
-    println!("Type {} | {} to quit", q.dark_grey(), quit.dark_grey());
-}
-
-fn load_prompt_from_stdin() -> anyhow::Result<String> {
-    print!(">>> ");
-    io::stdout().flush().context("failed to flush stdout")?;
-
-    let mut prompt = String::new();
-    io::stdin()
-        .read_line(&mut prompt)
-        .context("failed to read line from stdin")?;
-
-    Ok(prompt)
-}
-
-fn load_prompt_from_file_or_stdin() -> anyhow::Result<String> {
-    let user_prompt = match fs::read_to_string("Inputfile").ok() {
-        Some(prompt) => {
-            println!(">>> Read instructions from Inputfile!");
-            prompt
-        }
-        None => load_prompt_from_stdin()?,
-    };
-
-    Ok(user_prompt.trim().to_string())
-}
-
-fn should_exit_program(user_prompt: &str) -> bool {
-    matches!(user_prompt, "quit" | "q")
-}
 
 fn operate_on_file(configs: Configs, user_prompt: &str) -> anyhow::Result<AnthropicResults> {
     if configs.input_file.exists() {
@@ -73,38 +13,13 @@ fn operate_on_file(configs: Configs, user_prompt: &str) -> anyhow::Result<Anthro
     }
 }
 
-fn print_query_info(results: AnthropicResults) {
-    println!();
-    println!("● {}", results.description_of_what_was_done.dark_grey());
-
-    let input_tokens = format!("{}", results.input_tokens);
-    println!("● Input tokens: {}", input_tokens.green());
-
-    let output_tokens = format!("{}", results.output_tokens);
-    println!("● Output tokens: {}", output_tokens.green());
-}
-
 pub fn run_process(configs: Configs) -> anyhow::Result<()> {
-    print_misc_info(&configs);
-
-    let term_width = get_term_width();
-    separator!(term_width);
-
-    let user_prompt = load_prompt_from_file_or_stdin()?;
+    let user_prompt = String::from("test");
 
     if user_prompt.is_empty() {
         anyhow::bail!("the user prompt is empty")
     }
 
-    separator!(term_width);
-
-    if should_exit_program(&user_prompt) {
-        return Ok(());
-    }
-
     let results = operate_on_file(configs, &user_prompt).context("editing process failed")?;
-
-    print_query_info(results);
-    separator!(term_width);
     Ok(())
 }
