@@ -55,10 +55,10 @@ fn resolve_lang_from_extension(input_file: &Path) -> anyhow::Result<String> {
 
 #[derive(Serialize)]
 struct Results {
-    code: String,
     input_tokens: u32,
     lang_id: String,
     output_tokens: u32,
+    updated_code: String,
 }
 
 pub fn run_process(configs: &Configs) -> anyhow::Result<String> {
@@ -70,10 +70,10 @@ pub fn run_process(configs: &Configs) -> anyhow::Result<String> {
     let raw_results = edit_code_block(configs, &language).context("editing process failed")?;
 
     let results = Results {
-        code: raw_results.code,
         input_tokens: raw_results.input_tokens,
-        output_tokens: raw_results.output_tokens,
         lang_id: language,
+        output_tokens: raw_results.output_tokens,
+        updated_code: raw_results.code,
     };
 
     let json =
