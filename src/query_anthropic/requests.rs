@@ -33,16 +33,17 @@ Output:
     )
 }
 
-pub fn request_edit_code_block(code_block: &str, prompt: &str, params: &AnthropicParams) -> Value {
+pub fn request_edit_code_block(params: &AnthropicParams) -> Value {
     let prompt = format!(
         "Take the instructions:
 ```plaintext
-{prompt}
+{}
 ```
 And apply them to the code:
 ```
-{code_block}
-```"
+{}
+```",
+        params.prompt, params.code_to_edit
     );
 
     json!({
