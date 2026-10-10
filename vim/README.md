@@ -8,8 +8,8 @@ Run the setup script:
 
 ## Usage
 Select a block of text in visual mode, and execute `ed`. This will open the
-selected text in a new vertical split window (named **Prompt**) with a new
-scratch buffer. For example, selecting:
+selected text in a new vertical split window (named **Prompt**). For example,
+selecting:
 ```c
 void printIntAddr()
 {
@@ -29,8 +29,8 @@ void printIntAddr()
 ─────────────────────────────────────────────────────────────────────────────────────────────────────────────
 
 ```
-Place the instructions below the vertical separator and invoke `:W` to submit
-the job. For example:
+Place the instructions below the vertical separator and type <kbd>Enter</kbd>
+to submit the job. For example:
 ```console
 void printIntAddr()
 {
@@ -39,7 +39,7 @@ void printIntAddr()
     printf("Address: %p\n", (void *)&i);
 }
 ─────────────────────────────────────────────────────────────────────────────────────────────────────────────
-What does the code do?
+> What does the code do?
 ```
 The results will be loaded into another window named **Completion** which will
 be positioned beneath **Prompt**.
