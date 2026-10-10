@@ -96,16 +96,21 @@ function! s:yank_code_to_edit() abort
 endfunction
 
 function! s:copy_selected_code_to_new_window() abort
-  let l:code_to_edit = s:yank_code_to_edit()
-  let l:original_filename = bufname('%')
+  if executable('edit')
+    let l:code_to_edit = s:yank_code_to_edit()
+    let l:original_filename = bufname('%')
 
-  call s:start_repl_loop(l:code_to_edit)
+    call s:start_repl_loop(l:code_to_edit)
+    let b:code_to_edit = l:code_to_edit
+    let b:original_filename = l:original_filename
 
-  let b:code_to_edit = l:code_to_edit
-  let b:original_filename = l:original_filename
-
-  normal! Go
-  startinsert
+    normal! Go
+    startinsert
+  else
+    echohl ErrorMsg
+    echomsg 'could not find `edit` command in $PATH'
+    echohl None
+  endif
 endfunction
 
-xnoremap <silent> ed :<C-u>call <SID>copy_selected_code_to_new_window()<CR>
+xnoremap ed :<C-u>call <SID>copy_selected_code_to_new_window()<CR>
