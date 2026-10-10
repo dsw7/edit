@@ -11,7 +11,9 @@ use crate::program_files;
 
 pub struct Configs {
     // CLI
-    pub input_file: PathBuf,
+    pub code_to_edit: String,
+    pub filename: PathBuf,
+    pub instructions: String,
 
     // code editing
     pub code_edit_model: String,
@@ -37,11 +39,11 @@ pub fn setup_configurations() -> anyhow::Result<Configs> {
 
     let max_tokens_edit_model = cfgs_file.anthropic.max_tokens_edit_model.clamp(1, 64000);
 
-    let cfgs = Configs {
+    Ok(Configs {
         code_edit_model: cfgs_file.anthropic.code_edit_model,
-        input_file: cfgs_cli.file_to_edit,
+        code_to_edit: cfgs_cli.code_to_edit,
+        filename: cfgs_cli.filename,
+        instructions: cfgs_cli.instructions,
         max_tokens_edit_model,
-    };
-
-    Ok(cfgs)
+    })
 }
