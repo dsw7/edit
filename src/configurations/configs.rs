@@ -52,10 +52,8 @@ impl Configs {
 }
 
 pub fn setup_configurations() -> anyhow::Result<Configs> {
-    let configs = Configs::default()
+    Configs::default()
         .load_configs_from_cli()
         .load_configs_from_file()?
-        .resolve_lang_metadata()?;
-
-    Ok(configs)
+        .resolve_lang_metadata()?
 }
