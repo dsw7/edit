@@ -18,7 +18,7 @@ fn main() -> ExitCode {
         }
     };
 
-    match core::run_process(configs) {
+    match core::run_process(&configs) {
         Ok(()) => ExitCode::SUCCESS,
         Err(error) => {
             let errmsg = format!("{error:?}");

@@ -1,25 +1,26 @@
 use anyhow::Context;
 
-use super::create_new_file::create_new_file;
-use super::edit_existing_file::edit_existing_file;
 use crate::configurations::Configs;
-use crate::query_anthropic::AnthropicResults;
+use crate::query_anthropic::{AnthropicParams, write_new_code};
 
-fn operate_on_file(configs: Configs, user_prompt: &str) -> anyhow::Result<AnthropicResults> {
-    if configs.input_file.exists() {
-        edit_existing_file(configs, user_prompt)
-    } else {
-        create_new_file(configs, user_prompt)
-    }
-}
+use super::resolve_programming_language::resolve_lang_from_extension;
 
-pub fn run_process(configs: Configs) -> anyhow::Result<()> {
-    let user_prompt = String::from("test");
-
-    if user_prompt.is_empty() {
+pub fn run_process(configs: &Configs) -> anyhow::Result<()> {
+    if configs.instructions.is_empty() {
         anyhow::bail!("the user prompt is empty")
     }
 
-    let results = operate_on_file(configs, &user_prompt).context("editing process failed")?;
+    let lang = resolve_lang_from_extension(&configs.filename)?;
+
+    let results = write_new_code(
+        &configs.instructions,
+        &AnthropicParams {
+            max_tokens: configs.max_tokens_edit_model,
+            model: configs.code_edit_model,
+            programming_language: lang,
+        },
+    )
+    .context("editing process failed")?;
+
     Ok(())
 }
