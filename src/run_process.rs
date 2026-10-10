@@ -60,10 +60,6 @@ struct Results {
 }
 
 pub fn run_process(configs: &Configs) -> anyhow::Result<String> {
-    if configs.prompt.is_empty() {
-        anyhow::bail!("the user prompt is empty")
-    }
-
     let (language, vim_syntax_lang_id) = resolve_lang_from_extension(&configs.filename)?;
     let response = query_messages_api(configs, language).context("editing process failed")?;
 

@@ -30,10 +30,7 @@ impl Configs {
     }
 
     fn try_load_anthropic_api_key(mut self) -> anyhow::Result<Self> {
-        let key_name = "ANTHROPIC_API_KEY";
-        self.api_key =
-            env::var(key_name).context("failed to load environment variable: {key_name}")?;
-
+        self.api_key = env::var("ANTHROPIC_API_KEY").context("failed to load Anthropic API key")?;
         Ok(self)
     }
 
