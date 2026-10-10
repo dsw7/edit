@@ -1,5 +1,5 @@
 use anyhow::Context;
-use serde::{Deserialize, Serialize};
+use serde::{Deserialize};
 
 #[derive(Deserialize, Debug)]
 #[serde(untagged)]
@@ -46,7 +46,6 @@ struct Usage {
 #[derive(Deserialize, Debug)]
 struct StructuredOutput {
     code: String,
-    description_of_what_was_done: String,
 }
 
 fn unpack_structured_output(text: &str) -> anyhow::Result<StructuredOutput> {
@@ -73,12 +72,11 @@ fn unpack_text_block(response: &Response) -> anyhow::Result<StructuredOutput> {
     anyhow::bail!("no TextBlock object found in response")
 }
 
-#[derive(Serialize, Debug)]
+#[derive(Debug)]
 pub struct AnthropicResults {
     pub input_tokens: u32,
     pub output_tokens: u32,
     pub code: String,
-    pub description_of_what_was_done: String,
 }
 
 fn unpack_response(response: &Response) -> anyhow::Result<AnthropicResults> {
@@ -91,14 +89,11 @@ fn unpack_response(response: &Response) -> anyhow::Result<AnthropicResults> {
 
     let structured_output = unpack_text_block(response)?;
 
-    let results = AnthropicResults {
+    Ok(AnthropicResults {
         input_tokens: response.usage.input_tokens,
         output_tokens: response.usage.output_tokens,
         code: structured_output.code,
-        description_of_what_was_done: structured_output.description_of_what_was_done,
-    };
-
-    Ok(results)
+    })
 }
 
 pub fn deserialize_json_response(raw_json: String) -> anyhow::Result<AnthropicResults> {

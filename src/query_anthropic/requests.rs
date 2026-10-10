@@ -9,10 +9,9 @@ fn schema_structured_output_code_generation() -> Value {
             "schema": {
                 "type": "object",
                 "properties": {
-                    "description_of_what_was_done": { "type": "string" },
                     "code": { "type": "string" }
                 },
-                "required": ["description_of_what_was_done", "code"],
+                "required": ["code"],
                 "additionalProperties": false
             }
         }
@@ -27,8 +26,9 @@ IMPORTANT: Do not wrap your response in backticks (```). Output the code
 directly without markdown code fences.
 
 Output:
-- description_of_what_was_done: brief summary of what you did
 - code: your updated code
+
+Put a comment describing what was done above the code.
 "
     )
 }
