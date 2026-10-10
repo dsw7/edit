@@ -11,7 +11,7 @@ pub struct AnthropicConnector<'a> {
 }
 
 impl AnthropicConnector<'_> {
-    pub fn try_new(api_key: String) -> anyhow::Result<Self> {
+    pub fn try_new(api_key: &String) -> anyhow::Result<Self> {
         let connection_timeout = Duration::from_secs(60);
 
         let client = Client::builder().timeout(connection_timeout).build()?;
@@ -20,7 +20,7 @@ impl AnthropicConnector<'_> {
         Ok(AnthropicConnector {
             client,
             base_url,
-            api_key,
+            api_key: api_key.to_owned(),
         })
     }
 

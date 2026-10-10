@@ -1,5 +1,3 @@
-use std::env;
-
 use anyhow::Context;
 
 use crate::configurations::Configs;
@@ -8,19 +6,8 @@ use super::connector::AnthropicConnector;
 use super::requests::request_edit_code_block;
 use super::response::{AnthropicResults, deserialize_json_response};
 
-fn load_anthropic_api_key() -> anyhow::Result<String> {
-    let env_var_key = "ANTHROPIC_API_KEY";
-
-    let env_var_value = env::var(env_var_key).context(format!(
-        "failed to load environment variable: {env_var_key}"
-    ))?;
-
-    Ok(env_var_value)
-}
-
 pub fn edit_code_block(configs: &Configs, language: &str) -> anyhow::Result<AnthropicResults> {
-    let api_key = load_anthropic_api_key()?;
-    let connector = AnthropicConnector::try_new(api_key)?;
+    let connector = AnthropicConnector::try_new(&configs.api_key)?;
 
     let request_body = request_edit_code_block(configs, language);
     let raw_json = connector

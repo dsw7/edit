@@ -1,3 +1,4 @@
+use std::env;
 use std::fs;
 use std::path::PathBuf;
 
@@ -11,6 +12,7 @@ use crate::program_files;
 
 #[derive(Debug, Default)]
 pub struct Configs {
+    pub api_key: String,
     pub code_to_edit: String,
     pub filename: PathBuf,
     pub max_tokens: u16,
@@ -27,7 +29,15 @@ impl Configs {
         self
     }
 
-    fn load_configs_from_file(mut self) -> anyhow::Result<Self> {
+    fn try_load_anthropic_api_key(mut self) -> anyhow::Result<Self> {
+        let key_name = "ANTHROPIC_API_KEY";
+        self.api_key =
+            env::var(key_name).context("failed to load environment variable: {key_name}")?;
+
+        Ok(self)
+    }
+
+    fn try_load_configs_from_file(mut self) -> anyhow::Result<Self> {
         let app_dir = program_files::get_app_dir()?;
         let config_file = program_files::get_config_file(&app_dir);
 
@@ -46,7 +56,8 @@ impl Configs {
 pub fn setup_configurations() -> anyhow::Result<Configs> {
     let configs = Configs::default()
         .load_configs_from_cli()
-        .load_configs_from_file()?;
+        .try_load_anthropic_api_key()?
+        .try_load_configs_from_file()?;
 
     Ok(configs)
 }
