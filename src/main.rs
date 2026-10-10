@@ -1,11 +1,12 @@
 mod configurations;
-mod core;
 mod program_files;
 mod query_anthropic;
+mod run_process;
 
 use std::process::ExitCode;
 
 use configurations::setup_configurations;
+use run_process::run_process;
 
 fn main() -> ExitCode {
     let configs = match setup_configurations() {
@@ -16,7 +17,7 @@ fn main() -> ExitCode {
         }
     };
 
-    match core::run_process(configs) {
+    match run_process(configs) {
         Ok(results) => {
             println!("{results}");
             ExitCode::SUCCESS
