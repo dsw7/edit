@@ -5,7 +5,7 @@ use anyhow::Context;
 use serde::Serialize;
 
 use crate::configurations::Configs;
-use crate::query_anthropic::edit_code_block;
+use crate::query_anthropic::query_messages_api;
 
 fn possible_languages() -> HashMap<&'static str, (&'static str, &'static str)> {
     HashMap::from([
@@ -65,13 +65,13 @@ pub fn run_process(configs: &Configs) -> anyhow::Result<String> {
     }
 
     let (language, vim_syntax_lang_id) = resolve_lang_from_extension(&configs.filename)?;
-    let raw_results = edit_code_block(configs, language).context("editing process failed")?;
+    let response = query_messages_api(configs, language).context("editing process failed")?;
 
     let results = Results {
-        input_tokens: raw_results.input_tokens,
+        input_tokens: response.input_tokens,
         lang_id: vim_syntax_lang_id.to_string(),
-        output_tokens: raw_results.output_tokens,
-        updated_code: raw_results.code,
+        output_tokens: response.output_tokens,
+        updated_code: response.code,
     };
 
     let json =
