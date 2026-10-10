@@ -6,7 +6,7 @@ use crate::query_anthropic::{AnthropicParams, edit_code_block};
 use super::resolve_programming_language::resolve_lang_from_extension;
 
 pub fn run_process(configs: Configs) -> anyhow::Result<String> {
-    if configs.instructions.is_empty() {
+    if configs.prompt.is_empty() {
         anyhow::bail!("the user prompt is empty")
     }
 
@@ -14,10 +14,10 @@ pub fn run_process(configs: Configs) -> anyhow::Result<String> {
 
     let results = edit_code_block(&AnthropicParams {
         code_to_edit: configs.code_to_edit,
-        max_tokens: configs.max_tokens_edit_model,
-        model: configs.code_edit_model,
+        max_tokens: configs.max_tokens,
+        model: configs.model,
         programming_language: lang,
-        prompt: configs.instructions,
+        prompt: configs.prompt,
     })
     .context("editing process failed")?;
 
