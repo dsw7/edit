@@ -81,10 +81,7 @@ pub struct AnthropicResults {
 
 fn unpack_response(response: &Response) -> anyhow::Result<AnthropicResults> {
     if response.stop_reason != "end_turn" {
-        anyhow::bail!(format!(
-            "query stopped prematurely: {}",
-            response.stop_reason
-        ))
+        anyhow::bail!("query stopped prematurely: {}", response.stop_reason)
     }
 
     let structured_output = unpack_text_block(response)?;

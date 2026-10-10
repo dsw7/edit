@@ -47,9 +47,7 @@ fn resolve_lang_from_extension(input_file: &Path) -> anyhow::Result<(&'static st
 
     match lang_map.get(extension) {
         Some(lang) => Ok(*lang),
-        None => anyhow::bail!(format!(
-            "cannot resolve language from extension `{extension}`"
-        )),
+        None => anyhow::bail!("cannot resolve language from extension `{extension}`"),
     }
 }
 
