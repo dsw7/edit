@@ -17,7 +17,7 @@ fn main() -> ExitCode {
         }
     };
 
-    match run_process(configs) {
+    match run_process(&configs) {
         Ok(results) => {
             println!("{results}");
             ExitCode::SUCCESS

@@ -1,6 +1,6 @@
 use serde_json::{Value, json};
 
-use super::params::AnthropicParams;
+use crate::configurations::Configs;
 
 fn schema_structured_output_code_generation() -> Value {
     json!({
@@ -33,7 +33,7 @@ Output:
     )
 }
 
-pub fn request_edit_code_block(params: &AnthropicParams) -> Value {
+pub fn request_edit_code_block(configs: &Configs) -> Value {
     let prompt = format!(
         "Take the instructions:
 ```plaintext
@@ -43,14 +43,14 @@ And apply them to the code:
 ```
 {}
 ```",
-        params.prompt, params.code_to_edit
+        configs.prompt, configs.code_to_edit
     );
 
     json!({
-        "max_tokens": params.max_tokens,
+        "max_tokens": configs.max_tokens,
         "messages": [{"content": prompt, "role": "user"}],
-        "model": params.model,
+        "model": configs.model,
         "output_config": schema_structured_output_code_generation(),
-        "system": [{"text": system_prompt_code_generation(&params.programming_language), "type": "text"}],
+        "system": [{"text": system_prompt_code_generation(&configs.lang), "type": "text"}],
     })
 }
