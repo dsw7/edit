@@ -34,8 +34,8 @@ fn possible_languages() -> HashMap<&'static str, (&'static str, &'static str)> {
     ])
 }
 
-fn resolve_lang_from_extension(input_file: &Path) -> anyhow::Result<(&'static str, &'static str)> {
-    let ext_os = input_file
+fn resolve_lang_from_extension(filename: &Path) -> anyhow::Result<(&'static str, &'static str)> {
+    let ext_os = filename
         .extension()
         .ok_or_else(|| anyhow::anyhow!("could not get extension from file"))?;
 
@@ -46,7 +46,7 @@ fn resolve_lang_from_extension(input_file: &Path) -> anyhow::Result<(&'static st
     let lang_map = possible_languages();
 
     match lang_map.get(extension) {
-        Some(lang) => Ok(*lang),
+        Some(pair) => Ok(*pair),
         None => anyhow::bail!("cannot resolve language from extension `{extension}`"),
     }
 }

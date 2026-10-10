@@ -36,7 +36,7 @@ impl Configs {
 
     fn try_load_configs_from_file(mut self) -> anyhow::Result<Self> {
         let app_dir = program_files::get_app_dir()?;
-        let config_file = program_files::get_config_file(&app_dir);
+        let config_file = app_dir.join("config.toml");
 
         let toml_str = fs::read_to_string(&config_file)
             .context(format!("cannot read {}", config_file.display()))?;
