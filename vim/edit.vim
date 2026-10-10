@@ -13,6 +13,15 @@ function! s:handle_submission(user_input)
   call prompt_setprompt(bufnr('%'), '> ')
 endfunction
 
+function! s:write_header(code_to_edit)
+  call setline(1, "Type 'quit' to exit")
+  call matchaddpos('Comment', [1])
+  call setline(2, '')
+  call setline(3, split(a:code_to_edit, "\n"))
+  call append('$', repeat('─', ((&colorcolumn > 0 ? &colorcolumn : 81) - 1)))
+  call matchaddpos('Comment', [line('$')])
+endfunction
+
 function! s:start_repl_loop(code_to_edit) abort
   vnew Prompt
   setlocal buftype=prompt
@@ -22,15 +31,7 @@ function! s:start_repl_loop(code_to_edit) abort
   call prompt_setprompt(bufnr('%'), '> ')
   call prompt_setcallback(bufnr('%'), 's:handle_submission')
 
-  let l:separator = repeat('─', ((&colorcolumn > 0 ? &colorcolumn : 81) - 1))
-
-  call setline(1, "Type 'quit' to exit")
-  call matchaddpos('Comment', [1])
-  call setline(2, '')
-  call setline(3, split(a:code_to_edit, "\n"))
-  call append('$', l:separator)
-  call matchaddpos('Comment', [line('$')])
-
+  call s:write_header(a:code_to_edit)
   startinsert
 endfunction
 
