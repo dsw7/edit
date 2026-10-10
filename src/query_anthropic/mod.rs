@@ -5,5 +5,5 @@ mod requests;
 mod response;
 
 pub use params::AnthropicParams;
-pub use queries::{edit_code_block, write_new_code};
+pub use queries::edit_code_block;
 pub use response::AnthropicResults;
