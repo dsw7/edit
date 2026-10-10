@@ -18,11 +18,11 @@ fn load_anthropic_api_key() -> anyhow::Result<String> {
     Ok(env_var_value)
 }
 
-pub fn edit_code_block(configs: &Configs) -> anyhow::Result<AnthropicResults> {
+pub fn edit_code_block(configs: &Configs, language: &str) -> anyhow::Result<AnthropicResults> {
     let api_key = load_anthropic_api_key()?;
     let connector = AnthropicConnector::try_new(api_key)?;
 
-    let request_body = request_edit_code_block(configs);
+    let request_body = request_edit_code_block(configs, &language);
     let raw_json = connector
         .query_messages_api(request_body)
         .context("failed to edit code")?;

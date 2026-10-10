@@ -19,9 +19,9 @@ fn schema_structured_output_code_generation() -> Value {
     })
 }
 
-fn system_prompt_code_generation(lang: &str) -> String {
+fn system_prompt_code_generation(language: &str) -> String {
     format!(
-        "You are a helpful programming assistant that specializes in: {lang}
+        "You are a helpful programming assistant that specializes in: {language}
 
 IMPORTANT: Do not wrap your response in backticks (```). Output the code
 directly without markdown code fences.
@@ -33,7 +33,7 @@ Output:
     )
 }
 
-pub fn request_edit_code_block(configs: &Configs) -> Value {
+pub fn request_edit_code_block(configs: &Configs, language: &str) -> Value {
     let prompt = format!(
         "Take the instructions:
 ```plaintext
@@ -51,6 +51,6 @@ And apply them to the code:
         "messages": [{"content": prompt, "role": "user"}],
         "model": configs.model,
         "output_config": schema_structured_output_code_generation(),
-        "system": [{"text": system_prompt_code_generation(&configs.lang), "type": "text"}],
+        "system": [{"text": system_prompt_code_generation(language), "type": "text"}],
     })
 }
