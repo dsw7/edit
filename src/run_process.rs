@@ -7,34 +7,34 @@ use serde::Serialize;
 use crate::configurations::Configs;
 use crate::query_anthropic::edit_code_block;
 
-fn possible_languages() -> HashMap<&'static str, &'static str> {
+fn possible_languages() -> HashMap<&'static str, (&'static str, &'static str)> {
     HashMap::from([
-        ("cc", "C++"),
-        ("cpp", "C++"),
-        ("c", "C"),
-        ("cs", "C#"),
-        ("css", "CSS"),
-        ("html", "HTML"),
-        ("js", "JavaScript"),
-        ("json", "JSON"),
-        ("java", "Java"),
-        ("kt", "Kotlin"),
-        ("pl", "Perl"),
-        ("php", "PHP"),
-        ("py", "Python"),
-        ("rb", "Ruby"),
-        ("rs", "Rust"),
-        ("sh", "Shell"),
-        ("sql", "SQL"),
-        ("swift", "Swift"),
-        ("ts", "TypeScript"),
-        ("xml", "XML"),
-        ("yaml", "YAML"),
-        ("yml", "YAML"),
+        ("cc", ("C++", "cpp")),
+        ("cpp", ("C++", "cpp")),
+        ("c", ("C", "c")),
+        ("cs", ("C#", "cs")),
+        ("css", ("CSS", "css")),
+        ("html", ("HTML", "html")),
+        ("js", ("JavaScript", "javascript")),
+        ("json", ("JSON", "json")),
+        ("java", ("Java", "java")),
+        ("kt", ("Kotlin", "kotlin")),
+        ("pl", ("Perl", "perl")),
+        ("php", ("PHP", "php")),
+        ("py", ("Python", "python")),
+        ("rb", ("Ruby", "ruby")),
+        ("rs", ("Rust", "rust")),
+        ("sh", ("Shell", "sh")),
+        ("sql", ("SQL", "sql")),
+        ("swift", ("Swift", "swift")),
+        ("ts", ("TypeScript", "typescript")),
+        ("xml", ("XML", "xml")),
+        ("yaml", ("YAML", "yaml")),
+        ("yml", ("YAML", "yaml")),
     ])
 }
 
-fn resolve_lang_from_extension(input_file: &Path) -> anyhow::Result<String> {
+fn resolve_lang_from_extension(input_file: &Path) -> anyhow::Result<(&'static str, &'static str)> {
     let ext_os = input_file
         .extension()
         .ok_or_else(|| anyhow::anyhow!("could not get extension from file"))?;
@@ -46,7 +46,7 @@ fn resolve_lang_from_extension(input_file: &Path) -> anyhow::Result<String> {
     let lang_map = possible_languages();
 
     match lang_map.get(extension) {
-        Some(lang) => Ok(lang.to_string()),
+        Some(lang) => Ok(*lang),
         None => anyhow::bail!(format!(
             "cannot resolve language from extension `{extension}`"
         )),
@@ -66,12 +66,12 @@ pub fn run_process(configs: &Configs) -> anyhow::Result<String> {
         anyhow::bail!("the user prompt is empty")
     }
 
-    let language = resolve_lang_from_extension(&configs.filename)?;
-    let raw_results = edit_code_block(configs, &language).context("editing process failed")?;
+    let (language, vim_syntax_lang_id) = resolve_lang_from_extension(&configs.filename)?;
+    let raw_results = edit_code_block(configs, language).context("editing process failed")?;
 
     let results = Results {
         input_tokens: raw_results.input_tokens,
-        lang_id: language,
+        lang_id: vim_syntax_lang_id.to_string(),
         output_tokens: raw_results.output_tokens,
         updated_code: raw_results.code,
     };
