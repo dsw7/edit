@@ -6,4 +6,3 @@ mod response;
 
 pub use params::AnthropicParams;
 pub use queries::edit_code_block;
-pub use response::AnthropicResults;

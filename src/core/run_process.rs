@@ -5,7 +5,7 @@ use crate::query_anthropic::{AnthropicParams, edit_code_block};
 
 use super::resolve_programming_language::resolve_lang_from_extension;
 
-pub fn run_process(configs: Configs) -> anyhow::Result<()> {
+pub fn run_process(configs: Configs) -> anyhow::Result<String> {
     if configs.instructions.is_empty() {
         anyhow::bail!("the user prompt is empty")
     }
@@ -23,5 +23,7 @@ pub fn run_process(configs: Configs) -> anyhow::Result<()> {
     )
     .context("editing process failed")?;
 
-    Ok(())
+    let json_str =
+        serde_json::to_string_pretty(&results).context("failed to serialize outgoing results")?;
+    Ok(json_str)
 }

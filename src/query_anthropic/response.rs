@@ -1,5 +1,5 @@
 use anyhow::Context;
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 
 #[derive(Deserialize, Debug)]
 #[serde(untagged)]
@@ -73,7 +73,7 @@ fn unpack_text_block(response: &Response) -> anyhow::Result<StructuredOutput> {
     anyhow::bail!("no TextBlock object found in response")
 }
 
-#[derive(Debug)]
+#[derive(Serialize, Debug)]
 pub struct AnthropicResults {
     pub input_tokens: u32,
     pub output_tokens: u32,

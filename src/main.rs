@@ -5,8 +5,6 @@ mod query_anthropic;
 
 use std::process::ExitCode;
 
-use crossterm::style::Stylize;
-
 use configurations::setup_configurations;
 
 fn main() -> ExitCode {
@@ -19,10 +17,13 @@ fn main() -> ExitCode {
     };
 
     match core::run_process(configs) {
-        Ok(()) => ExitCode::SUCCESS,
+        Ok(results) => {
+            println!("{results}");
+            ExitCode::SUCCESS
+        }
         Err(error) => {
             let errmsg = format!("{error:?}");
-            eprintln!("{}", errmsg.red());
+            eprintln!("{errmsg}");
             ExitCode::FAILURE
         }
     }
