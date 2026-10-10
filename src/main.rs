@@ -22,8 +22,7 @@ fn main() -> ExitCode {
             ExitCode::SUCCESS
         }
         Err(error) => {
-            let errmsg = format!("{error:?}");
-            eprintln!("{errmsg}");
+            eprintln!("{error:?}");
             ExitCode::FAILURE
         }
     }
