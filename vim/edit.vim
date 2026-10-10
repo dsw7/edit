@@ -4,16 +4,64 @@
 " See https://github.com/dsw7/edit for more information
 " -----------------------------------------------------------------------------------------------------------
 
-function! s:handle_submission(user_input)
+function! s:run_edit_subprocess(instructions) abort
+  let l:command = printf(
+  \ 'edit --filename=%s %s %s',
+  \ shellescape(b:original_filename),
+  \ shellescape(b:code_to_edit),
+  \ shellescape(a:instructions)
+  \ )
+  return system(l:command)
+endfunction
+
+function! s:write_results_to_completion_window(results) abort
+  let l:win_id = bufwinid('Completion')
+
+  if l:win_id == -1
+    let l:bufnr = bufnr('Completion')
+
+    if l:bufnr == -1
+      new Completion
+      setlocal buftype=nofile bufhidden=wipe noswapfile
+    else
+      split
+      buffer l:bufnr
+    endif
+  else
+    call win_gotoid(l:win_id)
+  endif
+
+  silent %delete _
+
+  let l:json = json_decode(a:results)
+  execute 'setlocal syntax=' . l:json.lang
+  call setline(1, split(l:json.content, "\n"))
+endfunction
+
+function! s:write_error_to_prompt(error) abort
+  let l:start_line = line('$')
+  call append(l:start_line - 1, split(a:error, "\n"))
+  call matchaddpos('WarningMsg', range(l:start_line, line('$') - 1))
+endfunction
+
+function! s:handle_submission(user_input) abort
   if a:user_input ==# 'quit'
-      execute 'q!'
-      return
+    execute 'q!'
+    return
+  endif
+
+  let l:results = s:run_edit_subprocess(a:user_input)
+
+  if v:shell_error == 0
+    call s:write_results_to_completion_window(l:results)
+  else
+    call s:write_error_to_prompt(l:results)
   endif
 
   call prompt_setprompt(bufnr('%'), '> ')
 endfunction
 
-function! s:write_header(code_to_edit)
+function! s:write_header(code_to_edit) abort
   call setline(1, "Type 'quit' to exit")
   call matchaddpos('Comment', [1])
   call setline(2, '')
