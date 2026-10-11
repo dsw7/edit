@@ -1,4 +1,4 @@
-.PHONY = lint test
+.PHONY = lint test install
 
 lint:
 	@cargo fmt
@@ -7,3 +7,6 @@ lint:
 
 test:
 	@cargo llvm-cov --html --output-dir="target/coverage"
+
+install:
+	@cargo install --path . --root ~/.local
