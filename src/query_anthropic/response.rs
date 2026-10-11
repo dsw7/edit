@@ -22,14 +22,11 @@ struct Error {
 struct Response {
     content: Vec<ContentBlock>,
     usage: Usage,
-
-    // see https://platform.claude.com/docs/en/api/http/messages#stop_reason
     stop_reason: String,
 }
 
 #[derive(Deserialize, Debug)]
 struct ContentBlock {
-    // see https://platform.claude.com/docs/en/api/http/messages#content_block
     #[serde(rename = "type")]
     content_type: String,
 
@@ -38,7 +35,6 @@ struct ContentBlock {
 
 #[derive(Deserialize, Debug)]
 struct Usage {
-    // see https://platform.claude.com/docs/en/api/http/messages#usage
     input_tokens: u32,
     output_tokens: u32,
 }
@@ -46,7 +42,6 @@ struct Usage {
 #[derive(Deserialize, Debug)]
 struct StructuredOutput {
     code: String,
-    description_of_what_was_done: String,
 }
 
 fn unpack_structured_output(text: &str) -> anyhow::Result<StructuredOutput> {
@@ -62,7 +57,6 @@ fn unpack_text_block(response: &Response) -> anyhow::Result<StructuredOutput> {
     }
 
     for content_block in &response.content {
-        // see https://platform.claude.com/docs/en/api/http/messages#text_block
         if content_block.content_type == "text" {
             if let Some(text) = &content_block.text {
                 return unpack_structured_output(text);
@@ -78,27 +72,20 @@ pub struct AnthropicResults {
     pub input_tokens: u32,
     pub output_tokens: u32,
     pub code: String,
-    pub description_of_what_was_done: String,
 }
 
 fn unpack_response(response: &Response) -> anyhow::Result<AnthropicResults> {
     if response.stop_reason != "end_turn" {
-        anyhow::bail!(format!(
-            "query stopped prematurely: {}",
-            response.stop_reason
-        ))
+        anyhow::bail!("query stopped prematurely: {}", response.stop_reason)
     }
 
     let structured_output = unpack_text_block(response)?;
 
-    let results = AnthropicResults {
+    Ok(AnthropicResults {
         input_tokens: response.usage.input_tokens,
         output_tokens: response.usage.output_tokens,
         code: structured_output.code,
-        description_of_what_was_done: structured_output.description_of_what_was_done,
-    };
-
-    Ok(results)
+    })
 }
 
 pub fn deserialize_json_response(raw_json: String) -> anyhow::Result<AnthropicResults> {
@@ -145,7 +132,7 @@ mod tests {
             "content": [
                 {
                     "type": "text",
-                    "text": "{\"code\": \"print('Hello, world!')\", \"description_of_what_was_done\": \"A simple hello world code\"}"
+                    "text": "{\"code\": \"print('Hello, world!')\"}"
                 }
             ],
             "stop_reason": "end_turn",
@@ -156,10 +143,6 @@ mod tests {
         assert_eq!(response.input_tokens, 100);
         assert_eq!(response.output_tokens, 50);
         assert_eq!(response.code, "print('Hello, world!')");
-        assert_eq!(
-            response.description_of_what_was_done,
-            "A simple hello world code"
-        );
     }
 
     #[test]
@@ -203,7 +186,7 @@ mod tests {
                 { "type": "tool_use", "name": "code_edit_tool" },
                 {
                     "type": "text",
-                    "text": "{\"code\": \"print('Hello, world!')\"}"
+                    "text": "{\"results\": \"print('Hello, world!')\"}"
                 }
             ],
             "stop_reason": "end_turn",

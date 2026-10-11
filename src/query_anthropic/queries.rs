@@ -1,89 +1,30 @@
-use std::env;
+use std::time::Duration;
 
 use anyhow::Context;
+use reqwest::blocking::Client;
 
-use super::connector::AnthropicConnector;
-use super::params::AnthropicParams;
-use super::requests::{request_edit_code_block, request_write_new_code};
+use crate::configurations::Configs;
+
+use super::requests::request_edit_code_block;
 use super::response::{AnthropicResults, deserialize_json_response};
 
-fn load_anthropic_api_key() -> anyhow::Result<String> {
-    let env_var_key = "ANTHROPIC_API_KEY";
+pub fn query_messages_api(configs: &Configs, language: &str) -> anyhow::Result<AnthropicResults> {
+    let connection_timeout = Duration::from_secs(60);
+    let client = Client::builder().timeout(connection_timeout).build()?;
 
-    let env_var_value = env::var(env_var_key).context(format!(
-        "failed to load environment variable: {env_var_key}"
-    ))?;
+    let request_body = request_edit_code_block(configs, language);
 
-    Ok(env_var_value)
-}
+    let response = client
+        .post("https://api.anthropic.com/v1/messages")
+        .header("Content-Type", "application/json")
+        .header("anthropic-version", "2023-06-01")
+        .header("X-Api-Key", &configs.api_key)
+        .json(&request_body)
+        .send()?;
 
-pub fn write_new_code(prompt: &str, params: &AnthropicParams) -> anyhow::Result<AnthropicResults> {
-    let api_key = load_anthropic_api_key()?;
-    let connector = AnthropicConnector::try_new(api_key)?;
-
-    let request_body = request_write_new_code(prompt, params);
-    let raw_json = connector
-        .query_messages_api(request_body)
-        .context("failed to write code")?;
-
-    deserialize_json_response(raw_json)
-}
-
-pub fn edit_code_block(
-    code_block: &str,
-    prompt: &str,
-    params: &AnthropicParams,
-) -> anyhow::Result<AnthropicResults> {
-    let api_key = load_anthropic_api_key()?;
-    let connector = AnthropicConnector::try_new(api_key)?;
-
-    let request_body = request_edit_code_block(code_block, prompt, params);
-    let raw_json = connector
-        .query_messages_api(request_body)
-        .context("failed to edit code")?;
+    let raw_json = response
+        .text()
+        .context("failed to decode response body to string")?;
 
     deserialize_json_response(raw_json)
-}
-
-#[cfg(test)]
-mod tests {
-    use super::{AnthropicParams, edit_code_block, write_new_code};
-
-    #[test]
-    fn test_write_new_code_invalid_model() {
-        let prompt = "What is 3 + 5?";
-        let params = AnthropicParams {
-            model: String::from("foobar"),
-            ..AnthropicParams::default()
-        };
-
-        let result = write_new_code(prompt, &params);
-        assert!(result.is_err());
-
-        let error = result.unwrap_err();
-        assert_eq!(error.to_string(), "model: foobar");
-    }
-
-    #[test]
-    fn test_write_new_code_valid_query() {
-        let prompt = "Print 'hello world'.";
-        let params = AnthropicParams::default();
-        let result = write_new_code(prompt, &params).unwrap();
-        assert!(result.input_tokens > 0);
-        assert!(result.output_tokens > 0);
-        assert!(!result.description_of_what_was_done.is_empty());
-        assert_eq!(result.code, "print('hello world')");
-    }
-
-    #[test]
-    fn test_edit_code_block_valid_query() {
-        let code_block = "print('hello world'";
-        let prompt = "Fix the code such that it prints 'hello world'";
-        let params = AnthropicParams::default();
-        let result = edit_code_block(code_block, prompt, &params).unwrap();
-        assert!(result.input_tokens > 0);
-        assert!(result.output_tokens > 0);
-        assert!(!result.description_of_what_was_done.is_empty());
-        assert_eq!(result.code, "print('hello world')");
-    }
 }

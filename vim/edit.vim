@@ -34,8 +34,8 @@ function! s:write_results_to_completion_window(results) abort
   silent %delete _
 
   let l:json = json_decode(a:results)
-  execute 'setlocal syntax=' . l:json.lang
-  call setline(1, split(l:json.content, "\n"))
+  execute 'setlocal syntax=' . l:json.lang_id
+  call setline(1, split(l:json.updated_code, "\n"))
 endfunction
 
 function! s:write_error_to_prompt(error) abort

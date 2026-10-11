@@ -1,6 +1,6 @@
 use serde_json::{Value, json};
 
-use super::params::AnthropicParams;
+use crate::configurations::Configs;
 
 fn schema_structured_output_code_generation() -> Value {
     json!({
@@ -9,57 +9,48 @@ fn schema_structured_output_code_generation() -> Value {
             "schema": {
                 "type": "object",
                 "properties": {
-                    "description_of_what_was_done": { "type": "string" },
                     "code": { "type": "string" }
                 },
-                "required": ["description_of_what_was_done", "code"],
+                "required": ["code"],
                 "additionalProperties": false
             }
         }
     })
 }
 
-fn system_prompt_code_generation(lang: &str) -> String {
+fn system_prompt_code_generation(language: &str) -> String {
     format!(
-        "You are a helpful programming assistant that specializes in: {lang}
+        "You are a helpful programming assistant that specializes in: {language}
 
 IMPORTANT: Do not wrap your response in backticks (```). Output the code
 directly without markdown code fences.
 
 Output:
-- description_of_what_was_done: brief summary of what you did
 - code: your updated code
+
+Put a comment describing what was done above the code.
 "
     )
 }
 
-pub fn request_write_new_code(prompt: &str, params: &AnthropicParams) -> Value {
-    json!({
-        "max_tokens": params.max_tokens,
-        "messages": [{"content": prompt, "role": "user"}],
-        "model": params.model,
-        "output_config": schema_structured_output_code_generation(),
-        "system": [{"text": system_prompt_code_generation(&params.programming_language), "type": "text"}],
-    })
-}
-
-pub fn request_edit_code_block(code_block: &str, prompt: &str, params: &AnthropicParams) -> Value {
+pub fn request_edit_code_block(configs: &Configs, language: &str) -> Value {
     let prompt = format!(
         "Take the instructions:
 ```plaintext
-{prompt}
+{}
 ```
 And apply them to the code:
 ```
-{code_block}
-```"
+{}
+```",
+        configs.prompt, configs.code_to_edit
     );
 
     json!({
-        "max_tokens": params.max_tokens,
+        "max_tokens": configs.max_tokens,
         "messages": [{"content": prompt, "role": "user"}],
-        "model": params.model,
+        "model": configs.model,
         "output_config": schema_structured_output_code_generation(),
-        "system": [{"text": system_prompt_code_generation(&params.programming_language), "type": "text"}],
+        "system": [{"text": system_prompt_code_generation(language), "type": "text"}],
     })
 }
