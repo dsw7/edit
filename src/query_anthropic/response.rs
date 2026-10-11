@@ -88,8 +88,8 @@ fn unpack_response(response: &Response) -> anyhow::Result<AnthropicResults> {
     })
 }
 
-pub fn deserialize_json_response(raw_json: String) -> anyhow::Result<AnthropicResults> {
-    let response = serde_json::from_str::<ApiResponse>(&raw_json)
+pub fn deserialize_json_response(raw_json: &str) -> anyhow::Result<AnthropicResults> {
+    let response = serde_json::from_str::<ApiResponse>(raw_json)
         .context("failed to deserialize raw json from Anthropic")?;
 
     match response {
@@ -103,7 +103,7 @@ mod tests {
     use super::deserialize_json_response;
 
     fn assert_error_message(raw_json: &str, expected_error: &str) {
-        let result = deserialize_json_response(raw_json.to_string());
+        let result = deserialize_json_response(raw_json);
         assert!(result.is_err());
 
         let error = result.unwrap_err();
@@ -139,7 +139,7 @@ mod tests {
             "usage": { "input_tokens": 100, "output_tokens": 50 }
         }"#;
 
-        let response = deserialize_json_response(raw_json.to_string()).unwrap();
+        let response = deserialize_json_response(raw_json).unwrap();
         assert_eq!(response.input_tokens, 100);
         assert_eq!(response.output_tokens, 50);
         assert_eq!(response.code, "print('Hello, world!')");

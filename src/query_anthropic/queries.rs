@@ -26,5 +26,5 @@ pub fn query_messages_api(configs: &Configs, language: &str) -> anyhow::Result<A
         .text()
         .context("failed to decode response body to string")?;
 
-    deserialize_json_response(raw_json)
+    deserialize_json_response(&raw_json)
 }
