@@ -15,6 +15,9 @@ struct ResponseError {
 
 #[derive(Deserialize, Debug)]
 struct Error {
+    #[serde(rename = "type")]
+    error_type: String,
+
     message: String,
 }
 
@@ -93,7 +96,13 @@ pub fn deserialize_json_response(raw_json: &str) -> anyhow::Result<AnthropicResu
         .context("failed to deserialize raw json from Anthropic")?;
 
     match response {
-        ApiResponse::ErrorResponse(response) => anyhow::bail!(response.error.message),
+        ApiResponse::ErrorResponse(response) => {
+            anyhow::bail!(
+                "query failed with Anthropic error type '{}' and message '{}'",
+                response.error.error_type,
+                response.error.message
+            )
+        }
         ApiResponse::SuccessResponse(response) => unpack_response(&response),
     }
 }
