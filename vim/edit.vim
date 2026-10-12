@@ -14,6 +14,16 @@ function! s:run_edit_subprocess(instructions) abort
   return system(l:command)
 endfunction
 
+function! s:run_edit_subprocess_with_echo() abort
+  let l:command = printf(
+  \ 'edit --echo --filename=%s %s %s',
+  \ shellescape(b:original_filename),
+  \ shellescape(b:code_to_edit),
+  \ shellescape('This is a test')
+  \ )
+  return system(l:command)
+endfunction
+
 function! s:write_results_to_completion_window(updated_code, lang_id) abort
   let l:win_id = bufwinid('Completion')
 
@@ -64,7 +74,11 @@ function! s:handle_submission(user_input) abort
     return
   endif
 
-  let l:results = s:run_edit_subprocess(a:user_input)
+  if a:user_input == 'echo'
+    let l:results = s:run_edit_subprocess_with_echo()
+  else
+    let l:results = s:run_edit_subprocess(a:user_input)
+  endif
 
   if v:shell_error == 0
     call s:unpack_json(l:results)
@@ -76,10 +90,11 @@ function! s:handle_submission(user_input) abort
 endfunction
 
 function! s:write_header(code_to_edit) abort
-  call setline(1, "Type 'q', 'quit' or 'exit' to exit")
-  call matchaddpos('Comment', [1])
-  call setline(2, '')
-  call setline(3, split(a:code_to_edit, "\n"))
+  call setline(1, "Type 'quit', 'q' or 'exit' to exit")
+  call setline(2, "Type 'echo' to echo payload (for debugging)")
+  call matchaddpos('Comment', [1, 2])
+  call setline(3, '')
+  call setline(4, split(a:code_to_edit, "\n"))
   call append('$', repeat('─', ((&colorcolumn > 0 ? &colorcolumn : 81) - 1)))
   call matchaddpos('Comment', [line('$')])
 endfunction
