@@ -27,4 +27,8 @@ pub struct ConfigsFromCli {
     /// Specify filename (used to infer programming language)
     #[arg(short, long)]
     pub filename: PathBuf,
+
+    /// Echo payload back to client (useful for debugging)
+    #[arg(short, long)]
+    pub echo: bool,
 }
