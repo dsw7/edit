@@ -14,6 +14,7 @@ use crate::program_files;
 pub struct Configs {
     pub api_key: String,
     pub code_to_edit: String,
+    pub echo: bool,
     pub filename: PathBuf,
     pub max_tokens: u16,
     pub model: String,
@@ -24,6 +25,7 @@ impl Configs {
     fn load_configs_from_cli(mut self) -> Self {
         let configs = ConfigsFromCli::parse();
         self.code_to_edit = configs.code_to_edit;
+        self.echo = configs.echo;
         self.filename = configs.filename;
         self.prompt = configs.instructions;
         self

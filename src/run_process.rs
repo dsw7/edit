@@ -7,6 +7,14 @@ use serde::Serialize;
 use crate::configurations::Configs;
 use crate::query_anthropic::query_messages_api;
 
+#[derive(Default, Serialize)]
+struct Results {
+    input_tokens: u32,
+    lang_id: String,
+    output_tokens: u32,
+    updated_code: String,
+}
+
 fn possible_languages() -> HashMap<&'static str, (&'static str, &'static str)> {
     HashMap::from([
         ("cc", ("C++", "cpp")),
@@ -52,23 +60,34 @@ fn resolve_lang_from_extension(filename: &Path) -> anyhow::Result<(&'static str,
     }
 }
 
-#[derive(Serialize)]
-struct Results {
-    input_tokens: u32,
-    lang_id: String,
-    output_tokens: u32,
-    updated_code: String,
+fn echo_payload_back_to_client(configs: &Configs) -> anyhow::Result<Results> {
+    let (_, vim_syntax_lang_id) = resolve_lang_from_extension(&configs.filename)?;
+    let updated_code = format!("```{vim_syntax_lang_id}\n{}\n```", configs.code_to_edit);
+
+    Ok(Results {
+        lang_id: String::from("off"),
+        updated_code,
+        ..Default::default()
+    })
 }
 
-pub fn run_process(configs: &Configs) -> anyhow::Result<String> {
+fn process_code_using_anthropic(configs: &Configs) -> anyhow::Result<Results> {
     let (language, vim_syntax_lang_id) = resolve_lang_from_extension(&configs.filename)?;
     let response = query_messages_api(configs, language).context("editing process failed")?;
 
-    let results = Results {
+    Ok(Results {
         input_tokens: response.input_tokens,
         lang_id: vim_syntax_lang_id.to_string(),
         output_tokens: response.output_tokens,
         updated_code: response.code,
+    })
+}
+
+pub fn run_process(configs: &Configs) -> anyhow::Result<String> {
+    let results = if configs.echo {
+        echo_payload_back_to_client(configs)?
+    } else {
+        process_code_using_anthropic(configs)?
     };
 
     let json =
