@@ -44,8 +44,12 @@ function! s:write_error_to_prompt(error) abort
   call matchaddpos('WarningMsg', range(l:start_line, line('$') - 1))
 endfunction
 
+function! s:check_if_should_exit(user_input) abort
+  return index(['quit', 'q', 'exit'], a:user_input) >= 0
+endfunction
+
 function! s:handle_submission(user_input) abort
-  if a:user_input ==# 'quit'
+  if s:check_if_should_exit(a:user_input)
     execute 'q!'
     return
   endif
@@ -62,7 +66,7 @@ function! s:handle_submission(user_input) abort
 endfunction
 
 function! s:write_header(code_to_edit) abort
-  call setline(1, "Type 'quit' to exit")
+  call setline(1, "Type 'q', 'quit' or 'exit' to exit")
   call matchaddpos('Comment', [1])
   call setline(2, '')
   call setline(3, split(a:code_to_edit, "\n"))
