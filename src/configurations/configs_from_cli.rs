@@ -31,4 +31,8 @@ pub struct ConfigsFromCli {
     /// Echo payload back to client (useful for debugging)
     #[arg(short, long)]
     pub echo: bool,
+
+    /// Pretty print results (useful for debugging)
+    #[arg(short, long)]
+    pub pretty: bool,
 }

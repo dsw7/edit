@@ -95,7 +95,11 @@ pub fn run_process(configs: &Configs) -> anyhow::Result<String> {
         process_code_using_anthropic(configs)?
     };
 
-    let json =
-        serde_json::to_string_pretty(&results).context("failed to serialize outgoing results")?;
+    let json = if configs.pretty {
+        serde_json::to_string_pretty(&results).context("failed to serialize outgoing results")?
+    } else {
+        serde_json::to_string(&results).context("failed to serialize outgoing results")?
+    };
+
     Ok(json)
 }
