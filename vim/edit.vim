@@ -51,7 +51,8 @@ function! s:write_usage_to_prompt(json_results) abort
   call append(line('$') - 1, '• model: ' . a:json_results.model)
   call append(line('$') - 1, '• input tokens: ' . a:json_results.input_tokens)
   call append(line('$') - 1, '• output tokens: ' . a:json_results.output_tokens)
-  call matchaddpos('Title', range(line('$') - 3, line('$') - 1))
+  call append(line('$') - 1, '• inferred language: ' . a:json_results.language)
+  call matchaddpos('Title', range(line('$') - 4, line('$') - 1))
 endfunction
 
 function! s:unpack_json(results) abort
