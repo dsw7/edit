@@ -11,6 +11,7 @@ use crate::query_anthropic::query_messages_api;
 struct Results {
     input_tokens: u32,
     lang_id: String,
+    model: String,
     output_tokens: u32,
     updated_code: String,
 }
@@ -65,6 +66,7 @@ fn echo_payload_back_to_client(configs: &Configs) -> anyhow::Result<Results> {
 
     Ok(Results {
         lang_id: vim_syntax_lang_id.to_owned(),
+        model: String::from("None"),
         updated_code: configs.code_to_edit.to_owned(),
         ..Default::default()
     })
@@ -76,7 +78,8 @@ fn process_code_using_anthropic(configs: &Configs) -> anyhow::Result<Results> {
 
     Ok(Results {
         input_tokens: response.input_tokens,
-        lang_id: vim_syntax_lang_id.to_string(),
+        lang_id: vim_syntax_lang_id.to_owned(),
+        model: configs.model.to_owned(),
         output_tokens: response.output_tokens,
         updated_code: response.code,
     })
