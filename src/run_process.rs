@@ -76,7 +76,7 @@ fn echo_payload_back_to_client(configs: &Configs) -> anyhow::Result<Results> {
 
 fn process_code_using_anthropic(configs: &Configs) -> anyhow::Result<Results> {
     let (language, vim_syntax_lang_id) = resolve_lang_from_extension(&configs.filename)?;
-    let response = query_messages_api(configs, language).context("editing process failed")?;
+    let response = query_messages_api(configs, language).context("reasoning process failed")?;
 
     Ok(Results {
         input_tokens: response.input_tokens,
