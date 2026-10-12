@@ -130,9 +130,12 @@ mod tests {
     #[test]
     fn test_deserialize_error_response() {
         let raw_json = r#"{
-            "error": {"message": "Something went wrong"}
+            "error": {"type": "not_found_error", "message": "model: foobar"}
         }"#;
-        assert_error_message(raw_json, "Something went wrong");
+        assert_error_message(
+            raw_json,
+            "query failed with Anthropic error type 'not_found_error' and message 'model: foobar'",
+        )
     }
 
     #[test]
