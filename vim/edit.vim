@@ -14,7 +14,7 @@ function! s:run_edit_subprocess(instructions) abort
   return system(l:command)
 endfunction
 
-function! s:write_results_to_completion_window(results) abort
+function! s:write_results_to_completion_window(updated_code, lang_id) abort
   let l:win_id = bufwinid('Completion')
 
   if l:win_id == -1
@@ -33,9 +33,19 @@ function! s:write_results_to_completion_window(results) abort
 
   silent %delete _
 
+  execute 'setlocal syntax=' . a:lang_id
+  call setline(1, split(a:updated_code, "\n"))
+endfunction
+
+function! s:write_usage_to_prompt(input_tokens, output_tokens) abort
+  call append(line('$') - 1, '• Input tokens: ' . a:input_tokens)
+  call append(line('$') - 1, '• Output tokens: ' . a:output_tokens)
+endfunction
+
+function! s:unpack_json(results) abort
   let l:json = json_decode(a:results)
-  execute 'setlocal syntax=' . l:json.lang_id
-  call setline(1, split(l:json.updated_code, "\n"))
+  call s:write_usage_to_prompt(l:json.input_tokens, l:json.output_tokens)
+  call s:write_results_to_completion_window(l:json.updated_code, l:json.lang_id)
 endfunction
 
 function! s:write_error_to_prompt(error) abort
@@ -57,7 +67,7 @@ function! s:handle_submission(user_input) abort
   let l:results = s:run_edit_subprocess(a:user_input)
 
   if v:shell_error == 0
-    call s:write_results_to_completion_window(l:results)
+    call s:unpack_json(l:results)
   else
     call s:write_error_to_prompt(l:results)
   endif
