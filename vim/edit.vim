@@ -24,7 +24,7 @@ function! s:run_edit_subprocess_with_echo() abort
   return system(l:command)
 endfunction
 
-function! s:write_results_to_completion_window(updated_code, lang_id) abort
+function! s:write_results_to_completion_window(json_results) abort
   let l:win_id = bufwinid('Completion')
 
   if l:win_id == -1
@@ -43,19 +43,21 @@ function! s:write_results_to_completion_window(updated_code, lang_id) abort
 
   silent %delete _
 
-  execute 'setlocal syntax=' . a:lang_id
-  call setline(1, split(a:updated_code, "\n"))
+  execute 'setlocal syntax=' . a:json_results.lang_id
+  call setline(1, split(a:json_results.updated_code, "\n"))
 endfunction
 
-function! s:write_usage_to_prompt(input_tokens, output_tokens) abort
-  call append(line('$') - 1, '• Input tokens: ' . a:input_tokens)
-  call append(line('$') - 1, '• Output tokens: ' . a:output_tokens)
+function! s:write_usage_to_prompt(json_results) abort
+  call append(line('$') - 1, '• model: ' . a:json_results.model)
+  call append(line('$') - 1, '• input tokens: ' . a:json_results.input_tokens)
+  call append(line('$') - 1, '• output tokens: ' . a:json_results.output_tokens)
+  call matchaddpos('Title', range(line('$') - 3, line('$') - 1))
 endfunction
 
 function! s:unpack_json(results) abort
-  let l:json = json_decode(a:results)
-  call s:write_usage_to_prompt(l:json.input_tokens, l:json.output_tokens)
-  call s:write_results_to_completion_window(l:json.updated_code, l:json.lang_id)
+  let l:json_results = json_decode(a:results)
+  call s:write_usage_to_prompt(l:json_results)
+  call s:write_results_to_completion_window(l:json_results)
 endfunction
 
 function! s:write_error_to_prompt(error) abort
@@ -90,8 +92,8 @@ function! s:handle_submission(user_input) abort
 endfunction
 
 function! s:write_header(code_to_edit) abort
-  call setline(1, "Type 'quit', 'q' or 'exit' to exit")
-  call setline(2, "Type 'echo' to echo payload (for debugging)")
+  call setline(1, "• type 'quit', 'q' or 'exit' to exit")
+  call setline(2, "• type 'echo' to echo payload (for debugging)")
   call matchaddpos('Comment', [1, 2])
   call setline(3, '')
   call setline(4, split(a:code_to_edit, "\n"))
