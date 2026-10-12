@@ -18,6 +18,7 @@ pub struct Configs {
     pub filename: PathBuf,
     pub max_tokens: u16,
     pub model: String,
+    pub pretty: bool,
     pub prompt: String,
 }
 
@@ -27,6 +28,7 @@ impl Configs {
         self.code_to_edit = configs.code_to_edit;
         self.echo = configs.echo;
         self.filename = configs.filename;
+        self.pretty = configs.pretty;
         self.prompt = configs.instructions;
         self
     }
