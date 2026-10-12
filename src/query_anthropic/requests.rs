@@ -2,23 +2,7 @@ use serde_json::{Value, json};
 
 use crate::configurations::Configs;
 
-fn schema_structured_output_code_generation() -> Value {
-    json!({
-        "format": {
-            "type": "json_schema",
-            "schema": {
-                "type": "object",
-                "properties": {
-                    "code": { "type": "string" }
-                },
-                "required": ["code"],
-                "additionalProperties": false
-            }
-        }
-    })
-}
-
-fn system_prompt_code_generation(language: &str) -> String {
+fn format_system_prompt(language: &str) -> String {
     format!(
         "You are a helpful programming assistant that specializes in: {language}
 
@@ -33,8 +17,8 @@ Put a comment describing what was done above the code.
     )
 }
 
-pub fn request_edit_code_block(configs: &Configs, language: &str) -> Value {
-    let prompt = format!(
+fn format_user_prompt(configs: &Configs) -> String {
+    format!(
         "Take the instructions:
 ```plaintext
 {}
@@ -44,13 +28,27 @@ And apply them to the code:
 {}
 ```",
         configs.prompt, configs.code_to_edit
-    );
+    )
+}
 
+pub fn request_edit_code_block(configs: &Configs, language: &str) -> Value {
     json!({
         "max_tokens": configs.max_tokens,
-        "messages": [{"content": prompt, "role": "user"}],
+        "messages": [{"content": format_user_prompt(configs), "role": "user"}],
         "model": configs.model,
-        "output_config": schema_structured_output_code_generation(),
-        "system": [{"text": system_prompt_code_generation(language), "type": "text"}],
+        "system": [{"text": format_system_prompt(language), "type": "text"}],
+        "output_config": {
+            "format": {
+                "type": "json_schema",
+                "schema": {
+                    "type": "object",
+                    "properties": {
+                        "code": { "type": "string" }
+                    },
+                    "required": ["code"],
+                    "additionalProperties": false
+                }
+            }
+        }
     })
 }
