@@ -28,6 +28,7 @@ fn possible_languages() -> HashMap<&'static str, (&'static str, &'static str)> {
         ("sql", ("SQL", "sql")),
         ("swift", ("Swift", "swift")),
         ("ts", ("TypeScript", "typescript")),
+        ("vim", ("Vimscript", "vim")),
         ("xml", ("XML", "xml")),
         ("yaml", ("YAML", "yaml")),
         ("yml", ("YAML", "yaml")),
