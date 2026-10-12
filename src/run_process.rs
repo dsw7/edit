@@ -62,7 +62,10 @@ fn resolve_lang_from_extension(filename: &Path) -> anyhow::Result<(&'static str,
 
 fn echo_payload_back_to_client(configs: &Configs) -> anyhow::Result<Results> {
     let (_, vim_syntax_lang_id) = resolve_lang_from_extension(&configs.filename)?;
-    let updated_code = format!("```{vim_syntax_lang_id}\n{}\n```", configs.code_to_edit);
+    let updated_code = format!(
+        "```plaintext\n{}\n```\n\n```{vim_syntax_lang_id}\n{}\n```\n",
+        configs.prompt, configs.code_to_edit
+    );
 
     Ok(Results {
         lang_id: String::from("off"),
