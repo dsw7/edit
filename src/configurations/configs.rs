@@ -22,17 +22,20 @@ pub struct Configs {
     pub prompt: String,
 }
 
-impl Configs {
-    fn load_configs_from_cli(mut self) -> Self {
-        let configs = ConfigsFromCli::parse();
-        self.code_to_edit = configs.code_to_edit;
-        self.echo = configs.echo;
-        self.filename = configs.filename;
-        self.pretty = configs.pretty;
-        self.prompt = configs.instructions;
-        self
+impl From<ConfigsFromCli> for Configs {
+    fn from(cli: ConfigsFromCli) -> Self {
+        Self {
+            code_to_edit: cli.code_to_edit,
+            echo: cli.echo,
+            filename: cli.filename,
+            pretty: cli.pretty,
+            prompt: cli.instructions,
+            ..Default::default()
+        }
     }
+}
 
+impl Configs {
     fn try_load_anthropic_api_key(mut self) -> anyhow::Result<Self> {
         self.api_key = env::var("ANTHROPIC_API_KEY").context("failed to load Anthropic API key")?;
         Ok(self)
@@ -55,8 +58,8 @@ impl Configs {
 }
 
 pub fn setup_configurations() -> anyhow::Result<Configs> {
-    let configs = Configs::default()
-        .load_configs_from_cli()
+    let cli = ConfigsFromCli::parse();
+    let configs = Configs::from(cli)
         .try_load_anthropic_api_key()?
         .try_load_configs_from_file()?;
 
