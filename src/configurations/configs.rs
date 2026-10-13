@@ -5,7 +5,7 @@ use std::path::PathBuf;
 use anyhow::Context;
 use clap::Parser;
 
-use super::configs_from_cli::ConfigsFromCli;
+use super::configs_from_cli::Cli;
 use super::configs_from_file::ConfigsFromFile;
 
 use crate::program_files;
@@ -22,8 +22,8 @@ pub struct Configs {
     pub prompt: String,
 }
 
-impl From<ConfigsFromCli> for Configs {
-    fn from(cli: ConfigsFromCli) -> Self {
+impl From<Cli> for Configs {
+    fn from(cli: Cli) -> Self {
         Self {
             code_to_edit: cli.code_to_edit,
             echo: cli.echo,
@@ -58,7 +58,7 @@ impl Configs {
 }
 
 pub fn setup_configurations() -> anyhow::Result<Configs> {
-    let cli = ConfigsFromCli::parse();
+    let cli = Cli::parse();
     let configs = Configs::from(cli)
         .try_load_anthropic_api_key()?
         .try_load_configs_from_file()?;
