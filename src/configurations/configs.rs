@@ -5,8 +5,8 @@ use std::path::PathBuf;
 use anyhow::Context;
 use clap::Parser;
 
-use super::configs_from_cli::Cli;
-use super::configs_from_file::ConfigsFromFile;
+use super::cli::Cli;
+use super::config_file::ConfigsFromFile;
 
 use crate::program_files;
 
