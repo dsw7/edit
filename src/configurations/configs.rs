@@ -1,14 +1,11 @@
 use std::env;
-use std::fs;
 use std::path::PathBuf;
 
 use anyhow::Context;
 use clap::Parser;
 
 use super::cli::Cli;
-use super::config_file::ConfigsFromFile;
-
-use crate::program_files;
+use super::config_file::read_configs;
 
 #[derive(Debug, Default)]
 pub struct Configs {
@@ -42,17 +39,9 @@ impl Configs {
     }
 
     fn try_load_configs_from_file(mut self) -> anyhow::Result<Self> {
-        let app_dir = program_files::get_app_dir()?;
-        let config_file = app_dir.join("config.toml");
-
-        let toml_str = fs::read_to_string(&config_file)
-            .context(format!("cannot read {}", config_file.display()))?;
-
-        let configs = toml::from_str::<ConfigsFromFile>(&toml_str)
-            .context(format!("failed to parse {}", config_file.display()))?;
-
-        self.model = configs.anthropic.code_edit_model;
-        self.max_tokens = configs.anthropic.max_tokens_edit_model.clamp(1, 64000);
+        let configs = read_configs()?;
+        self.model = configs.anthropic.model;
+        self.max_tokens = configs.anthropic.max_tokens.clamp(1, 64000);
         Ok(self)
     }
 }

@@ -1,4 +1,9 @@
+use std::fs;
+
+use anyhow::Context;
 use serde::{Deserialize, Deserializer};
+
+use crate::program_files;
 
 fn check_not_empty<'de, D>(deserializer: D) -> Result<String, D::Error>
 where
@@ -21,7 +26,20 @@ pub struct ConfigsFromFile {
 #[derive(Deserialize, Debug)]
 pub struct Anthropic {
     #[serde(deserialize_with = "check_not_empty")]
-    pub code_edit_model: String,
+    pub model: String,
 
-    pub max_tokens_edit_model: u16,
+    pub max_tokens: u16,
+}
+
+pub fn read_configs() -> anyhow::Result<ConfigsFromFile> {
+    let app_dir = program_files::get_app_dir()?;
+    let config_file = app_dir.join("config.toml");
+
+    let toml_str = fs::read_to_string(&config_file)
+        .context(format!("cannot read {}", config_file.display()))?;
+
+    let configs = toml::from_str::<ConfigsFromFile>(&toml_str)
+        .context(format!("failed to parse {}", config_file.display()))?;
+
+    Ok(configs)
 }
