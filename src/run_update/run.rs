@@ -42,7 +42,7 @@ fn process_code_using_anthropic(configs: &Configs) -> anyhow::Result<Results> {
     })
 }
 
-pub fn update_code(configs_from_cli: UpdateConfigs) -> anyhow::Result<()> {
+pub fn run_update(configs_from_cli: UpdateConfigs) -> anyhow::Result<()> {
     let configs = Configs::from(configs_from_cli)
         .try_load_anthropic_api_key()?
         .try_load_configs_from_file()?;
