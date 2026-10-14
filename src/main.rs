@@ -5,7 +5,7 @@
 
 mod cli;
 mod core;
-mod edit;
+mod run_edit;
 
 use std::process::ExitCode;
 
@@ -13,7 +13,7 @@ use clap::Parser;
 
 use cli::{Cli, Commands, EditConfigs};
 use core::setup_configurations;
-use edit::edit_code;
+use run_edit::edit_code;
 
 fn exec_edit_subcommand(configs: EditConfigs) -> anyhow::Result<()> {
     let configs = setup_configurations(configs)?;
