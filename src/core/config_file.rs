@@ -3,7 +3,7 @@ use std::fs;
 use anyhow::Context;
 use serde::{Deserialize, Deserializer};
 
-use crate::program_files;
+use super::program_files;
 
 fn check_not_empty<'de, D>(deserializer: D) -> Result<String, D::Error>
 where

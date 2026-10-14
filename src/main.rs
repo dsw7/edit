@@ -4,16 +4,15 @@
 #![deny(unused_must_use)]
 
 mod cli;
-mod configurations;
+mod core;
 mod edit;
-mod program_files;
 
 use std::process::ExitCode;
 
 use clap::Parser;
 
 use cli::{Cli, Commands, EditConfigs};
-use configurations::setup_configurations;
+use core::setup_configurations;
 use edit::edit_code;
 
 fn exec_edit_subcommand(configs: EditConfigs) -> anyhow::Result<()> {

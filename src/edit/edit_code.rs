@@ -5,7 +5,7 @@ use anyhow::Context;
 use serde::Serialize;
 
 use super::anthropic::query_messages_api;
-use crate::configurations::Configs;
+use crate::core::Configs;
 
 #[derive(Default, Serialize)]
 struct Results {

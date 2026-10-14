@@ -1,6 +1,6 @@
 use serde_json::{Value, json};
 
-use crate::configurations::Configs;
+use crate::core::Configs;
 
 fn format_system_prompt(language: &str) -> String {
     format!(
