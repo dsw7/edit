@@ -3,8 +3,8 @@ use std::path::PathBuf;
 
 use anyhow::Context;
 
-use super::cli::RunConfigs;
 use super::config_file::read_configs;
+use crate::cli::RunConfigs;
 
 #[derive(Debug, Default)]
 pub struct Configs {

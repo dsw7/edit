@@ -3,6 +3,7 @@
 #![deny(clippy::panic)]
 #![deny(unused_must_use)]
 
+mod cli;
 mod configurations;
 mod program_files;
 mod query_anthropic;
@@ -12,7 +13,7 @@ use std::process::ExitCode;
 
 use clap::Parser;
 
-use configurations::cli::{Cli, Commands, RunConfigs};
+use cli::{Cli, Commands, RunConfigs};
 use configurations::setup_configurations;
 use run_process::run_process;
 
