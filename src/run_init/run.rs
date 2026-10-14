@@ -28,7 +28,7 @@ fn create_config_file() -> anyhow::Result<()> {
     Ok(())
 }
 
-pub fn initialize_program() -> anyhow::Result<()> {
+pub fn run_init() -> anyhow::Result<()> {
     create_app_dir()?;
     create_config_file()?;
     Ok(())

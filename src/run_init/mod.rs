@@ -1,3 +1,3 @@
-mod init;
+mod run;
 
-pub use init::initialize_program;
+pub use run::run_init;

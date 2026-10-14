@@ -13,14 +13,14 @@ use std::process::ExitCode;
 use clap::Parser;
 
 use cli::{Cli, Commands};
-use run_init::initialize_program;
+use run_init::run_init;
 use run_update::update_code;
 
 fn execute_subcommand() -> anyhow::Result<()> {
     let cli = Cli::parse();
 
     match cli.command {
-        Commands::Init {} => initialize_program(),
+        Commands::Init {} => run_init(),
         Commands::Update(configs) => update_code(configs),
     }
 }
