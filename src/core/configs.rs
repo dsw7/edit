@@ -3,7 +3,7 @@ use std::path::PathBuf;
 
 use anyhow::Context;
 
-use super::config_file::read_configs;
+use super::config_file::read_configs_from_file;
 use crate::cli::UpdateConfigs;
 
 #[derive(Debug, Default)]
@@ -38,7 +38,7 @@ impl Configs {
     }
 
     fn try_load_configs_from_file(mut self) -> anyhow::Result<Self> {
-        let configs = read_configs()?;
+        let configs = read_configs_from_file()?;
         self.model = configs.anthropic.model;
         self.max_tokens = configs.anthropic.max_tokens.clamp(1, 64000);
         Ok(self)
