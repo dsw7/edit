@@ -27,7 +27,7 @@ pub enum Commands {
     /// Install program files
     Install {},
 
-    /// Reason with code using an LLM
+    /// Operate on code using an LLM
     Update(UpdateConfigs),
 }
 
@@ -43,7 +43,7 @@ pub struct UpdateConfigs {
     #[arg(short, long)]
     pub filename: PathBuf,
 
-    /// Echo payload back to client (useful for debugging)
+    /// Do not query LLM. Simply echo payload back to client (useful for debugging)
     #[arg(short, long)]
     pub echo: bool,
 
