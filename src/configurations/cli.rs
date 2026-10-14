@@ -28,23 +28,26 @@ pub enum Commands {
     Install {},
 
     /// Reason with code using an LLM
-    Run {
-        #[arg(value_name = "CODE-TO-EDIT", value_parser = non_empty_argument)]
-        pub code_to_edit: String,
+    Run(RunConfigs),
+}
 
-        #[arg(value_name = "INSTRUCTIONS", value_parser = non_empty_argument)]
-        pub instructions: String,
+#[derive(Parser)]
+pub struct RunConfigs {
+    #[arg(value_name = "CODE-TO-EDIT", value_parser = non_empty_argument)]
+    pub code_to_edit: String,
 
-        /// Specify filename (used to infer programming language)
-        #[arg(short, long)]
-        pub filename: PathBuf,
+    #[arg(value_name = "INSTRUCTIONS", value_parser = non_empty_argument)]
+    pub instructions: String,
 
-        /// Echo payload back to client (useful for debugging)
-        #[arg(short, long)]
-        pub echo: bool,
+    /// Specify filename (used to infer programming language)
+    #[arg(short, long)]
+    pub filename: PathBuf,
 
-        /// Pretty print results (useful for debugging)
-        #[arg(short, long)]
-        pub pretty: bool,
-    },
+    /// Echo payload back to client (useful for debugging)
+    #[arg(short, long)]
+    pub echo: bool,
+
+    /// Pretty print results (useful for debugging)
+    #[arg(short, long)]
+    pub pretty: bool,
 }
