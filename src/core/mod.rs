@@ -1,2 +1,4 @@
 pub mod config_file;
-pub mod files;
+mod files;
+
+pub use files::{try_app_dir, try_config_file};

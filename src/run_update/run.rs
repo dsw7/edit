@@ -6,9 +6,10 @@ use serde::Serialize;
 use super::anthropic::query_messages_api;
 use super::configs::Configs;
 use super::resolve_language::resolve_lang_from_extension;
+
 use crate::cli::UpdateConfigs;
+use crate::core;
 use crate::core::config_file::read_configs_from_file;
-use crate::core::files::get_config_file;
 
 #[derive(Default, Serialize)]
 struct Results {
@@ -52,7 +53,7 @@ fn process_code_using_anthropic(configs: &Configs) -> anyhow::Result<Results> {
 }
 
 pub fn run_update(configs_from_cli: UpdateConfigs) -> anyhow::Result<()> {
-    let config_file = get_config_file()?;
+    let config_file = core::try_config_file()?;
     let configs_from_file = read_configs_from_file(&config_file)?;
     let api_key = try_load_anthropic_api_key()?;
 
