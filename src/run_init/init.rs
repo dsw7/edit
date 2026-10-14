@@ -10,7 +10,7 @@ fn create_app_dir() -> anyhow::Result<()> {
         println!("program directory already exists");
     } else {
         fs::create_dir_all(&app_dir)?;
-        println!("Created application directory at: {}", app_dir.display());
+        println!("created application directory at: {}", app_dir.display());
     }
 
     Ok(())
