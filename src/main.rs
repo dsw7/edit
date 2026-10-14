@@ -7,7 +7,6 @@ mod cli;
 mod configurations;
 mod edit;
 mod program_files;
-mod query_anthropic;
 
 use std::process::ExitCode;
 

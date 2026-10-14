@@ -4,8 +4,8 @@ use std::path::Path;
 use anyhow::Context;
 use serde::Serialize;
 
+use super::anthropic::query_messages_api;
 use crate::configurations::Configs;
-use crate::query_anthropic::query_messages_api;
 
 #[derive(Default, Serialize)]
 struct Results {
