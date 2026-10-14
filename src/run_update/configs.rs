@@ -1,11 +1,7 @@
-use std::env;
 use std::path::PathBuf;
 
-use anyhow::Context;
-
 use crate::cli::UpdateConfigs;
-use crate::core::config_file::read_configs_from_file;
-use crate::core::files::get_config_file;
+use crate::core::config_file::ConfigsFromFile;
 
 #[derive(Debug, Default)]
 pub struct Configs {
@@ -19,30 +15,24 @@ pub struct Configs {
     pub prompt: String,
 }
 
-impl From<UpdateConfigs> for Configs {
-    fn from(cli: UpdateConfigs) -> Self {
-        Self {
-            code_to_edit: cli.code_to_edit,
-            echo: cli.echo,
-            filename: cli.filename,
-            pretty: cli.pretty,
-            prompt: cli.instructions,
-            ..Default::default()
-        }
-    }
-}
-
 impl Configs {
-    pub fn try_load_anthropic_api_key(mut self) -> anyhow::Result<Self> {
-        self.api_key = env::var("ANTHROPIC_API_KEY").context("failed to load Anthropic API key")?;
-        Ok(self)
+    pub fn override_from_cli(mut self, configs_from_cli: UpdateConfigs) -> Self {
+        self.code_to_edit = configs_from_cli.code_to_edit;
+        self.echo = configs_from_cli.echo;
+        self.filename = configs_from_cli.filename;
+        self.pretty = configs_from_cli.pretty;
+        self.prompt = configs_from_cli.instructions;
+        self
     }
 
-    pub fn try_load_configs_from_file(mut self) -> anyhow::Result<Self> {
-        let config_file = get_config_file()?;
-        let configs = read_configs_from_file(&config_file)?;
-        self.model = configs.anthropic.model;
-        self.max_tokens = configs.anthropic.max_tokens.clamp(1, 64000);
-        Ok(self)
+    pub fn override_from_file(mut self, configs_from_file: ConfigsFromFile) -> Self {
+        self.model = configs_from_file.anthropic.model;
+        self.max_tokens = configs_from_file.anthropic.max_tokens.clamp(1, 64000);
+        self
+    }
+
+    pub fn override_api_key(mut self, api_key: String) -> Self {
+        self.api_key = api_key;
+        self
     }
 }

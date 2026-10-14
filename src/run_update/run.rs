@@ -1,3 +1,5 @@
+use std::env;
+
 use anyhow::Context;
 use serde::Serialize;
 
@@ -5,6 +7,8 @@ use super::anthropic::query_messages_api;
 use super::configs::Configs;
 use super::resolve_language::resolve_lang_from_extension;
 use crate::cli::UpdateConfigs;
+use crate::core::config_file::read_configs_from_file;
+use crate::core::files::get_config_file;
 
 #[derive(Default, Serialize)]
 struct Results {
@@ -14,6 +18,11 @@ struct Results {
     model: String,
     output_tokens: u32,
     updated_code: String,
+}
+
+fn try_load_anthropic_api_key() -> anyhow::Result<String> {
+    let api_key = env::var("ANTHROPIC_API_KEY").context("failed to load Anthropic API key")?;
+    Ok(api_key)
 }
 
 fn echo_payload_back_to_client(configs: &Configs) -> anyhow::Result<Results> {
@@ -43,9 +52,14 @@ fn process_code_using_anthropic(configs: &Configs) -> anyhow::Result<Results> {
 }
 
 pub fn run_update(configs_from_cli: UpdateConfigs) -> anyhow::Result<()> {
-    let configs = Configs::from(configs_from_cli)
-        .try_load_anthropic_api_key()?
-        .try_load_configs_from_file()?;
+    let config_file = get_config_file()?;
+    let configs_from_file = read_configs_from_file(&config_file)?;
+    let api_key = try_load_anthropic_api_key()?;
+
+    let configs = Configs::default()
+        .override_from_cli(configs_from_cli)
+        .override_from_file(configs_from_file)
+        .override_api_key(api_key);
 
     let results = if configs.echo {
         echo_payload_back_to_client(&configs)?
