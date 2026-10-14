@@ -38,7 +38,8 @@ impl Configs {
     }
 
     fn try_load_configs_from_file(mut self) -> anyhow::Result<Self> {
-        let configs = read_configs_from_file()?;
+        let config_file = super::files::get_config_file()?;
+        let configs = read_configs_from_file(&config_file)?;
         self.model = configs.anthropic.model;
         self.max_tokens = configs.anthropic.max_tokens.clamp(1, 64000);
         Ok(self)

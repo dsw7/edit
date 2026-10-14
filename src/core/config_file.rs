@@ -48,7 +48,7 @@ pub fn write_configs_to_file(config_file: &PathBuf) -> anyhow::Result<()> {
 }
 
 pub fn read_configs_from_file(config_file: &PathBuf) -> anyhow::Result<ConfigsFromFile> {
-    let toml_str = fs::read_to_string(&config_file)
+    let toml_str = fs::read_to_string(config_file)
         .context(format!("cannot read {}", config_file.display()))?;
 
     let configs = toml::from_str::<ConfigsFromFile>(&toml_str)
