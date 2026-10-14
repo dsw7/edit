@@ -6,7 +6,7 @@
 
 function! s:run_edit_subprocess(instructions) abort
   let l:command = printf(
-  \ 'edit --filename=%s %s %s',
+  \ 'edit update --filename=%s %s %s',
   \ shellescape(b:original_filename),
   \ shellescape(b:code_to_edit),
   \ shellescape(a:instructions)
@@ -16,7 +16,7 @@ endfunction
 
 function! s:run_edit_subprocess_with_echo() abort
   let l:command = printf(
-  \ 'edit --echo --filename=%s %s %s',
+  \ 'edit update --echo --filename=%s %s %s',
   \ shellescape(b:original_filename),
   \ shellescape(b:code_to_edit),
   \ shellescape('This is a test')
