@@ -3,7 +3,7 @@ use std::time::Duration;
 use anyhow::Context;
 use reqwest::blocking::Client;
 
-use crate::configurations::Configs;
+use crate::core::Configs;
 
 use super::requests::request_edit_code_block;
 use super::response::{AnthropicResults, deserialize_json_response};

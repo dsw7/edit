@@ -3,30 +3,37 @@
 #![deny(clippy::panic)]
 #![deny(unused_must_use)]
 
-mod configurations;
-mod program_files;
-mod query_anthropic;
-mod run_process;
+mod cli;
+mod core;
+mod run_update;
 
 use std::process::ExitCode;
 
-use configurations::setup_configurations;
-use run_process::run_process;
+use clap::Parser;
+
+use cli::{Cli, Commands, UpdateConfigs};
+use core::setup_configurations;
+use run_update::update_code;
+
+fn exec_update_subcommand(configs: UpdateConfigs) -> anyhow::Result<()> {
+    let configs = setup_configurations(configs)?;
+    let results = update_code(&configs)?;
+    println!("{results}");
+    Ok(())
+}
+
+fn execute_subcommand() -> anyhow::Result<()> {
+    let cli = Cli::parse();
+
+    match cli.command {
+        Commands::Install {} => unimplemented!("Not ready"),
+        Commands::Update(configs) => exec_update_subcommand(configs),
+    }
+}
 
 fn main() -> ExitCode {
-    let configs = match setup_configurations() {
-        Ok(configs) => configs,
-        Err(error) => {
-            eprintln!("{error:?}");
-            return ExitCode::FAILURE;
-        }
-    };
-
-    match run_process(&configs) {
-        Ok(results) => {
-            println!("{results}");
-            ExitCode::SUCCESS
-        }
+    match execute_subcommand() {
+        Ok(()) => ExitCode::SUCCESS,
         Err(error) => {
             eprintln!("{error:?}");
             ExitCode::FAILURE

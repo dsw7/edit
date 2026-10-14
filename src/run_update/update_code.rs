@@ -4,8 +4,8 @@ use std::path::Path;
 use anyhow::Context;
 use serde::Serialize;
 
-use crate::configurations::Configs;
-use crate::query_anthropic::query_messages_api;
+use super::anthropic::query_messages_api;
+use crate::core::Configs;
 
 #[derive(Default, Serialize)]
 struct Results {
@@ -88,7 +88,7 @@ fn process_code_using_anthropic(configs: &Configs) -> anyhow::Result<Results> {
     })
 }
 
-pub fn run_process(configs: &Configs) -> anyhow::Result<String> {
+pub fn update_code(configs: &Configs) -> anyhow::Result<String> {
     let results = if configs.echo {
         echo_payload_back_to_client(configs)?
     } else {
