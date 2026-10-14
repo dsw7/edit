@@ -1,3 +1,20 @@
+use std::fs;
+use std::path::PathBuf;
+
+use crate::core::get_app_dir;
+
+pub fn create_app_dir() -> anyhow::Result<PathBuf> {
+    let app_dir = get_app_dir()?;
+
+    if !app_dir.exists() {
+        fs::create_dir_all(&app_dir)?;
+        println!("Created application directory at: {}", app_dir.display());
+    }
+
+    Ok(app_dir)
+}
+
 pub fn initialize_program() -> anyhow::Result<()> {
-    unimplemented!("Not ready");
+    create_app_dir()?;
+    Ok(())
 }
