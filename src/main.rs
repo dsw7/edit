@@ -24,7 +24,7 @@ fn run(configs: RunConfigs) -> anyhow::Result<()> {
     Ok(())
 }
 
-fn run_subcommand() -> anyhow::Result<()> {
+fn execute_subcommand() -> anyhow::Result<()> {
     let cli = Cli::parse();
 
     match cli.command {
@@ -34,7 +34,7 @@ fn run_subcommand() -> anyhow::Result<()> {
 }
 
 fn main() -> ExitCode {
-    match run_subcommand() {
+    match execute_subcommand() {
         Ok(()) => ExitCode::SUCCESS,
         Err(error) => {
             eprintln!("{error:?}");
