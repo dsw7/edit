@@ -1,7 +1,7 @@
 use std::path::PathBuf;
 
 use crate::cli::UpdateConfigs;
-use crate::core::config_file::ConfigsFromFile;
+use crate::core::ConfigsFromFile;
 
 #[derive(Debug, Default)]
 pub struct Configs {

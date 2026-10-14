@@ -9,7 +9,11 @@ use super::resolve_language::resolve_lang_from_extension;
 
 use crate::cli::UpdateConfigs;
 use crate::core;
-use crate::core::config_file::read_configs_from_file;
+
+fn try_load_anthropic_api_key() -> anyhow::Result<String> {
+    let api_key = env::var("ANTHROPIC_API_KEY").context("failed to load Anthropic API key")?;
+    Ok(api_key)
+}
 
 #[derive(Default, Serialize)]
 struct Results {
@@ -19,11 +23,6 @@ struct Results {
     model: String,
     output_tokens: u32,
     updated_code: String,
-}
-
-fn try_load_anthropic_api_key() -> anyhow::Result<String> {
-    let api_key = env::var("ANTHROPIC_API_KEY").context("failed to load Anthropic API key")?;
-    Ok(api_key)
 }
 
 fn echo_payload_back_to_client(configs: &Configs) -> anyhow::Result<Results> {
@@ -54,7 +53,7 @@ fn process_code_using_anthropic(configs: &Configs) -> anyhow::Result<Results> {
 
 pub fn run_update(configs_from_cli: UpdateConfigs) -> anyhow::Result<()> {
     let config_file = core::try_config_file()?;
-    let configs_from_file = read_configs_from_file(&config_file)?;
+    let configs_from_file = core::try_read_configs_from_file(&config_file)?;
     let api_key = try_load_anthropic_api_key()?;
 
     let configs = Configs::default()

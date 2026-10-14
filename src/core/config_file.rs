@@ -39,7 +39,7 @@ impl Default for Anthropic {
     }
 }
 
-pub fn write_configs_to_file(config_file: &PathBuf) -> anyhow::Result<()> {
+pub fn try_write_configs_to_file(config_file: &PathBuf) -> anyhow::Result<()> {
     let configs = ConfigsFromFile::default();
     let toml_str = toml::to_string_pretty(&configs)?;
 
@@ -47,7 +47,7 @@ pub fn write_configs_to_file(config_file: &PathBuf) -> anyhow::Result<()> {
     Ok(())
 }
 
-pub fn read_configs_from_file(config_file: &PathBuf) -> anyhow::Result<ConfigsFromFile> {
+pub fn try_read_configs_from_file(config_file: &PathBuf) -> anyhow::Result<ConfigsFromFile> {
     let toml_str = fs::read_to_string(config_file)
         .context(format!("cannot read {}", config_file.display()))?;
 
