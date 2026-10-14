@@ -13,11 +13,11 @@ use std::process::ExitCode;
 
 use clap::Parser;
 
-use cli::{Cli, Commands, RunConfigs};
+use cli::{Cli, Commands, EditConfigs};
 use configurations::setup_configurations;
 use run_process::run_process;
 
-fn run(configs: RunConfigs) -> anyhow::Result<()> {
+fn exec_edit_subcommand(configs: EditConfigs) -> anyhow::Result<()> {
     let configs = setup_configurations(configs)?;
     let results = run_process(&configs)?;
     println!("{results}");
@@ -29,7 +29,7 @@ fn execute_subcommand() -> anyhow::Result<()> {
 
     match cli.command {
         Commands::Install {} => unimplemented!("Not ready"),
-        Commands::Run(configs) => run(configs),
+        Commands::Edit(configs) => exec_edit_subcommand(configs),
     }
 }
 
