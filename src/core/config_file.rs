@@ -3,7 +3,7 @@ use std::fs;
 use anyhow::Context;
 use serde::{Deserialize, Deserializer};
 
-use super::program_files;
+use super::app_dir;
 
 fn check_not_empty<'de, D>(deserializer: D) -> Result<String, D::Error>
 where
@@ -32,7 +32,7 @@ pub struct Anthropic {
 }
 
 pub fn read_configs() -> anyhow::Result<ConfigsFromFile> {
-    let app_dir = program_files::get_app_dir()?;
+    let app_dir = app_dir::get_app_dir()?;
     let config_file = app_dir.join("config.toml");
 
     let toml_str = fs::read_to_string(&config_file)

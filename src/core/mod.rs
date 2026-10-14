@@ -1,5 +1,6 @@
+mod app_dir;
 mod config_file;
 mod configs;
-mod program_files;
 
+pub use app_dir::get_app_dir;
 pub use configs::{Configs, setup_configurations};
