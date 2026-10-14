@@ -1,6 +1,6 @@
 use std::path::PathBuf;
 
-use clap::Parser;
+use clap::{Parser, Subcommand};
 
 fn non_empty_argument(arg: &str) -> Result<String, String> {
     if arg.is_empty() {
@@ -10,7 +10,7 @@ fn non_empty_argument(arg: &str) -> Result<String, String> {
     }
 }
 
-#[derive(Parser, Debug)]
+#[derive(Parser)]
 #[command(
     name = "edit",
     version,
@@ -18,21 +18,33 @@ fn non_empty_argument(arg: &str) -> Result<String, String> {
     after_help = "See https://github.com/dsw7/edit for more information"
 )]
 pub struct Cli {
-    #[arg(value_name = "CODE-TO-EDIT", value_parser = non_empty_argument)]
-    pub code_to_edit: String,
+    #[command(subcommand)]
+    pub command: Commands,
+}
 
-    #[arg(value_name = "INSTRUCTIONS", value_parser = non_empty_argument)]
-    pub instructions: String,
+#[derive(Subcommand)]
+pub enum Commands {
+    /// Install program files
+    Install {},
 
-    /// Specify filename (used to infer programming language)
-    #[arg(short, long)]
-    pub filename: PathBuf,
+    /// Reason with code using an LLM
+    Run {
+        #[arg(value_name = "CODE-TO-EDIT", value_parser = non_empty_argument)]
+        pub code_to_edit: String,
 
-    /// Echo payload back to client (useful for debugging)
-    #[arg(short, long)]
-    pub echo: bool,
+        #[arg(value_name = "INSTRUCTIONS", value_parser = non_empty_argument)]
+        pub instructions: String,
 
-    /// Pretty print results (useful for debugging)
-    #[arg(short, long)]
-    pub pretty: bool,
+        /// Specify filename (used to infer programming language)
+        #[arg(short, long)]
+        pub filename: PathBuf,
+
+        /// Echo payload back to client (useful for debugging)
+        #[arg(short, long)]
+        pub echo: bool,
+
+        /// Pretty print results (useful for debugging)
+        #[arg(short, long)]
+        pub pretty: bool,
+    },
 }
