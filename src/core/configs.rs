@@ -4,7 +4,7 @@ use std::path::PathBuf;
 use anyhow::Context;
 
 use super::config_file::read_configs;
-use crate::cli::EditConfigs;
+use crate::cli::UpdateConfigs;
 
 #[derive(Debug, Default)]
 pub struct Configs {
@@ -18,8 +18,8 @@ pub struct Configs {
     pub prompt: String,
 }
 
-impl From<EditConfigs> for Configs {
-    fn from(cli: EditConfigs) -> Self {
+impl From<UpdateConfigs> for Configs {
+    fn from(cli: UpdateConfigs) -> Self {
         Self {
             code_to_edit: cli.code_to_edit,
             echo: cli.echo,
@@ -45,7 +45,7 @@ impl Configs {
     }
 }
 
-pub fn setup_configurations(run_configs: EditConfigs) -> anyhow::Result<Configs> {
+pub fn setup_configurations(run_configs: UpdateConfigs) -> anyhow::Result<Configs> {
     let configs = Configs::from(run_configs)
         .try_load_anthropic_api_key()?
         .try_load_configs_from_file()?;

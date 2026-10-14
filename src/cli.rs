@@ -28,11 +28,11 @@ pub enum Commands {
     Install {},
 
     /// Reason with code using an LLM
-    Edit(EditConfigs),
+    Update(UpdateConfigs),
 }
 
 #[derive(Parser)]
-pub struct EditConfigs {
+pub struct UpdateConfigs {
     #[arg(value_name = "CODE-TO-EDIT", value_parser = non_empty_argument)]
     pub code_to_edit: String,
 

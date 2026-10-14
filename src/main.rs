@@ -5,19 +5,19 @@
 
 mod cli;
 mod core;
-mod run_edit;
+mod run_update;
 
 use std::process::ExitCode;
 
 use clap::Parser;
 
-use cli::{Cli, Commands, EditConfigs};
+use cli::{Cli, Commands, UpdateConfigs};
 use core::setup_configurations;
-use run_edit::edit_code;
+use run_update::update_code;
 
-fn exec_edit_subcommand(configs: EditConfigs) -> anyhow::Result<()> {
+fn exec_update_subcommand(configs: UpdateConfigs) -> anyhow::Result<()> {
     let configs = setup_configurations(configs)?;
-    let results = edit_code(&configs)?;
+    let results = update_code(&configs)?;
     println!("{results}");
     Ok(())
 }
@@ -27,7 +27,7 @@ fn execute_subcommand() -> anyhow::Result<()> {
 
     match cli.command {
         Commands::Install {} => unimplemented!("Not ready"),
-        Commands::Edit(configs) => exec_edit_subcommand(configs),
+        Commands::Update(configs) => exec_update_subcommand(configs),
     }
 }
 
