@@ -10,23 +10,31 @@ mod run_process;
 
 use std::process::ExitCode;
 
+use clap::Parser;
+
+use configurations::cli::{Cli, Commands, RunConfigs};
 use configurations::setup_configurations;
 use run_process::run_process;
 
-fn main() -> ExitCode {
-    let configs = match setup_configurations() {
-        Ok(configs) => configs,
-        Err(error) => {
-            eprintln!("{error:?}");
-            return ExitCode::FAILURE;
-        }
-    };
+fn run(configs: RunConfigs) -> anyhow::Result<()> {
+    let configs = setup_configurations(configs)?;
+    let results = run_process(&configs)?;
+    println!("{results}");
+    Ok(())
+}
 
-    match run_process(&configs) {
-        Ok(results) => {
-            println!("{results}");
-            ExitCode::SUCCESS
-        }
+fn run_subcommand() -> anyhow::Result<()> {
+    let cli = Cli::parse();
+
+    match cli.command {
+        Commands::Install {} => unimplemented!("Not ready"),
+        Commands::Run(configs) => run(configs),
+    }
+}
+
+fn main() -> ExitCode {
+    match run_subcommand() {
+        Ok(()) => ExitCode::SUCCESS,
         Err(error) => {
             eprintln!("{error:?}");
             ExitCode::FAILURE
