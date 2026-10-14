@@ -12,24 +12,16 @@ use std::process::ExitCode;
 
 use clap::Parser;
 
-use cli::{Cli, Commands, UpdateConfigs};
-use core::setup_configurations;
+use cli::{Cli, Commands};
 use run_init::initialize_program;
 use run_update::update_code;
-
-fn exec_update_subcommand(configs: UpdateConfigs) -> anyhow::Result<()> {
-    let configs = setup_configurations(configs)?;
-    let results = update_code(&configs)?;
-    println!("{results}");
-    Ok(())
-}
 
 fn execute_subcommand() -> anyhow::Result<()> {
     let cli = Cli::parse();
 
     match cli.command {
         Commands::Init {} => initialize_program(),
-        Commands::Update(configs) => exec_update_subcommand(configs),
+        Commands::Update(configs) => update_code(configs),
     }
 }
 

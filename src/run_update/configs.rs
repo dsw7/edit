@@ -3,8 +3,9 @@ use std::path::PathBuf;
 
 use anyhow::Context;
 
-use super::config_file::read_configs_from_file;
 use crate::cli::UpdateConfigs;
+use crate::core::config_file::read_configs_from_file;
+use crate::core::files::get_config_file;
 
 #[derive(Debug, Default)]
 pub struct Configs {
@@ -32,24 +33,16 @@ impl From<UpdateConfigs> for Configs {
 }
 
 impl Configs {
-    fn try_load_anthropic_api_key(mut self) -> anyhow::Result<Self> {
+    pub fn try_load_anthropic_api_key(mut self) -> anyhow::Result<Self> {
         self.api_key = env::var("ANTHROPIC_API_KEY").context("failed to load Anthropic API key")?;
         Ok(self)
     }
 
-    fn try_load_configs_from_file(mut self) -> anyhow::Result<Self> {
-        let config_file = super::files::get_config_file()?;
+    pub fn try_load_configs_from_file(mut self) -> anyhow::Result<Self> {
+        let config_file = get_config_file()?;
         let configs = read_configs_from_file(&config_file)?;
         self.model = configs.anthropic.model;
         self.max_tokens = configs.anthropic.max_tokens.clamp(1, 64000);
         Ok(self)
     }
-}
-
-pub fn setup_configurations(run_configs: UpdateConfigs) -> anyhow::Result<Configs> {
-    let configs = Configs::from(run_configs)
-        .try_load_anthropic_api_key()?
-        .try_load_configs_from_file()?;
-
-    Ok(configs)
 }

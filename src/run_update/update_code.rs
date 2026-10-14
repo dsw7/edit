@@ -2,8 +2,9 @@ use anyhow::Context;
 use serde::Serialize;
 
 use super::anthropic::query_messages_api;
+use super::configs::Configs;
 use super::resolve_language::resolve_lang_from_extension;
-use crate::core::Configs;
+use crate::cli::UpdateConfigs;
 
 #[derive(Default, Serialize)]
 struct Results {
@@ -41,11 +42,15 @@ fn process_code_using_anthropic(configs: &Configs) -> anyhow::Result<Results> {
     })
 }
 
-pub fn update_code(configs: &Configs) -> anyhow::Result<String> {
+pub fn update_code(configs_from_cli: UpdateConfigs) -> anyhow::Result<()> {
+    let configs = Configs::from(configs_from_cli)
+        .try_load_anthropic_api_key()?
+        .try_load_configs_from_file()?;
+
     let results = if configs.echo {
-        echo_payload_back_to_client(configs)?
+        echo_payload_back_to_client(&configs)?
     } else {
-        process_code_using_anthropic(configs)?
+        process_code_using_anthropic(&configs)?
     };
 
     let json = if configs.pretty {
@@ -54,5 +59,6 @@ pub fn update_code(configs: &Configs) -> anyhow::Result<String> {
         serde_json::to_string(&results).context("failed to serialize outgoing results")?
     };
 
-    Ok(json)
+    println!("{json}");
+    Ok(())
 }

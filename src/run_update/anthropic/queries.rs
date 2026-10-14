@@ -3,10 +3,9 @@ use std::time::Duration;
 use anyhow::Context;
 use reqwest::blocking::Client;
 
-use crate::core::Configs;
-
 use super::requests::request_edit_code_block;
 use super::response::{AnthropicResults, deserialize_json_response};
+use crate::run_update::configs::Configs;
 
 pub fn query_messages_api(configs: &Configs, language: &str) -> anyhow::Result<AnthropicResults> {
     let connection_timeout = Duration::from_secs(60);

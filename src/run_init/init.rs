@@ -1,7 +1,6 @@
 use std::fs;
 
-use crate::core::files;
-use crate::core::write_configs_to_file;
+use crate::core::{config_file, files};
 
 fn create_app_dir() -> anyhow::Result<()> {
     let app_dir = files::get_app_dir()?;
@@ -23,7 +22,7 @@ fn create_config_file() -> anyhow::Result<()> {
         println!("program configuration file already exists")
     } else {
         println!("wrote new configuration file: {}", config_file.display());
-        write_configs_to_file(&config_file)?;
+        config_file::write_configs_to_file(&config_file)?;
     }
 
     Ok(())
