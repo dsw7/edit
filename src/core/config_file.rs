@@ -19,17 +19,9 @@ where
     }
 }
 
-#[derive(Deserialize, Serialize, Debug)]
+#[derive(Deserialize, Serialize, Debug, Default)]
 pub struct ConfigsFromFile {
     pub anthropic: Anthropic,
-}
-
-impl Default for ConfigsFromFile {
-    fn default() -> Self {
-        Self {
-            anthropic: Anthropic::default(),
-        }
-    }
 }
 
 #[derive(Deserialize, Serialize, Debug)]
@@ -68,8 +60,10 @@ pub fn read_configs_from_file() -> anyhow::Result<ConfigsFromFile> {
 
 pub fn write_configs_to_file() -> anyhow::Result<()> {
     let config_file = get_path_configs_file()?;
+
     let configs = ConfigsFromFile::default();
     let toml_str = toml::to_string_pretty(&configs)?;
+
     fs::write(config_file, toml_str)?;
     Ok(())
 }
