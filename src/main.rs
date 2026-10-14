@@ -5,6 +5,7 @@
 
 mod cli;
 mod core;
+mod run_init;
 mod run_update;
 
 use std::process::ExitCode;
@@ -13,6 +14,7 @@ use clap::Parser;
 
 use cli::{Cli, Commands, UpdateConfigs};
 use core::setup_configurations;
+use run_init::initialize_program;
 use run_update::update_code;
 
 fn exec_update_subcommand(configs: UpdateConfigs) -> anyhow::Result<()> {
@@ -26,7 +28,7 @@ fn execute_subcommand() -> anyhow::Result<()> {
     let cli = Cli::parse();
 
     match cli.command {
-        Commands::Install {} => unimplemented!("Not ready"),
+        Commands::Init {} => initialize_program(),
         Commands::Update(configs) => exec_update_subcommand(configs),
     }
 }

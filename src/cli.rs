@@ -24,8 +24,8 @@ pub struct Cli {
 
 #[derive(Subcommand)]
 pub enum Commands {
-    /// Install program files
-    Install {},
+    /// Initialize the program
+    Init {},
 
     /// Operate on code using an LLM
     Update(UpdateConfigs),

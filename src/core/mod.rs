@@ -1,5 +1,6 @@
 mod config_file;
 mod configs;
-mod program_files;
+pub mod files;
 
+pub use config_file::write_configs_to_file;
 pub use configs::{Configs, setup_configurations};
