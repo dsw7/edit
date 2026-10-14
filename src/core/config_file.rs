@@ -4,8 +4,6 @@ use std::path::PathBuf;
 use anyhow::Context;
 use serde::{Deserialize, Deserializer, Serialize};
 
-use super::app_dir;
-
 fn check_not_empty<'de, D>(deserializer: D) -> Result<String, D::Error>
 where
     D: Deserializer<'de>,
@@ -41,14 +39,15 @@ impl Default for Anthropic {
     }
 }
 
-fn get_path_configs_file() -> anyhow::Result<PathBuf> {
-    let app_dir = app_dir::get_app_dir()?;
-    Ok(app_dir.join("config.toml"))
+pub fn write_configs_to_file(config_file: &PathBuf) -> anyhow::Result<()> {
+    let configs = ConfigsFromFile::default();
+    let toml_str = toml::to_string_pretty(&configs)?;
+
+    fs::write(config_file, toml_str)?;
+    Ok(())
 }
 
-pub fn read_configs_from_file() -> anyhow::Result<ConfigsFromFile> {
-    let config_file = get_path_configs_file()?;
-
+pub fn read_configs_from_file(config_file: &PathBuf) -> anyhow::Result<ConfigsFromFile> {
     let toml_str = fs::read_to_string(&config_file)
         .context(format!("cannot read {}", config_file.display()))?;
 
@@ -56,14 +55,4 @@ pub fn read_configs_from_file() -> anyhow::Result<ConfigsFromFile> {
         .context(format!("failed to parse {}", config_file.display()))?;
 
     Ok(configs)
-}
-
-pub fn write_configs_to_file() -> anyhow::Result<()> {
-    let config_file = get_path_configs_file()?;
-
-    let configs = ConfigsFromFile::default();
-    let toml_str = toml::to_string_pretty(&configs)?;
-
-    fs::write(config_file, toml_str)?;
-    Ok(())
 }

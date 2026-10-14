@@ -12,3 +12,8 @@ pub fn get_app_dir() -> anyhow::Result<PathBuf> {
     let home_dir = get_home_dir()?;
     Ok(home_dir.join(".edit"))
 }
+
+pub fn get_config_file() -> anyhow::Result<PathBuf> {
+    let app_dir = get_app_dir()?;
+    Ok(app_dir.join("config.toml"))
+}
