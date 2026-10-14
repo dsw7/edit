@@ -88,7 +88,7 @@ fn process_code_using_anthropic(configs: &Configs) -> anyhow::Result<Results> {
     })
 }
 
-pub fn run_process(configs: &Configs) -> anyhow::Result<String> {
+pub fn edit_code(configs: &Configs) -> anyhow::Result<String> {
     let results = if configs.echo {
         echo_payload_back_to_client(configs)?
     } else {

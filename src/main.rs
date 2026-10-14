@@ -5,9 +5,9 @@
 
 mod cli;
 mod configurations;
+mod edit;
 mod program_files;
 mod query_anthropic;
-mod run_process;
 
 use std::process::ExitCode;
 
@@ -15,11 +15,11 @@ use clap::Parser;
 
 use cli::{Cli, Commands, EditConfigs};
 use configurations::setup_configurations;
-use run_process::run_process;
+use edit::edit_code;
 
 fn exec_edit_subcommand(configs: EditConfigs) -> anyhow::Result<()> {
     let configs = setup_configurations(configs)?;
-    let results = run_process(&configs)?;
+    let results = edit_code(&configs)?;
     println!("{results}");
     Ok(())
 }
