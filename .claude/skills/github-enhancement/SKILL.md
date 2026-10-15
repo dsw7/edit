@@ -6,13 +6,13 @@ allowed-tools:
   - Read
   - Edit
   - Bash
-argument-hint: "<url-to-github-issue> or <github-issue-number>"
 arguments:
-  - url
+  - issue
+argument-hint: "<url-to-github-issue> or <github-issue-number>"
 ---
 
 # Instructions
-Attempt to resolve GitHub issue: $url.
+Attempt to resolve GitHub issue: $issue.
 
 ## Step 0: Check GitHub connection
 1. **Authenticate:**
@@ -26,7 +26,7 @@ Attempt to resolve GitHub issue: $url.
 ## Step 1: Validate issue type then extract components
 1. **Fetch the issue:** Fetch the issue details:
   ```bash
-  gh issue view <$url>
+  gh issue view $issue
   ```
 2. **Check issue type:** Check if the label corresponds to an enhancement (i.e. `Labels: enhancement`)
 3. **Guard condition:** If the issue is **not** of type `enhancement`:
