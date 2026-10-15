@@ -39,7 +39,7 @@ Attempt to resolve GitHub issue: $issue.
   ```bash
   git checkout -b feature/<issue-number>-<short-description>
   ```
-2. **Understand the task:"**
+2. **Understand the task:**
   - The issue may contain a **Background** section. Use this as contextual information, **and**,
   - The issue may contain a **Task** section. Use this to determine what needs to be done, **otherwise**,
   - Infer what needs to be done from the issue description.
