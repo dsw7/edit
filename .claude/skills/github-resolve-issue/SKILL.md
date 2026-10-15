@@ -1,6 +1,6 @@
 ---
 name: github-resolve-issue
-description: Automates the end-to-end process of pulling a GitHub issue, implementing a targeted solution, and opening a pull request.
+description: Automates the end-to-end process of pulling a GitHub issue and implementing a solution.
 allowed-tools:
   - Write
   - Read
@@ -12,35 +12,45 @@ argument-hints:
 
 # Resolve GitHub Issue Skill
 
-Use this skill whenever the user asks to "resolve issue #X," or provides a GitHub issue link. Follow this strict, professional, end-to-end software engineering workflow.
+Use this skill whenever the user asks to "resolve issue #X," or provides a
+GitHub issue link. Follow this strict, professional, end-to-end software
+engineering workflow.
 
-## Step 0: Validate issue type
-1. **Authenticate & Fetch**: Ensure the GitHub CLI (`gh`) is authenticated. Fetch the issue details:
-   ```bash
-   gh issue view <issue_url>
-   ```
-2. **Check Issue Type:** Check if the label corresponds to an enhancement (i.e. `Labels: enhancement`)
-3. **Guard Condition:** If the issue is **not** of type `enhancement`:
-   - Print a clear message to the user indicating that the issue is not an enhancement.
-   - Stop execution immediately and do not proceed to subsequent steps.
+## Step 0: Check GitHub connection
+1. **Authenticate:**
+  ```bash
+  gh auth status
+  ```
+2. **Guard condition:** If **not** authenticated:
+  - Print a message describing the issue.
+  - Stop execution immediately and do not proceed to subsequent steps.
 
-## Step 1: Analysis & environment setup
-1. **Confirm Scope**: Parse the issue description and comments.
-2. **Isolate Development**: Create a dedicated feature branch using a semantic naming convention:
-   ```bash
-   git checkout -b claude/issue-<number>-<name>
-   ```
+## Step 1: Validate issue type then extract components
+1. **Fetch the issue:** Fetch the issue details:
+  ```bash
+  gh issue view <issue_url>
+  ```
+2. **Check issue type:** Check if the label corresponds to an enhancement (i.e. `Labels: enhancement`)
+3. **Guard condition:** If the issue is **not** of type `enhancement`:
+  - Print a clear message to the user indicating that the issue is not an enhancement.
+  - Stop execution immediately and do not proceed to subsequent steps.
+4. **Extract issue components:** The issue may contain a **Background**, **Task**, and **Where to look** section.
 
-## Step 2: Fix implementation
-1. **Locate Code**: Map out the files where the solution should be implemented if they are not specified in the issue description.
-2. **Implement Fix**: Apply the minimum required changes to implement the solution. Avoid unrelated code refactoring or cosmetic modifications.
-3. **Commit Changes**: Stage your minimal, relevant edits and commit with a clear, concise Git message matching project convention:
-   ```bash
-   git add .
-   git commit -m "fix #<number>: <description>"
-   ```
-4. **Push Branch**: Push the local branch up to the remote repository.
-5. **Submit PR**: Open a new pull request using the GitHub CLI, ensuring the body explicitly references the issue to close it automatically:
-   ```bash
-   gh pr create --title "fix: resolve issue #<number>" --body "Closes #<number>.\n"
-   ```
+## Step 2: Implement the solution
+1. **Isolate development:** Create a dedicated feature branch using a semantic naming convention:
+  ```bash
+  git checkout -b feature/<issue-number>-<short-description>
+  ```
+2. **Understand the task:"
+  - The issue may contain a **Background** section. Use this as contextual information, **and**,
+  - The issue may contain a **Task** section. Use this to determine what needs to be done, **otherwise**,
+  - Infer what needs to be done from the issue description.
+3. **Locate code:** Try the following:
+  - The issue may contain a **Where to look** section. This is where you should operate.
+  - If the **Where to look** section does not exist, you will need to decide where to implement the solution.
+3. **Implement fix:** Apply the minimum required changes to implement the solution. Avoid unrelated code refactoring or cosmetic modifications.
+4. **Commit changes:** Stage your minimal, relevant edits and commit with a clear, concise `git` message matching the project convention:
+  ```bash
+  git add .
+  git commit -m "claude: solution for issue #<issue-number>"
+  ```
