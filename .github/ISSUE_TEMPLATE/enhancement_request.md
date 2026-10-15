@@ -1,5 +1,8 @@
 ---
-labels: 'enhancement'
+name: Enhancement request
+about: Suggest an idea or feature to improve this project
+title: '[Enhancement]: '
+labels: enhancement
 ---
 
 ## Background
