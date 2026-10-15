@@ -35,7 +35,7 @@ fn create_readme_file() -> anyhow::Result<()> {
     if readme_file.exists() {
         println!("README.txt already exists")
     } else {
-        let contents = "Repository: https://github.com/dsw7/edit\n";
+        let contents = "* `edit`\n* See https://github.com/dsw7/edit for more information\n";
         fs::write(&readme_file, contents)?;
         println!("wrote new README file: {}", readme_file.display());
     }
