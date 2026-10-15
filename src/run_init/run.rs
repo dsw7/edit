@@ -28,8 +28,24 @@ fn create_config_file() -> anyhow::Result<()> {
     Ok(())
 }
 
+fn create_readme_file() -> anyhow::Result<()> {
+    let app_dir = core::try_app_dir()?;
+    let readme_file = app_dir.join("README.txt");
+
+    if readme_file.exists() {
+        println!("README.txt already exists")
+    } else {
+        let contents = "* `edit`\n* See https://github.com/dsw7/edit for more information\n";
+        fs::write(&readme_file, contents)?;
+        println!("wrote new README file: {}", readme_file.display());
+    }
+
+    Ok(())
+}
+
 pub fn run_init() -> anyhow::Result<()> {
     create_app_dir()?;
     create_config_file()?;
+    create_readme_file()?;
     Ok(())
 }
