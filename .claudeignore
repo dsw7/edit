@@ -1,0 +1,9 @@
+# Large auto-generated lockfile (can consume thousands of tokens)
+Cargo.lock
+
+# Build artifacts and compiled binaries
+target/
+**/*.rs.bk
+
+# Git internal data
+.git/
