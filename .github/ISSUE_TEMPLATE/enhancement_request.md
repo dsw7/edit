@@ -1,6 +1,4 @@
 ---
-name: Enhancement request
-title: '[Enhancement]: '
 labels: 'enhancement'
 ---
 
