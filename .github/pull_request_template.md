@@ -6,10 +6,6 @@ Closes:
 ```bash
 cargo check
 ```
-- [ ] I ran all unit tests:
-```bash
-cargo test
-```
 - [ ] I checked my code using a linter:
 ```bash
 cargo clippy
@@ -17,4 +13,8 @@ cargo clippy
 - [ ] I formatted my code:
 ```bash
 cargo fmt
+```
+- [ ] I ran all unit tests:
+```bash
+cargo test
 ```
