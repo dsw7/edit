@@ -19,14 +19,14 @@ Use this skill whenever the user asks to "resolve issue #X," or provides a GitHu
    ```bash
    gh issue view <issue_url>
    ```
-2. **Check issue type:** Check if the label corresponds to an enhancement (i.e. `Labels: enhancement`)
+2. **Check Issue Type:** Check if the label corresponds to an enhancement (i.e. `Labels: enhancement`)
 3. **Guard Condition:** If the issue is **not** of type `enhancement`:
-   - Print a clear message to the user: *"Aborting: Issue #<number> is not an enhancement (found type/label: <actual-type>)."*
+   - Print a clear message to the user indicating that the issue is not an enhancement.
    - Stop execution immediately and do not proceed to subsequent steps.
 
 ## Step 1: Analysis & environment setup
 1. **Confirm Scope**: Parse the issue description and comments.
-2. **Isolate Development**: Create a dedicated feature branch using a semantic naming convention (i.e. `claude/issue-<number>-<name>`):
+2. **Isolate Development**: Create a dedicated feature branch using a semantic naming convention:
    ```bash
    git checkout -b claude/issue-<number>-<name>
    ```
@@ -40,7 +40,7 @@ Use this skill whenever the user asks to "resolve issue #X," or provides a GitHu
    git commit -m "fix #<number>: <description>"
    ```
 4. **Push Branch**: Push the local branch up to the remote repository.
-5. **Submit PR**: Open a new Pull Request using the GitHub CLI, ensuring the body explicitly references the issue to close it automatically:
+5. **Submit PR**: Open a new pull request using the GitHub CLI, ensuring the body explicitly references the issue to close it automatically:
    ```bash
    gh pr create --title "fix: resolve issue #<number>" --body "Closes #<number>.\n"
    ```
