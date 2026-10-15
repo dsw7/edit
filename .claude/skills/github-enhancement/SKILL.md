@@ -1,20 +1,18 @@
 ---
-name: github-resolve-issue
+name: github-enhancement
 description: Automates the end-to-end process of pulling a GitHub issue and implementing a solution.
 allowed-tools:
   - Write
   - Read
   - Edit
   - Bash
-argument-hints:
-  issue_url: "The full URL or issue number of the GitHub issue to solve"
+argument-hint: "<url-to-github-issue> or <github-issue-number>"
+arguments:
+  - url
 ---
 
-# Resolve GitHub Issue Skill
-
-Use this skill whenever the user asks to "resolve issue #X," or provides a
-GitHub issue link. Follow this strict, professional, end-to-end software
-engineering workflow.
+# Instructions
+Attempt to resolve GitHub issue: $url.
 
 ## Step 0: Check GitHub connection
 1. **Authenticate:**
@@ -28,7 +26,7 @@ engineering workflow.
 ## Step 1: Validate issue type then extract components
 1. **Fetch the issue:** Fetch the issue details:
   ```bash
-  gh issue view <issue_url>
+  gh issue view <$url>
   ```
 2. **Check issue type:** Check if the label corresponds to an enhancement (i.e. `Labels: enhancement`)
 3. **Guard condition:** If the issue is **not** of type `enhancement`:
