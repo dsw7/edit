@@ -11,6 +11,9 @@ Anthropic's API.
 ## Table of Contents
 - [Prerequisites](#prerequisites)
 - [Installation](#installation)
+  - [Step 1. Install executable](#step-1-install-executable)
+  - [Step 2. Initialize the program](#step-2-initialize-the-program)
+  - [Step 3. Install `vim` plugin](#step-3-install-vim-plugin)
 - [Usage](#usage)
 
 ## Prerequisites
