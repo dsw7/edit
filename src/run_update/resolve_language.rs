@@ -13,6 +13,7 @@ fn possible_languages() -> HashMap<&'static str, (&'static str, &'static str)> {
         ("json", ("JSON", "json")),
         ("java", ("Java", "java")),
         ("kt", ("Kotlin", "kotlin")),
+        ("md", ("Markdown", "markdown")),
         ("pl", ("Perl", "perl")),
         ("php", ("PHP", "php")),
         ("py", ("Python", "python")),
