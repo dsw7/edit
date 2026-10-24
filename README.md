@@ -11,6 +11,7 @@ Anthropic's API.
 ## Table of Contents
 - [Prerequisites](#prerequisites)
 - [Installation](#installation)
+- [Usage](#usage)
 
 ## Prerequisites
 This program requires a valid Anthropic API key. Set it as an environment
@@ -44,3 +45,41 @@ Run the setup script:
 ```console
 ./vim/setup.py
 ```
+
+## Usage
+Select a block of text in visual mode, and execute `ed`. This will open the
+selected text in a new vertical split window (named **Prompt**). For example,
+selecting:
+```c
+void printIntAddr()
+{
+    const int i = 42;
+    printf("Value: %d\n", i);
+    printf("Address: %p\n", (void *)&i);
+}
+```
+Will open:
+```console
+void printIntAddr()
+{
+    const int i = 42;
+    printf("Value: %d\n", i);
+    printf("Address: %p\n", (void *)&i);
+}
+─────────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+```
+Place the instructions below the vertical separator and type <kbd>Enter</kbd>
+to submit the job. For example:
+```console
+void printIntAddr()
+{
+    const int i = 42;
+    printf("Value: %d\n", i);
+    printf("Address: %p\n", (void *)&i);
+}
+─────────────────────────────────────────────────────────────────────────────────────────────────────────────
+> What does the code do?
+```
+The results will be loaded into another window named **Completion** which will
+be positioned beneath **Prompt**.
