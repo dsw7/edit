@@ -59,7 +59,7 @@ def main() -> None:
     print(f"edit.vim -> {path_copied_file}")
 ```
 Will open:
-```console
+```plaintext
 def main() -> None:
     path_plugin_dir = Path.home() / ".vim" / "plugin"
     path_plugin_dir.mkdir(exist_ok=True)
@@ -71,7 +71,7 @@ def main() -> None:
 ```
 Place the instructions below the vertical separator and hit <kbd>Enter</kbd> to
 submit the job. For example:
-```console
+```plaintext
 def main() -> None:
     path_plugin_dir = Path.home() / ".vim" / "plugin"
     path_plugin_dir.mkdir(exist_ok=True)
