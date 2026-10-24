@@ -50,36 +50,37 @@ Run the setup script:
 Select a block of text in visual mode, and execute `ed`. This will open the
 selected text in a new vertical split window (named **Prompt**). For example,
 selecting:
-```c
-void printIntAddr()
-{
-    const int i = 42;
-    printf("Value: %d\n", i);
-    printf("Address: %p\n", (void *)&i);
-}
+```python3
+def main() -> None:
+    path_plugin_dir = Path.home() / ".vim" / "plugin"
+    path_plugin_dir.mkdir(exist_ok=True)
+
+    path_copied_file = copy("edit.vim", path_plugin_dir)
+    print(f"edit.vim -> {path_copied_file}")
 ```
 Will open:
 ```console
-void printIntAddr()
-{
-    const int i = 42;
-    printf("Value: %d\n", i);
-    printf("Address: %p\n", (void *)&i);
-}
-─────────────────────────────────────────────────────────────────────────────────────────────────────────────
+def main() -> None:
+    path_plugin_dir = Path.home() / ".vim" / "plugin"
+    path_plugin_dir.mkdir(exist_ok=True)
 
-```
-Place the instructions below the vertical separator and type <kbd>Enter</kbd>
-to submit the job. For example:
-```console
-void printIntAddr()
-{
-    const int i = 42;
-    printf("Value: %d\n", i);
-    printf("Address: %p\n", (void *)&i);
-}
+    path_copied_file = copy("edit.vim", path_plugin_dir)
+    print(f"edit.vim -> {path_copied_file}")
 ─────────────────────────────────────────────────────────────────────────────────────────────────────────────
-> What does the code do?
+>
+```
+Place the instructions below the vertical separator and hit <kbd>Enter</kbd> to
+submit the job. For example:
+```console
+def main() -> None:
+    path_plugin_dir = Path.home() / ".vim" / "plugin"
+    path_plugin_dir.mkdir(exist_ok=True)
+
+    path_copied_file = copy("edit.vim", path_plugin_dir)
+    print(f"edit.vim -> {path_copied_file}")
+─────────────────────────────────────────────────────────────────────────────────────────────────────────────
+> `copy` looks for `"edit.vim"` in the current working directory. change this so that `copy` looks for the file relative to the script calling the `main` function
 ```
 The results will be loaded into another window named **Completion** which will
-be positioned beneath **Prompt**.
+be positioned beneath **Prompt**. The token usage, inferred language, and model
+will also be reported.
