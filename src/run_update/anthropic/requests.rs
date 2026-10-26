@@ -37,7 +37,21 @@ fn format_system_prompt(language: &str) -> String {
     }
 }
 
-fn format_user_prompt(configs: &Configs) -> String {
+fn format_user_prompt_markup(configs: &Configs) -> String {
+    format!(
+        "Take the instructions:
+```plaintext
+{}
+```
+And apply them to the markup:
+```
+{}
+```",
+        configs.prompt, configs.code_to_edit
+    )
+}
+
+fn format_user_prompt_programming(configs: &Configs) -> String {
     format!(
         "Take the instructions:
 ```plaintext
@@ -51,10 +65,17 @@ And apply them to the code:
     )
 }
 
+fn format_user_prompt(configs: &Configs, language: &str) -> String {
+    match language {
+        "Markdown" => format_user_prompt_markup(configs),
+        _ => format_user_prompt_programming(configs),
+    }
+}
+
 pub fn request_edit_code_block(configs: &Configs, language: &str) -> Value {
     json!({
         "max_tokens": configs.max_tokens,
-        "messages": [{"content": format_user_prompt(configs), "role": "user"}],
+        "messages": [{"content": format_user_prompt(configs, language), "role": "user"}],
         "model": configs.model,
         "system": [{"text": format_system_prompt(language), "type": "text"}],
         "output_config": {
