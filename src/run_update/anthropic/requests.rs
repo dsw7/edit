@@ -2,7 +2,20 @@ use serde_json::{Value, json};
 
 use crate::run_update::configs::Configs;
 
-fn format_system_prompt(language: &str) -> String {
+fn format_system_prompt_markup(language: &str) -> String {
+    format!(
+        "You are a helpful assistant that specializes in: {language}
+
+IMPORTANT: Do not wrap your response in backticks (```). Output the response
+directly without markdown code fences.
+
+Output:
+- code: your updated markup
+"
+    )
+}
+
+fn format_system_prompt_programming(language: &str) -> String {
     format!(
         "You are a helpful programming assistant that specializes in: {language}
 
@@ -15,6 +28,13 @@ Output:
 Put a comment describing what was done above the code.
 "
     )
+}
+
+fn format_system_prompt(language: &str) -> String {
+    match language {
+        "Markdown" => format_system_prompt_markup(language),
+        _ => format_system_prompt_programming(language),
+    }
 }
 
 fn format_user_prompt(configs: &Configs) -> String {
