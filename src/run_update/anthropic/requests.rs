@@ -30,13 +30,6 @@ Put a comment describing what was done above the code.
     )
 }
 
-fn system_prompt(language: &str) -> String {
-    match language {
-        "Markdown" => system_prompt_markup(language),
-        _ => system_prompt_programming(language),
-    }
-}
-
 fn user_prompt_markup(configs: &Configs) -> String {
     format!(
         "Take the instructions:
@@ -65,19 +58,20 @@ And apply them to the code:
     )
 }
 
-fn user_prompt(configs: &Configs, language: &str) -> String {
-    match language {
-        "Markdown" => user_prompt_markup(configs),
-        _ => user_prompt_programming(configs),
-    }
-}
-
 pub fn request_edit_code_block(configs: &Configs, language: &str) -> Value {
+    let (user_prompt, system_prompt) = match language {
+        "Markdown" => (user_prompt_markup(configs), system_prompt_markup(language)),
+        _ => (
+            user_prompt_programming(configs),
+            system_prompt_programming(language),
+        ),
+    };
+
     json!({
         "max_tokens": configs.max_tokens,
-        "messages": [{"content": user_prompt(configs, language), "role": "user"}],
+        "messages": [{"content": user_prompt, "role": "user"}],
         "model": configs.model,
-        "system": [{"text": system_prompt(language), "type": "text"}],
+        "system": [{"text": system_prompt, "type": "text"}],
         "output_config": {
             "format": {
                 "type": "json_schema",
