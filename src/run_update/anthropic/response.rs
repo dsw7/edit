@@ -70,6 +70,7 @@ fn unpack_text_block(response: &Response) -> anyhow::Result<StructuredOutput> {
     anyhow::bail!("no TextBlock object found in response")
 }
 
+#[derive(Debug)]
 pub struct AnthropicResults {
     pub input_tokens: u32,
     pub output_tokens: u32,
