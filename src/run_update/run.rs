@@ -14,6 +14,7 @@ use crate::core;
 
 #[derive(Default, Serialize)]
 struct Results {
+    code_to_edit: String,
     input_tokens: u32,
     lang_id: String,
     language: String,
@@ -25,6 +26,7 @@ struct Results {
 impl Results {
     fn log_results(&self) {
         tracing::info!(
+            code_to_edit = self.code_to_edit,
             input_tokens = self.input_tokens,
             lang_id = self.lang_id,
             language = self.language,
@@ -75,6 +77,7 @@ fn process_code_using_anthropic(configs: &Configs) -> anyhow::Result<Results> {
     let response = query_messages_api(configs, language).context("reasoning process failed")?;
 
     let results = Results {
+        code_to_edit: configs.code_to_edit.to_owned(),
         input_tokens: response.input_tokens,
         lang_id: vim_syntax_lang_id.to_owned(),
         language: language.to_owned(),
@@ -82,8 +85,8 @@ fn process_code_using_anthropic(configs: &Configs) -> anyhow::Result<Results> {
         output_tokens: response.output_tokens,
         updated_code: response.code,
     };
-    results.log_results();
 
+    results.log_results();
     Ok(results)
 }
 
