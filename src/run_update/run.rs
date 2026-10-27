@@ -25,6 +25,19 @@ struct Results {
     updated_code: String,
 }
 
+impl Results {
+    fn log_results(&self) {
+        tracing::info!(
+            input_tokens = self.input_tokens,
+            lang_id = self.lang_id,
+            language = self.language,
+            model = self.model,
+            output_tokens = self.output_tokens,
+            updated_code = self.updated_code,
+        );
+    }
+}
+
 fn echo_payload_back_to_client(configs: &Configs) -> anyhow::Result<Results> {
     let (language, vim_syntax_lang_id) = resolve_lang_from_extension(&configs.filename)?;
 
@@ -41,14 +54,17 @@ fn process_code_using_anthropic(configs: &Configs) -> anyhow::Result<Results> {
     let (language, vim_syntax_lang_id) = resolve_lang_from_extension(&configs.filename)?;
     let response = query_messages_api(configs, language).context("reasoning process failed")?;
 
-    Ok(Results {
+    let results = Results {
         input_tokens: response.input_tokens,
         lang_id: vim_syntax_lang_id.to_owned(),
         language: language.to_owned(),
         model: configs.model.to_owned(),
         output_tokens: response.output_tokens,
         updated_code: response.code,
-    })
+    };
+    results.log_results();
+
+    Ok(results)
 }
 
 pub fn run_update(configs_from_cli: UpdateConfigs) -> anyhow::Result<()> {

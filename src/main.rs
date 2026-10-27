@@ -16,12 +16,23 @@ use cli::{Cli, Commands};
 use run_init::run_init;
 use run_update::run_update;
 
+fn set_up_logger() {
+    tracing_subscriber::fmt()
+        .json()
+        .with_target(false)
+        .with_max_level(tracing::Level::INFO)
+        .init();
+}
+
 fn execute_subcommand() -> anyhow::Result<()> {
     let cli = Cli::parse();
 
     match cli.command {
         Commands::Init {} => run_init(),
-        Commands::Update(configs) => run_update(configs),
+        Commands::Update(configs) => {
+            set_up_logger();
+            run_update(configs)
+        }
     }
 }
 
