@@ -1,19 +1,19 @@
 use anyhow::Context;
 use serde::Deserialize;
 
-#[derive(Deserialize, Debug)]
+#[derive(Deserialize)]
 #[serde(untagged)]
 enum ApiResponse {
     ErrorResponse(ResponseError),
     SuccessResponse(Response),
 }
 
-#[derive(Deserialize, Debug)]
+#[derive(Deserialize)]
 struct ResponseError {
     error: Error,
 }
 
-#[derive(Deserialize, Debug)]
+#[derive(Deserialize)]
 struct Error {
     #[serde(rename = "type")]
     error_type: String,
@@ -21,14 +21,14 @@ struct Error {
     message: String,
 }
 
-#[derive(Deserialize, Debug)]
+#[derive(Deserialize)]
 struct Response {
     content: Vec<ContentBlock>,
     usage: Usage,
     stop_reason: String,
 }
 
-#[derive(Deserialize, Debug)]
+#[derive(Deserialize)]
 struct ContentBlock {
     #[serde(rename = "type")]
     content_type: String,
@@ -36,13 +36,13 @@ struct ContentBlock {
     text: Option<String>,
 }
 
-#[derive(Deserialize, Debug)]
+#[derive(Deserialize)]
 struct Usage {
     input_tokens: u32,
     output_tokens: u32,
 }
 
-#[derive(Deserialize, Debug)]
+#[derive(Deserialize)]
 struct StructuredOutput {
     code: String,
 }
@@ -70,7 +70,6 @@ fn unpack_text_block(response: &Response) -> anyhow::Result<StructuredOutput> {
     anyhow::bail!("no TextBlock object found in response")
 }
 
-#[derive(Debug)]
 pub struct AnthropicResults {
     pub input_tokens: u32,
     pub output_tokens: u32,

@@ -3,7 +3,7 @@ use std::path::PathBuf;
 use crate::cli::UpdateConfigs;
 use crate::core::ConfigsFromFile;
 
-#[derive(Debug, Default)]
+#[derive(Default)]
 pub struct Configs {
     pub api_key: String,
     pub code_to_edit: String,

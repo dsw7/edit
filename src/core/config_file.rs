@@ -17,12 +17,12 @@ where
     }
 }
 
-#[derive(Deserialize, Serialize, Debug, Default)]
+#[derive(Deserialize, Serialize, Default)]
 pub struct ConfigsFromFile {
     pub anthropic: Anthropic,
 }
 
-#[derive(Deserialize, Serialize, Debug)]
+#[derive(Deserialize, Serialize)]
 pub struct Anthropic {
     #[serde(deserialize_with = "check_not_empty")]
     pub model: String,
