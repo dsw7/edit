@@ -17,3 +17,8 @@ pub fn try_config_file() -> anyhow::Result<PathBuf> {
     let app_dir = try_app_dir()?;
     Ok(app_dir.join("config.toml"))
 }
+
+pub fn try_log_dir() -> anyhow::Result<PathBuf> {
+    let app_dir = try_app_dir()?;
+    Ok(app_dir.join("logs"))
+}
